@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Attendance System{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* === ORIGINAL THEME COLOR VARIABLES (RESTORED) === */
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            
+            /* ORIGINAL Sidebar styling variables */
+            --sidebar-bg-default: #0e111a; 
+            --sidebar-text-default: #d1d5db;
+            --sidebar-hover-bg-default: #dd8383;
+            
+            /* Keeping original primary color for light theme content */
+            --primary-color-content: #49050c;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+
+            /* === PREMIUM SIDEBAR OVERRIDES (ALWAYS ACTIVE) === */
+            --sidebar-bg-start: #140808; 
+            --sidebar-bg-end: #000000;
+            --sidebar-primary: #b70000; /* Dark Red Accent */
+            --sidebar-primary-light: #f75d5d; 
+            --sidebar-accent-gold: #FFD700;
+            --sidebar-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 70px;
+        }
+        
+        /* ORIGINAL DARK THEME (RESTORED) */
+        body[data-theme="dark"] {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --sidebar-bg-default: rgba(22, 27, 34, 0.8);
+            --sidebar-hover-bg-default: #30363d;
+            --primary-color-content: #4a0808;
+            --shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.4);
+        }
+        /* ORIGINAL SEPIA THEME (RESTORED) */
+        body[data-theme="sepia"] {
+            --bg-color: #f1e7d0;
+            --card-bg: #fdf6e3;
+            --text-color: #584b3d;
+            --text-muted: #938f7b;
+            --border-color: #dcd3b8;
+            --sidebar-bg-default: #2b241c;
+            --sidebar-hover-bg-default: #dc8a18;
+            --primary-color-content: #b58900;
+        }
+
+        /* Base Body (Uses Poppins or Inter if available, but respects theme variables) */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', 'Poppins', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* === PREMIUM SIDEBAR STYLES === */
+        .sidebar {
+            position: fixed; top: 0; left: 0; height: 100vh;
+            width: var(--sidebar-width);
+            /* FORCED PREMIUM LOOK: Gradient background, ignoring theme's --sidebar-bg-default */
+            background: linear-gradient(145deg, var(--sidebar-bg-start), var(--sidebar-bg-end));
+            color: var(--sidebar-text-default);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1050; display: flex; flex-direction: column; 
+            padding: 1.5rem 1rem;
+            box-shadow: var(--sidebar-shadow);
+            border-right: 2px solid var(--sidebar-primary);
+        }
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+
+        /* Logo/Header */
+        .sidebar-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.5rem; font-weight: 800; padding-bottom: 1.5rem;
+            color: white;
+            border-bottom: 2px solid var(--sidebar-primary);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+        .sidebar-header i { 
+            color: var(--sidebar-primary-light); 
+            font-size: 1.8rem;
+            transition: transform 0.3s;
+        }
+        .sidebar.collapsed .sidebar-brand-text { display: none; }
+
+        /* Navigation Links */
+        .sidebar .nav-link {
+            color: var(--sidebar-text-default); 
+            border-radius: 4px; 
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease-in-out; 
+            display: flex; 
+            align-items: center;
+            gap: 1.2rem; 
+            padding: 1rem 1.25rem; 
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link:hover { 
+            background-color: var(--sidebar-primary); 
+            color: white; 
+            padding-left: 1.5rem;
+        }
+
+        /* Active Link - Gold Accent and Shadow */
+        .sidebar .nav-link.active { 
+            background-color: var(--sidebar-primary); 
+            color: var(--sidebar-accent-gold); 
+            border-left: 5px solid var(--sidebar-accent-gold);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.4); 
+            transform: translateX(0px);
+        }
+
+        .sidebar .nav-text { transition: opacity 0.2s; white-space: nowrap; }
+        .sidebar.collapsed .nav-text { opacity: 0; width: 0; overflow: hidden; }
+        .sidebar.collapsed .nav-link { justify-content: center; padding: 1rem 0; }
+        .sidebar.collapsed .nav-link.active { border-left: none; }
+
+        /* User Profile Block (New, Premium Feature) */
+        .sidebar-profile {
+            margin-top: auto;
+            padding: 1rem 0;
+            border-top: 1px dashed var(--sidebar-primary); 
+        }
+        .profile-box {
+            display: flex; 
+            align-items: center; 
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background-color: var(--sidebar-primary); 
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(183, 0, 0, 0.5); 
+            transition: all 0.3s;
+        }
+        .profile-box i { color: var(--sidebar-accent-gold); }
+        .profile-info strong { color: white; font-weight: 700; }
+        .profile-info small { color: var(--sidebar-accent-gold); font-weight: 600; text-transform: uppercase; }
+        .sidebar.collapsed .profile-box {
+            justify-content: center;
+            padding: 0.75rem 0.2rem;
+            background-color: transparent;
+            box-shadow: none;
+        }
+        .sidebar.collapsed .profile-info { display: none; }
+
+        /* Logout Link */
+        .sidebar-logout .nav-link { 
+            margin-top: 0.5rem;
+            background-color: #222;
+            padding: 0.8rem 1rem;
+        }
+        .sidebar-logout .nav-link:hover {
+            background-color: var(--sidebar-primary);
+            color: white;
+        }
+        
+        /* Main Content Layout (Adjusted widths for new sidebar size) */
+        .main-content { 
+            margin-left: var(--sidebar-width); 
+            transition: all 0.3s ease-in-out; 
+            min-height: 100vh; 
+            padding: 1.5rem;
+        }
+        .main-content.expanded { margin-left: var(--sidebar-collapsed-width); }
+        
+        /* Sidebar Toggle Button (Floating) */
+        #sidebar-toggle-btn {
+            position: fixed; 
+            top: 1.5rem; 
+            left: calc(var(--sidebar-width) + 1rem); 
+            z-index: 1000;
+            transition: left 0.3s ease-in-out;
+            background-color: var(--sidebar-primary); /* Use sidebar color for toggle button */
+            border-color: var(--sidebar-primary);
+            color: white;
+        }
+        .main-content.expanded + #sidebar-toggle-btn {
+             left: calc(var(--sidebar-collapsed-width) + 1rem); 
+        }
+
+        /* Flash Messages (Respects theme color for alerts/content) */
+        .flash-messages {
+            position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%);
+            z-index: 2000; width: auto; max-width: 90%;
+        }
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body data-theme="light"> <button class="btn btn-outline-secondary" id="sidebar-toggle-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-lg" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-bullseye fa-fw"></i>
+            <h2 class="sidebar-brand-text h4 mb-0">🔥 Attendly</h2>
+        </div>
+        
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}" href="{{ url_for('dashboard.dashboard') }}">
+                    <i class="fas fa-tachometer-alt fa-fw"></i><span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+
+            {% if g.user and g.user.role in ['student', 'teacher'] and g.user.institution_id is none %}
+            <li class="nav-item">
+                <a class="nav-link" style="background-color: var(--sidebar-primary); color: var(--sidebar-accent-gold);" href="{{ url_for('auth.join_institution') }}">
+                    <i class="fas fa-school fa-fw"></i>
+                    <span class="nav-text">Join Institution</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if g_role == 'student' %}
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.my_attendance' %}active{% endif %}" href="{{ url_for('student.my_attendance') }}">
+                    <i class="fas fa-user-check fa-fw"></i><span class="nav-text">My Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.check_attendance' %}active{% endif %}" href="{{ url_for('student.check_attendance') }}">
+                    <i class="fas fa-search fa-fw"></i><span class="nav-text">Search Attendance</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if g_role in ['admin', 'teacher'] %}
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.list_students' %}active{% endif %}" href="{{ url_for('student.list_students') }}">
+                    <i class="fas fa-users fa-fw"></i><span class="nav-text">Students</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.attendance_history' %}active{% endif %}" href="{{ url_for('student.attendance_history') }}">
+                    <i class="fas fa-calendar-check fa-fw"></i><span class="nav-text">Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.mark_attendance' %}active{% endif %}" href="{{ url_for('student.mark_attendance') }}">
+                    <i class="fas fa-marker fa-fw"></i><span class="nav-text">Mark Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.reports' %}active{% endif %}" href="{{ url_for('admin.reports') }}">
+                    <i class="fas fa-chart-bar fa-fw"></i><span class="nav-text">Reports</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if g_role == 'admin' %}
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.setup' %}active{% endif %}" href="{{ url_for('admin.setup') }}">
+                    <i class="fas fa-cog fa-fw"></i><span class="nav-text">Setup</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+
+        <div class="sidebar-profile">
+            {% if g.user %}
+            <div class="profile-box">
+                <i class="fas fa-id-card fa-2x"></i>
+                <div class="profile-info">
+                    <strong class="d-block">{{ g.user.username | default('Unauthorized') }}</strong>
+                    <small>({{ g_role | default('Guest') }})</small>
+                </div>
+            </div>
+            {% endif %}
+            <div class="sidebar-logout">
+                 <a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt fa-fw"></i><span class="nav-text">Log Out Securely</span></a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            const body = document.body;
+            const applyTheme = (theme) => {
+                body.setAttribute('data-theme', theme);
+                // Note: themeButtons are not visible in the HTML but the logic remains
+                themeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.theme === theme));
+                localStorage.setItem('attendance_theme', theme);
+                window.dispatchEvent(new CustomEvent('themeChanged'));
+            };
+            // Note: Listener for non-existent buttons remain to keep JS original
+            themeButtons.forEach(button => button.addEventListener('click', () => applyTheme(button.dataset.theme)));
+            const savedTheme = localStorage.getItem('attendance_theme') || 'light';
+            applyTheme(savedTheme);
+        });
+        
+        // Sidebar Toggle Function (UPDATED for new widths)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleButton = document.getElementById('sidebar-toggle-btn');
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebar_collapsed', isCollapsed);
+
+            const sidebarWidth = isCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)';
+            toggleButton.style.left = `calc(${sidebarWidth} + 1rem)`;
+        }
+
+        // Load saved sidebar state and set button position on load
+        window.addEventListener('load', () => {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleButton = document.getElementById('sidebar-toggle-btn');
+            
+            const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+                toggleButton.style.left = `calc(var(--sidebar-collapsed-width) + 1rem)`;
+            } else {
+                 toggleButton.style.left = `calc(var(--sidebar-width) + 1rem)`;
+            }
+        });
+    </script>
+    {% block body_extra %}{% endblock %}
+</body>
+</html>

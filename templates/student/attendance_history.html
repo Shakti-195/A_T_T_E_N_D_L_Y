@@ -1,0 +1,112 @@
+{% extends "shared/base.html" %}
+{% block title %}Attendance Records{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title fw-bold mb-0"><i class="fas fa-clipboard-list me-2 text-primary"></i>Attendance Records</h2>
+                        <a href="{{ url_for('student.mark_attendance') }}" class="btn btn-primary">
+                            <i class="fas fa-marker me-1"></i> Mark New Attendance
+                        </a>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="bg-light p-3 rounded mb-4">
+                        <form method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label for="date" class="form-label">Filter by Date</label>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ selected_date or '' }}">
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button type="submit" class="btn btn-dark"><i class="fas fa-filter me-1"></i> Filter</button>
+                            </div>
+                            <div class="col-md-2 d-grid">
+                                 <a href="{{ url_for('student.attendance_history') }}" class="btn btn-outline-secondary">Clear</a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Attendance Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student Name</th>
+                                    <th>Student ID</th>
+                                    <th>Subjects</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Logged At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if records.items %}
+                                    {% for record in records.items %}
+                                    <tr>
+                                        <td>{{ loop.index + (records.page - 1) * records.per_page }}</td>
+                                        <td class="fw-medium">{{ record.student.name }}</td>
+                                        <td><span class="badge bg-secondary">{{ record.student.student_id }}</span></td>
+                                        <td>{{ record.subject.name if record.subject else 'N/A' }}</td>
+                                        <td>{{ record.date.strftime('%d %b, %Y') }}</td>
+                                          <td>
+                                              {% if record.status == 'present' %}
+                                                  <span class="badge bg-success">Present</span>
+                                              {% elif record.status == 'absent' %}
+                                                  <span class="badge bg-danger">Absent</span>
+                                              {% elif record.status == 'leave' %}
+                                                  <span class="badge bg-info">On Leave</span>
+                                              {% else %}
+                                                  <span class="badge bg-secondary">{{ record.status|capitalize }}</span>
+                                              {% endif %}
+                                          </td>
+                                        <td>{{ record.created_at.strftime('%d %b, %Y %I:%M %p') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center p-5 text-muted">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <h5>No records found.</h5>
+                                        <p>No attendance has been marked for this date yet.</p>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if records.pages > 1 %}
+                    <nav class="mt-4 d-flex justify-content-end">
+                        <ul class="pagination">
+                            <li class="page-item {% if not records.has_prev %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('student.attendance_history', page=records.prev_num, date=selected_date) }}">Previous</a>
+                            </li>
+                            {% for page_num in records.iter_pages() %}
+                                {% if page_num %}
+                                    <li class="page-item {% if records.page == page_num %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('student.attendance_history', page=page_num, date=selected_date) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+                            <li class="page-item {% if not records.has_next %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('student.attendance_history', page=records.next_num, date=selected_date) }}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

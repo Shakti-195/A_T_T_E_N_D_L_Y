@@ -1,0 +1,39 @@
+{% extends "shared/base.html" %}
+{% block title %}Import Students{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="card-title fw-bold mb-4"><i class="fas fa-file-csv me-2 text-primary"></i>Import Students from CSV</h2>
+
+                    <div class="alert alert-info">
+                        <strong>Instructions:</strong>
+                        <p class="mb-1">Your CSV file must have the following columns in this exact order:</p>
+                        <code>name, student_id, email, class_batch_id</code>
+                        <ul class="mt-2 small text-muted">
+                            <li>The <code>email</code> column is optional.</li>
+                            <li>The <code>class_batch_id</code> is the numerical ID of the class, which you can find in the Setup page.</li>
+                        </ul>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="student_csv" class="form-label">Upload CSV File</label>
+                            <input class="form-control" type="file" id="student_csv" name="student_csv" accept=".csv" required>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ url_for('student.list_students') }}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i> Upload and Import
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

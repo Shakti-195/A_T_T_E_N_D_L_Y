@@ -1,0 +1,89 @@
+{% extends "shared/base.html" %}
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block head_extra %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="h2 fw-bold mb-4">Analytics & Reporting</h1>
+    
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Class Performance Heatmap (By Day & Hour)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Top Student Engagement (Last 30 Days)</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for student in student_engagement %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ student.name }}
+                        <span class="badge bg-primary rounded-pill">{{ "%.1f"|format(student.engagement_score) }}%</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const heatmapCtx = document.getElementById('heatmapChart');
+    if (heatmapCtx) {
+        const data = {{ heatmap_data | tojson }};
+        const chartData = data.map(d => ({
+            x: d.hour_of_day,
+            y: d.day_of_week,
+            v: d.percentage
+        }));
+
+        new Chart(heatmapCtx, {
+            type: 'matrix',
+            data: {
+                datasets: [{
+                    label: 'Attendance %',
+                    data: chartData,
+                    backgroundColor: (ctx) => {
+                        const value = ctx.dataset.data[ctx.dataIndex].v;
+                        if (value < 50) return 'rgba(255, 99, 132, 0.6)';
+                        if (value < 80) return 'rgba(255, 205, 86, 0.6)';
+                        return 'rgba(75, 192, 192, 0.6)';
+                    },
+                    width: (ctx) => (ctx.chart.chartArea.width / 24) - 1,
+                    height: (ctx) => (ctx.chart.chartArea.height / 7) - 1,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        type: 'category',
+                        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                        offset: true
+                    },
+                    x: {
+                          type: 'category',
+                          labels: Array.from({length: 24}, (_, i) => i), // 24 hours
+                          offset: true
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

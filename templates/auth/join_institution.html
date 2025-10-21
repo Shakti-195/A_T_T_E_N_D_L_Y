@@ -1,0 +1,290 @@
+{% extends "shared/base.html" %}
+{% block title %}Join Institution{% endblock %}
+
+{% block head_extra %}
+<style>
+    .wizard-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    .progress-bar-container {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.5rem 2rem;
+        background-color: var(--bg-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .step .step-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: var(--border-color);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    .step.active {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    .step.active .step-icon {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    .step.completed .step-icon {
+        background-color: #198754;
+        color: white;
+    }
+
+    .wizard-step-content {
+        display: none;
+        padding: 2.5rem;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    .wizard-step-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .list-group-item-action {
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: .2em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="wizard-card">
+                
+                <!-- UI for Teachers (Simple) -->
+                {% if g.user.role == 'teacher' %}
+                <div class="card-body wizard-step-content active p-5">
+                    <h2 class="fw-bold mb-3"><i class="fas fa-school me-2 text-primary"></i>Join Your Institution</h2>
+                    <p class="text-muted mb-4">As a teacher, you just need to enter the unique ID provided by your institution's administrator to get started.</p>
+                    <form method="POST" action="{{ url_for('auth.join_institution') }}">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="institution_code" name="institution_code" placeholder="e.g., AB12CD" required>
+                            <label for="institution_code">Institution ID</label>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" type="submit">Join Institution</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+                
+                <!-- UI for Students (Wizard) -->
+                {% if g.user.role == 'student' %}
+                <div class="progress-bar-container">
+                    <div class="step active" id="step-1">
+                        <div class="step-icon">1</div>
+                        <span>Institution ID</span>
+                    </div>
+                    <div class="step" id="step-2">
+                        <div class="step-icon">2</div>
+                        <span>Select Class</span>
+                    </div>
+                    <div class="step" id="step-3">
+                        <div class="step-icon">3</div>
+                        <span>Find Your Name</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Step 1: Enter Institution ID -->
+                    <div class="wizard-step-content active" id="content-step-1">
+                        <h4 class="mb-3 fw-bold"><i class="fas fa-school me-2 text-primary"></i>Enter Institution ID</h4>
+                        <p class="text-muted">Please enter the unique ID provided by your institution.</p>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="institution_code_student" placeholder="e.g., AB12CD">
+                            <button class="btn btn-primary" type="button" id="find-batches-btn">
+                                <span id="find-btn-text">Find</span>
+                                <span id="find-btn-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Select Batch/Class -->
+                    <div class="wizard-step-content" id="content-step-2">
+                         <h4 class="mb-3 fw-bold"><i class="fas fa-users me-2 text-primary"></i>Select Your Class</h4>
+                        <p class="text-muted">Now, choose your class or batch from the list below.</p>
+                        <select class="form-select" id="batch_id">
+                            <option>Loading classes...</option>
+                        </select>
+                    </div>
+
+                    <!-- Step 3: Select Student -->
+                    <div class="wizard-step-content" id="content-step-3">
+                        <h4 class="mb-3 fw-bold"><i class="fas fa-user-check me-2 text-primary"></i>Confirm Your Identity</h4>
+                        <p class="text-muted">Find and click your name to link your account. This is a one-time action.</p>
+                        <div id="student-list" class="list-group" style="max-height: 250px; overflow-y: auto;">
+                            <!-- Student list will be populated here -->
+                        </div>
+                    </div>
+
+                    <form method="POST" id="join-form-student" action="{{ url_for('auth.join_institution') }}">
+                        <input type="hidden" id="student_record_id" name="student_record_id">
+                    </form>
+                    
+                    <div id="error-message" class="alert alert-danger mx-4 mt-3" style="display: none;"></div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+// This script only runs if the user is a student
+{% if g.user.role == 'student' %}
+document.addEventListener('DOMContentLoaded', function () {
+    const steps = {
+        1: { indicator: document.getElementById('step-1'), content: document.getElementById('content-step-1') },
+        2: { indicator: document.getElementById('step-2'), content: document.getElementById('content-step-2') },
+        3: { indicator: document.getElementById('step-3'), content: document.getElementById('content-step-3') }
+    };
+    const findBatchesBtn = document.getElementById('find-batches-btn');
+    const findBtnText = document.getElementById('find-btn-text');
+    const findBtnSpinner = document.getElementById('find-btn-spinner');
+    const institutionCodeInput = document.getElementById('institution_code_student');
+    const batchSelect = document.getElementById('batch_id');
+    const studentListDiv = document.getElementById('student-list');
+    const joinForm = document.getElementById('join-form-student');
+    const hiddenStudentRecordIdInput = document.getElementById('student_record_id');
+    const errorMessageDiv = document.getElementById('error-message');
+
+    function showError(message) {
+        errorMessageDiv.textContent = message;
+        errorMessageDiv.style.display = 'block';
+    }
+
+    function setActiveStep(stepNumber) {
+        Object.values(steps).forEach(step => {
+            step.indicator.classList.remove('active', 'completed');
+            step.content.classList.remove('active');
+        });
+        for (let i = 1; i < stepNumber; i++) {
+            steps[i].indicator.classList.add('completed');
+        }
+        steps[stepNumber].indicator.classList.add('active');
+        steps[stepNumber].content.classList.add('active');
+    }
+
+    findBatchesBtn.addEventListener('click', function () {
+        const instCode = institutionCodeInput.value.trim().toUpperCase();
+        if (!instCode) {
+            showError('Please enter an Institution ID.');
+            return;
+        }
+
+        findBtnText.style.display = 'none';
+        findBtnSpinner.style.display = 'inline-block';
+        findBatchesBtn.disabled = true;
+
+        const batchesUrl = "{{ url_for('auth.get_batches_for_institution', institution_code='__CODE__') }}".replace('__CODE__', instCode);
+
+        fetch(batchesUrl)
+            .then(response => {
+                if (!response.ok) throw new Error('Institution not found or invalid ID.');
+                return response.json();
+            })
+            .then(batches => {
+                batchSelect.innerHTML = '<option value="">Select your class...</option>';
+                batches.forEach(batch => {
+                    batchSelect.add(new Option(batch.name, batch.id));
+                });
+                errorMessageDiv.style.display = 'none';
+                setActiveStep(2);
+            })
+            .catch(error => {
+                showError(error.message);
+                setActiveStep(1);
+            })
+            .finally(() => {
+                findBtnText.style.display = 'inline';
+                findBtnSpinner.style.display = 'none';
+                findBatchesBtn.disabled = false;
+            });
+    });
+
+    batchSelect.addEventListener('change', function () {
+        const batchId = this.value;
+        if (!batchId) {
+            setActiveStep(2);
+            return;
+        }
+
+        studentListDiv.innerHTML = '<div class="d-flex justify-content-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        setActiveStep(3);
+
+        const studentsUrlPrototype = "{{ url_for('auth.get_students_in_batch', batch_id=0) }}";
+        const studentsUrl = studentsUrlPrototype.replace('/0', '/' + batchId);
+
+        fetch(studentsUrl)
+            .then(response => response.json())
+            .then(students => {
+                studentListDiv.innerHTML = '';
+                if (students.length === 0) {
+                    studentListDiv.innerHTML = '<p class="text-muted text-center p-4">No unclaimed student records found in this class. Please contact your administrator.</p>';
+                } else {
+                    students.forEach(student => {
+                        const studentLink = document.createElement('a');
+                        studentLink.href = '#';
+                        studentLink.className = 'list-group-item list-group-item-action';
+                        studentLink.innerHTML = `<strong>${student.name}</strong> <small class="text-muted">(ID: ${student.student_id})</small>`;
+                        studentLink.dataset.id = student.id;
+                        studentListDiv.appendChild(studentLink);
+                    });
+                }
+            });
+    });
+
+    studentListDiv.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = e.target.closest('.list-group-item-action');
+        
+        if (target) {
+            const studentRecordId = target.dataset.id;
+            const studentName = target.querySelector('strong').textContent;
+            hiddenStudentRecordIdInput.value = studentRecordId;
+            
+            this.querySelectorAll('.list-group-item-action').forEach(item => item.classList.remove('active'));
+            target.classList.add('active');
+
+            if (confirm(`Are you sure you want to link your account to the academic record for "${studentName}"? This action cannot be undone.`)) {
+                joinForm.submit();
+            }
+        }
+    });
+});
+{% endif %}
+</script>
+{% endblock %}
+

@@ -1,0 +1,116 @@
+{% extends "shared/base.html" %}
+{% block title %}Manage Students{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="card-title fw-bold mb-0"><i class="fas fa-users me-2 text-primary"></i>Manage Students</h2>
+                <div>
+                    <a href="{{ url_for('student.add_student') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-1"></i> Add Student
+                    </a>
+                    <a href="{{ url_for('student.import_students') }}" class="btn btn-secondary">
+                        <i class="fas fa-file-import me-1"></i> Import CSV
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-light p-3 rounded mb-4 border">
+                <form method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="query" class="form-label">Search by Name or ID</label>
+                        <input type="text" class="form-control" id="query" name="query" placeholder="e.g., John Doe or 12345" value="{{ query or '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="class_id" class="form-label">Filter by Class</label>
+                        <select name="class_id" class="form-select">
+                            <option value="">All Classes</option>
+                            {% for class_batch in all_classes %}
+                                <option value="{{ class_batch.id }}" {% if class_batch.id == selected_class_id %}selected{% endif %}>
+                                    {{ class_batch.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-grid">
+                        <button type="submit" class="btn btn-dark"><i class="fas fa-search me-1"></i> Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Student Table -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Student ID</th>
+                            <th>Class/Batch</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if students.items %}
+                            {% for student in students.items %}
+                            <tr>
+                                <td>{{ loop.index + (students.page - 1) * students.per_page }}</td>
+                                <td class="fw-medium">{{ student.name }}</td>
+                                <td><span class="badge bg-secondary">{{ student.student_id }}</span></td>
+                                <td>{{ student.class_batch.name if student.class_batch else 'N/A' }}</td>
+                                <td>{{ student.email or 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('student.edit_student', student_id=student.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('student.delete_student', student_id=student.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this student?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center p-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5>No students found.</h5>
+                                <p>Try adjusting your search filters or add a new student.</p>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if students.pages > 1 %}
+            <nav class="mt-4 d-flex justify-content-end">
+                <ul class="pagination">
+                    <li class="page-item {% if not students.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('student.list_students', page=students.prev_num, query=query, class_id=selected_class_id) }}">Previous</a>
+                    </li>
+                    {% for page_num in students.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if students.page == page_num %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('student.list_students', page=page_num, query=query, class_id=selected_class_id) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not students.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('student.list_students', page=students.next_num, query=query, class_id=selected_class_id) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

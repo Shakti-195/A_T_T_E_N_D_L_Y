@@ -1,0 +1,1010 @@
+{% extends "shared/base.html" %}
+
+{% block title %}Dashboard - Attendance System{% endblock %}
+
+{% block head_extra %}
+    <!-- Dashboard-specific Stylesheet -->
+    <style>
+        
+        /* === Advanced Component Styles === */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        body[data-theme="dark"] .card {
+             border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
+        .toggle-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); }
+        .user-profile { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+
+        .theme-switcher { display: flex; gap: 0.5rem; background-color: var(--card-bg); padding: 0.3rem; border-radius: 20px; border: 1px solid var(--border-color);}
+        .theme-btn { background: none; border: none; padding: 0.3rem 0.7rem; border-radius: 20px; color: var(--text-muted); cursor: pointer; transition: all 0.3s; }
+        .theme-btn.active { background-color: var(--primary-color); color: white; }
+
+        .stat-card-wrapper { text-decoration: none; }
+        .stat-card-wrapper .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        body[data-theme="dark"] .stat-card-wrapper .card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); }
+        .stat-card { display: flex; align-items: center; gap: 1.5rem; }
+        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; color: white; }
+        .icon-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .icon-2 { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .icon-3 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .icon-4 { background: linear-gradient(135deg, #2af598, #009efd); }
+        .stat-info h2 { font-size: 2.5rem; font-weight: 700; color: var(--text-color); transition: color 0.3s;}
+        .stat-info p { color: var(--text-muted); font-weight: 500; margin-bottom:0; transition: color 0.3s;}
+
+        .filter-bar { background-color: var(--card-bg); padding: 1rem; border-radius: 12px; box-shadow: var(--shadow); }
+        .filter-bar .form-control, .filter-bar .form-select { background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color); }
+        .filter-bar .form-control::placeholder { color: var(--text-muted); }
+        .filter-bar .btn-primary { background-color: var(--primary-color); border:none; }
+
+        .table { color: var(--text-color); }
+        .table thead th { border-bottom: 2px solid var(--border-color); }
+        .table td, .table th { border-top: 1px solid var(--border-color); }
+        body[data-theme="dark"] .table { --bs-table-bg: transparent; --bs-table-striped-bg: rgba(33, 38, 45, 0.5); }
+
+        .leaderboard-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
+        .leaderboard-item:last-child { border-bottom: none; }
+        .leaderboard-item .badge { font-size: 0.9rem; }
+
+        /* === Dark Mode Visibility Fixes === */
+        .dropdown-menu {
+            --bs-dropdown-bg: var(--card-bg);
+            --bs-dropdown-border-color: var(--border-color);
+            --bs-dropdown-link-color: var(--text-color);
+            --bs-dropdown-link-hover-bg: var(--sidebar-hover-bg);
+            --bs-dropdown-link-hover-color: var(--text-color);
+            --bs-dropdown-divider-bg: var(--border-color);
+        }
+        .modal-content { background-color: var(--card-bg); color: var(--text-color); }
+        .modal-header { border-bottom-color: var(--border-color); }
+        .modal-footer { border-top-color: var(--border-color); }
+        .btn-close { filter: var(--bs-body-color-rgb) invert(1) grayscale(100%) brightness(200%); }
+        body[data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        .dropdown-item { display: flex; align-items: center; gap: 0.75rem; }
+        .alert.bg-transparent { background-color: transparent !important; }
+
+        /* === Enhanced Dark Mode Visibility === */
+        body[data-theme="dark"] .card h5, body[data-theme="dark"] .fw-bold, body[data-theme="dark"] .modal-title { color: #f0f6fc; }
+        body[data-theme="dark"] .text-muted { color: #8b949e !important; }
+        body[data-theme="dark"] .table thead th, body[data-theme="dark"] .table tbody td, body[data-theme="dark"] .leaderboard-item span { color: #c9d1d9; }
+        body[data-theme="dark"] a { color: var(--primary-color); }
+        body[data-theme="dark"] .table a:hover { text-decoration: underline; }
+        body[data-theme="dark"] .badge.bg-success { background-color: #238636 !important; color: #f0fdf4 !important; }
+        body[data-theme="dark"] .badge.bg-info { background-color: #388bfd !important; color: #dbeafe !important; }
+        body[data-theme="dark"] .badge.bg-primary { background-color: #6e7681 !important; color: #f0f6fc !important; }
+        body[data-theme="dark"] .btn-success { background-color: #238636; border-color: #2ea043; }
+        body[data-theme="dark"] .btn-danger { background-color: #da3633; border-color: #f85149; }
+        body[data-theme="dark"] .btn-secondary { background-color: #30363d; border-color: #484f58; color: #f0f6fc; }
+        body[data-theme="dark"] .btn-secondary:hover { background-color: #484f58; }
+        body[data-theme="dark"] .alert-info { color: #79c0ff !important; border-color: #79c0ff !important; }
+        body[data-theme="dark"] .alert-warning { color: #e3b341 !important; border-color: #e3b341 !important; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<header class="header">
+    <div class="header-left">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <h4 class="ms-3 d-none d-md-block"><b>DashBoard</b></h4>
+    </div>
+    <div class="header-right">
+        <div class="theme-switcher">
+            <button class="theme-btn active" data-theme="light" title="Light Mode"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" data-theme="dark" title="Dark Mode"><i class="fas fa-moon"></i></button>
+            <button class="theme-btn" data-theme="sepia" title="Eye Comfort"><i class="fas fa-eye"></i></button>
+        </div>
+        <div class="user-profile dropdown">
+    <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+        <i class="fas fa-user-circle fs-2 me-2"></i>
+        
+        <div class="d-none d-sm-block">
+    <span class="fw-bold">{{ g.user.username }}</span><br>
+    
+    {% if g.user.role == 'admin' %}
+        <small class="text-muted">
+            {% if session.view_as == 'student' %}
+                Student View
+            {% elif session.view_as == 'teacher' %}
+                Teacher View
+            {% else %}
+                Admin View
+            {% endif %}
+        </small>
+    {% endif %}
+</div>
+        <i class="fas fa-chevron-down small ms-2 text-muted"></i>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        
+        {% if g.user and g.user.role == 'admin' %}
+            <li><a class="dropdown-item" href="{{ url_for('profile.switch_role', new_role='teacher') }}"><i class="fas fa-chalkboard-teacher fa-fw"></i>Switch to Teacher View</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('profile.switch_role', new_role='student') }}"><i class="fas fa-user-graduate fa-fw"></i>Switch to Student View</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('profile.switch_role', new_role='admin') }}"><i class="fas fa-user-shield fa-fw"></i>Switch back to Admin</a></li>
+            <li><hr class="dropdown-divider"></li>
+        {% endif %}
+
+        <li><a class="dropdown-item" href="{{ url_for('profile.profile_view') }}"><i class="fas fa-user-cog fa-fw"></i>Profile</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt fa-fw"></i>Logout</a></li>
+    </ul>
+</div>
+    </div>
+</header>
+
+<!-- Interactive Filtering -->
+<form method="GET" action="{{ url_for('dashboard.dashboard') }}" class="mb-4 card filter-bar">
+   <div class="row g-3 align-items-center">
+    <div class="col-md-5">
+        <input type="date" name="filter_date" class="form-control" value="{{ selected_date or '' }}">
+    </div>
+    <div class="col-md-5">
+        <select name="class_id" class="form-select">
+            <option value="">All Classes</option>
+            {% for class_batch in all_classes %}
+                <option value="{{ class_batch.id }}" {% if class_batch.id == selected_class_id %}selected{% endif %}>
+                    {{ class_batch.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</div>
+</form>
+
+<!-- Real-time Analytics -->
+
+<section class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <a href="#" class="stat-card-wrapper" data-bs-toggle="modal" data-bs-target="#dataModal" data-card-type="roster">
+            <div class="card p-3 stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon icon-1 flex-shrink-0"><i class="fas fa-users"></i></div>
+                    <div class="stat-info flex-grow-1 ms-3">
+                        <h2 id="roster-count">{{ student_counts.total|default(0) }}</h2>
+                        <p>Student Roster</p>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top">
+                    <h6 class="card-subtitle text-muted small mb-0">
+                        {% if selected_class_id %}
+                            In selected class
+                        {% else %}
+                            Across all classes
+                        {% endif %}
+                    </h6>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="#" class="stat-card-wrapper" data-bs-toggle="modal" data-bs-target="#dataModal" data-card-type="present">
+            <div class="card p-3 stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon icon-2 flex-shrink-0"><i class="fas fa-user-check"></i></div>
+                    <div class="stat-info flex-grow-1 ms-3">
+                        <h2 id="present-count">{{ student_counts.present|default(0) }}</h2>
+                        <p>Present Today</p>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top">
+                    <h6 class="card-subtitle text-muted small mb-1">Subjects Today:</h6>
+                    {% if subjects_today %}
+                        <div class="d-flex flex-wrap gap-1">
+                        {% for subject in subjects_today %}
+                            <span class="badge bg-secondary fw-normal">{{ subject }}</span>
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="small text-muted mb-0">No classes held.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        {% set absent_count = (student_counts.total|default(0)) - (student_counts.present|default(0)) %}
+        <a href="#" class="stat-card-wrapper" data-bs-toggle="modal" data-bs-target="#dataModal" data-card-type="absent">
+            <div class="card p-3 stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon icon-3 flex-shrink-0"><i class="fas fa-user-times"></i></div>
+                    <div class="stat-info flex-grow-1 ms-3">
+                        <h2 id="absent-count">{{ absent_count }}</h2>
+                        <p>Absent Today</p>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top">
+                    <h6 class="card-subtitle text-muted small mb-0">
+                        On Approved Leave: <span class="fw-bold">{{ on_leave_count|default(0) }}</span>
+                    </h6>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        {% set rate = (((student_counts.present|default(0)) * 100 / (student_counts.total|default(1))) | round | int) if (student_counts.total|default(0)) > 0 else 0 %}
+        <a href="#" class="stat-card-wrapper" data-bs-toggle="modal" data-bs-target="#dataModal" data-card-type="rate">
+            <div class="card p-3 stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon icon-4 flex-shrink-0"><i class="fas fa-percentage"></i></div>
+                    <div class="stat-info flex-grow-1 ms-3">
+                        <h2 id="rate-count">{{ rate }}%</h2>
+                        <p>Attendance Rate</p>
+                    </div>
+                </div>
+                   <div class="mt-2 pt-2 border-top">
+                    <h6 class="card-subtitle text-muted small mb-0">
+                        {% if rate >= 90 %}
+                            <span class="text-success">Excellent!</span>
+                        {% elif rate >= 75 %}
+                            <span class="text-info">Good</span>
+                        {% else %}
+                            <span class="text-warning">Needs Improvement</span>
+                        {% endif %}
+                    </h6>
+                </div>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- Visualization & AI Insights -->
+<section class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Recent Attendance Trends</h5>
+                <div class="flex-grow-1" style="position: relative; height: 320px;">
+                    <canvas id="attendanceTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+           <div class="card h-100">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="fas fa-brain me-2"></i>AI-Powered Insights</h5>
+                <div class="alert alert-info bg-transparent border-info">
+    <strong>Prediction:</strong> <span id="at-risk-count">{{ (insights.at_risk_count if insights else 0)|default(0) }}</span> students are at risk of falling below 75% attendance.
+</div>
+<div id="anomaly-container" class="alert alert-warning bg-transparent border-warning" {% if not (insights and insights.anomaly_message) %}style="display: none;"{% endif %}>
+    <span id="anomaly-message">{{ (insights.anomaly_message if insights else '')|default('') }}</span>
+</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Leave Management & Gamification -->
+<section class="row g-4 mb-4">
+    <div class="col-md-7">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Pending Leave Requests</h5>
+                <table class="table table-sm">
+                    <thead><tr><th>Student</th><th>Date</th><th>Reason</th><th>Action</th></tr></thead>
+                    <tbody id="pending-leaves-tbody">
+    {% if pending_leaves and pending_leaves|length > 0 %}
+        {% for leave in pending_leaves %}
+        <tr>
+            <td>{{ leave.student.name if leave.student else 'Unknown' }}</td>
+            <td>{{ leave.start_date.strftime('%d %b') if leave.start_date else 'N/A' }} - {{ leave.end_date.strftime('%d %b') if leave.end_date else 'N/A' }}</td>
+            <td>{{ leave.reason if leave.reason else 'No reason provided' }}</td>
+            <td>
+                <div class="d-flex gap-2">
+                    <form method="POST" action="{{ url_for('student.handle_leave', leave_id=leave.id, action='approve') }}" class="mb-0">
+                        <button type="submit" class="btn btn-success btn-sm p-1 lh-1" title="Approve">✔</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('student.handle_leave', leave_id=leave.id, action='deny') }}" class="mb-0">
+                        <button type="submit" class="btn btn-danger btn-sm p-1 lh-1" title="Deny">✖</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr>
+            <td colspan="4" class="text-center text-muted">No pending requests.</td>
+        </tr>
+    {% endif %}
+</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="fas fa-trophy me-2"></i>Attendance Leaderboard</h5>
+                <div id="leaderboard-container">
+    {% if leaderboard and leaderboard|length > 0 %}
+        {% for student in leaderboard %}
+        <div class="leaderboard-item">
+            <span>{{ loop.index }}. {{ student.name if student.name else 'Unknown' }}</span>
+            <span class="badge {% if (student.percentage|default(0)) >= 95 %}bg-success{% elif (student.percentage|default(0)) >= 90 %}bg-info{% else %}bg-primary{% endif %}">
+                {{ (student.percentage|default(0)|round|int) }}%
+            </span>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-center text-muted">No data available for leaderboard.</p>
+    {% endif %}
+</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reporting, Integrations & Security -->
+ <section class="row g-4">
+    <div class="col-md-5">
+           <div class="card h-100">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="fas fa-file-export me-2"></i>Export & Reporting</h5>
+                <p class="text-muted small">Generate and schedule reports.</p>
+               <div class="d-flex gap-2">
+                          <a href="{{ url_for('student.export_pdf') }}" class="btn btn-secondary flex-grow-1">
+                               <i class="fas fa-file-pdf me-1"></i> PDF
+                          </a>
+                          <a href="{{ url_for('student.export_csv') }}" class="btn btn-secondary flex-grow-1">
+                              <i class="fas fa-file-excel me-1"></i> Excel
+                          </a>
+                          <a href="{{ url_for('admin.schedule') }}" class="btn btn-primary flex-grow-1">
+                              <i class="fas fa-clock me-1"></i> Schedule
+                          </a>
+                      </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+           <div class="card h-100">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="fas fa-cogs me-2"></i>Integrations & Security</h5>
+                   <table class="table table-sm table-borderless">
+                       <tbody>
+                           <tr><td><i class="fas fa-fingerprint me-2"></i>Biometric Sync</td><td><span class="badge bg-success">Active</span></td></tr>
+                           <tr><td><i class="fas fa-key me-2"></i>Admin MFA</td><td><span class="badge bg-success">Enabled</span></td></tr>
+                           <tr><td><i class="fas fa-history me-2"></i>Audit Logs</td><td><a href="#">View Logs</a></td></tr>
+                       </tbody>
+                   </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reusable Modal HTML -->
+<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dataModalLabel">Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="dataModalBody">
+        <!-- Content will be injected by JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // --- ELEMENT REFERENCES ---
+        const rosterCountEl = document.getElementById('roster-count');
+        const presentCountEl = document.getElementById('present-count');
+        const absentCountEl = document.getElementById('absent-count');
+        const rateCountEl = document.getElementById('rate-count');
+
+        // --- GLOBAL VARIABLES FOR DATA ---
+        // Initialize with safe defaults and null checks
+        let studentMasterList, presentList, absentList;
+        let totalStudents = {{ student_counts.total if student_counts else 0 }};
+        let presentStudents = {{ student_counts.present if student_counts else 0 }};
+
+        // Safe JSON parsing with try-catch
+        try {
+            studentMasterList = {{ (student_lists.all | tojson | safe) if (student_lists and student_lists.all) else '[]' }};
+        } catch(e) {
+            console.warn('Error parsing studentMasterList:', e);
+            studentMasterList = [];
+        }
+
+        try {
+            presentList = {{ (student_lists.present | tojson | safe) if (student_lists and student_lists.present) else '[]' }};
+        } catch(e) {
+            console.warn('Error parsing presentList:', e);
+            presentList = [];
+        }
+
+        try {
+            absentList = {{ (student_lists.absent | tojson | safe) if (student_lists and student_lists.absent) else '[]' }};
+        } catch(e) {
+            console.warn('Error parsing absentList:', e);
+            absentList = [];
+        }
+
+        // --- ANIMATION HELPER ---
+        function animateValue(obj, start, end, duration) {
+            if (!obj || start === end) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentValue = Math.floor(progress * (end - start) + start);
+                obj.innerHTML = currentValue;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+            errorDiv.innerHTML = `
+                <strong>Error:</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.header').insertAdjacentElement('afterend', errorDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // --- FETCH AND UPDATE DASHBOARD FUNCTION ---
+        async function fetchAndUpdateDashboard() {
+            try {
+                const response = await fetch('/api/dashboard-data');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // Validate response data structure
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Invalid response format');
+                }
+
+                // --- 1. Update Stat Cards with comprehensive null checks ---
+                const newTotal = (data.student_counts && typeof data.student_counts.total === 'number') ? data.student_counts.total : 0;
+                const newPresent = (data.student_counts && typeof data.student_counts.present === 'number') ? data.student_counts.present : 0;
+                const newAbsent = Math.max(0, newTotal - newPresent);
+                const newRate = newTotal > 0 ? Math.round((newPresent / newTotal) * 100) + '%' : '0%';
+
+                // Update with animation and existence checks
+                if (presentCountEl) animateValue(presentCountEl, presentStudents, newPresent, 500);
+                if (rosterCountEl) rosterCountEl.innerText = newTotal;
+                if (absentCountEl) absentCountEl.innerText = newAbsent;
+                if (rateCountEl) rateCountEl.innerText = newRate;
+                
+                // Update globals
+                presentStudents = newPresent;
+                totalStudents = newTotal;
+
+                // Update global arrays for modal with validation
+                if (data.student_lists && Array.isArray(data.student_lists.all)) {
+                    studentMasterList = data.student_lists.all;
+                }
+                if (data.student_lists && Array.isArray(data.student_lists.present)) {
+                    presentList = data.student_lists.present;
+                }
+                if (data.student_lists && Array.isArray(data.student_lists.absent)) {
+                    absentList = data.student_lists.absent;
+                }
+
+                // --- 2. Update Chart ---
+                if (window.attendanceChart && data.chart_data && typeof data.chart_data === 'object') {
+                    const chartLabels = Array.isArray(data.chart_data.labels) ? data.chart_data.labels : [];
+                    const chartValues = Array.isArray(data.chart_data.values) ? data.chart_data.values : [];
+                    
+                    window.attendanceChart.data.labels = chartLabels;
+                    window.attendanceChart.data.datasets[0].data = chartValues;
+                    window.attendanceChart.update('none'); // Update without animation for better performance
+                }
+
+                // --- 3. Update AI Insights ---
+                const atRiskCountEl = document.getElementById('at-risk-count');
+                const anomalyContainerEl = document.getElementById('anomaly-container');
+                const anomalyMessageEl = document.getElementById('anomaly-message');
+                
+                if (atRiskCountEl && data.insights && typeof data.insights.at_risk_count === 'number') {
+                    atRiskCountEl.innerText = data.insights.at_risk_count;
+                }
+                
+                if (anomalyContainerEl && anomalyMessageEl) {
+                    if (data.insights && data.insights.anomaly_message && data.insights.anomaly_message.trim()) {
+                        anomalyMessageEl.innerText = data.insights.anomaly_message;
+                        anomalyContainerEl.style.display = 'block';
+                    } else {
+                        anomalyContainerEl.style.display = 'none';
+                    }
+                }
+
+                // --- 4. Update Pending Leaves ---
+                const leavesTbody = document.getElementById('pending-leaves-tbody');
+                if (leavesTbody) {
+                    let leavesHtml = '';
+                    if (data.pending_leaves && Array.isArray(data.pending_leaves) && data.pending_leaves.length > 0) {
+                        leavesHtml = data.pending_leaves.map(leave => {
+                            // Validate leave object structure
+                            const studentName = (leave && leave.student_name) ? leave.student_name : 'Unknown';
+                            const startDate = (leave && leave.start_date) ? leave.start_date : 'N/A';
+                            const endDate = (leave && leave.end_date) ? leave.end_date : 'N/A';
+                            const reason = (leave && leave.reason) ? leave.reason : 'No reason provided';
+                            const leaveId = (leave && leave.id) ? leave.id : '';
+                            
+                            return `
+                                <tr>
+                                    <td>${studentName}</td>
+                                    <td>${startDate} - ${endDate}</td>
+                                    <td>${reason}</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <form method="POST" action="/handle_leave/${leaveId}/approve" class="mb-0">
+                                                <button type="submit" class="btn btn-success btn-sm p-1 lh-1" title="Approve">✔</button>
+                                            </form>
+                                            <form method="POST" action="/handle_leave/${leaveId}/deny" class="mb-0">
+                                                <button type="submit" class="btn btn-danger btn-sm p-1 lh-1" title="Deny">✖</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        leavesHtml = '<tr><td colspan="4" class="text-center text-muted">No pending requests.</td></tr>';
+                    }
+                    leavesTbody.innerHTML = leavesHtml;
+                }
+
+                // --- 5. Update Leaderboard ---
+                const leaderboardContainer = document.getElementById('leaderboard-container');
+                if (leaderboardContainer) {
+                    let leaderboardHtml = '';
+                    if (data.leaderboard && Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
+                        leaderboardHtml = data.leaderboard.map((student, index) => {
+                            // Validate student object and provide defaults
+                            const name = (student && student.name) ? student.name : 'Unknown';
+                            const percentage = (student && typeof student.percentage === 'number') ? student.percentage : 0;
+                            
+                            let badgeClass = 'bg-primary';
+                            if (percentage >= 95) badgeClass = 'bg-success';
+                            else if (percentage >= 90) badgeClass = 'bg-info';
+                            
+                            return `
+                                <div class="leaderboard-item">
+                                    <span>${index + 1}. ${name}</span>
+                                    <span class="badge ${badgeClass}">${Math.round(percentage)}%</span>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        leaderboardHtml = '<p class="text-center text-muted">No data available for leaderboard.</p>';
+                    }
+                    leaderboardContainer.innerHTML = leaderboardHtml;
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch dashboard data:", error);
+                showErrorMessage("Unable to update dashboard data. Please refresh the page.");
+            }
+        }
+
+        // --- MODAL LOGIC ---
+        const dataModal = document.getElementById('dataModal');
+        if (dataModal) {
+            const dataModalTitle = document.getElementById('dataModalLabel');
+            const dataModalBody = document.getElementById('dataModalBody');
+
+            dataModal.addEventListener('show.bs.modal', function (event) {
+                const card = event.relatedTarget;
+                if (!card) return;
+                
+                const cardType = card.getAttribute('data-card-type');
+                
+                let title = 'Information';
+                let listToShow = [];
+                let isStudentList = true;
+                
+                switch (cardType) {
+                    case 'roster':
+                        title = 'Full Student Roster';
+                        listToShow = Array.isArray(studentMasterList) ? studentMasterList : [];
+                        break;
+                    case 'present':
+                        title = 'Students Present Today';
+                        listToShow = Array.isArray(presentList) ? presentList : [];
+                        break;
+                    case 'absent':
+                        title = 'Students Absent Today';
+                        listToShow = Array.isArray(absentList) ? absentList : [];
+                        break;
+                    case 'rate':
+                        title = 'Attendance Rate Details';
+                        isStudentList = false;
+                        break;
+                    default:
+                        title = 'Information';
+                        isStudentList = false;
+                }
+
+                if (dataModalTitle) {
+                    dataModalTitle.textContent = title;
+                }
+
+                let content = '';
+
+                if (isStudentList) {
+                    content = `<div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Student Name</th>
+                                            <th>Student ID</th>
+                                            <th>Class</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                    
+                    if (listToShow.length > 0) {
+                        content += listToShow.map((student, index) => {
+                            // Validate student object properties
+                            const name = (student && student.name) ? student.name : 'N/A';
+                            const studentId = (student && student.student_id) ? student.student_id : 'N/A';
+                            const className = (student && student.class_name) ? student.class_name : 'N/A';
+                            const id = (student && student.id) ? student.id : '#';
+                            
+                            return `<tr>
+                                <td>${index + 1}</td>
+                                <td>
+                                    <a href="/student_profile/${id}" class="text-decoration-none">${name}</a>
+                                </td>
+                                <td><span class="badge bg-secondary fw-normal">${studentId}</span></td>
+                                <td>${className}</td>
+                              </tr>`;
+                        }).join('');
+                    } else {
+                        content += '<tr><td colspan="4" class="text-center text-muted p-4">No students to display.</td></tr>';
+                    }
+                    content += `</tbody></table></div>`;
+                } else if (cardType === 'rate') {
+                    const total = totalStudents || 0;
+                    const present = presentStudents || 0;
+                    const absent = Math.max(0, total - present);
+                    const rate = total > 0 ? ((present * 100) / total).toFixed(1) : 0;
+                    
+                    content = `<div class="p-3">
+                        <h5 class="mb-3">Statistics for Today</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                Total Students: <strong>${total}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                Present: <strong class="text-success">${present}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                Absent: <strong class="text-danger">${absent}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                Attendance Rate: <strong class="text-primary">${rate}%</strong>
+                            </li>
+                        </ul>
+                       </div>`;
+                }
+                
+                if (dataModalBody) {
+                    dataModalBody.innerHTML = content;
+                }
+            });
+        }
+        
+        // --- CHART DRAWING LOGIC ---
+        function drawCharts() {
+            const attendanceCanvas = document.getElementById('attendanceTrendsChart');
+            if (!attendanceCanvas) {
+                console.warn('Attendance chart canvas not found');
+                return;
+            }
+
+            // Destroy existing chart to prevent memory leaks
+            if (window.attendanceChart) {
+                window.attendanceChart.destroy();
+                window.attendanceChart = null;
+            }
+
+            // Get CSS variables with fallbacks
+            const body = document.body;
+            const computedStyle = getComputedStyle(body);
+            const gridColor = computedStyle.getPropertyValue('--chart-grid-color')?.trim() || 'rgba(128, 128, 128, 0.2)';
+            const textColor = computedStyle.getPropertyValue('--text-muted')?.trim() || '#6c757d';
+            const primaryColor = computedStyle.getPropertyValue('--primary-color')?.trim() || '#0d6efd';
+
+            // Parse chart data safely
+            let attendanceData;
+            try {
+                attendanceData = {{ (chart_data | tojson | safe) if chart_data else '{"labels": [], "values": []}' }};
+                
+                // Validate data structure
+                if (!attendanceData || typeof attendanceData !== 'object') {
+                    throw new Error('Invalid chart data structure');
+                }
+                
+                if (!Array.isArray(attendanceData.labels)) {
+                    attendanceData.labels = [];
+                }
+                
+                if (!Array.isArray(attendanceData.values)) {
+                    attendanceData.values = [];
+                }
+            } catch (e) {
+                console.warn('Chart data parsing error:', e);
+                attendanceData = { labels: [], values: [] };
+            }
+
+            const attendanceCtx = attendanceCanvas.getContext('2d');
+            
+            try {
+                window.attendanceChart = new Chart(attendanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: attendanceData.labels,
+                        datasets: [{
+                            label: 'Attendance %',
+                            data: attendanceData.values,
+                            borderColor: primaryColor,
+                            backgroundColor: primaryColor + '20',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: primaryColor,
+                            pointBorderColor: primaryColor,
+                            pointHoverBackgroundColor: primaryColor,
+                            pointHoverBorderColor: '#fff',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: { 
+                                labels: { color: textColor },
+                                display: true
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: primaryColor,
+                                borderWidth: 1,
+                                cornerRadius: 6,
+                                displayColors: false
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                max: 100,
+                                grid: { 
+                                    color: gridColor,
+                                    drawBorder: false
+                                },
+                                ticks: { 
+                                    color: textColor,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    },
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { 
+                                    color: gridColor,
+                                    drawBorder: false
+                                },
+                                ticks: { 
+                                    color: textColor,
+                                    maxTicksLimit: 7,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating attendance chart:', error);
+                const chartContainer = attendanceCanvas.parentElement;
+                if (chartContainer) {
+                    chartContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100"><div class="text-center"><i class="fas fa-chart-line fa-3x text-muted mb-3"></i><p class="text-muted">Chart data unavailable</p></div></div>';
+                }
+            }
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initializing...');
+            
+            // Initialize charts
+            drawCharts();
+            
+            // Periodic updates with error handling
+            let updateInterval;
+            let updateFailureCount = 0;
+            const maxFailures = 3;
+            
+            function startPeriodicUpdates() {
+                if (updateInterval) {
+                    clearInterval(updateInterval);
+                }
+                
+                updateInterval = setInterval(async () => {
+                    try {
+                        await fetchAndUpdateDashboard();
+                        updateFailureCount = 0; // Reset failure count on success
+                    } catch (error) {
+                        updateFailureCount++;
+                        console.warn(`Periodic update failed (${updateFailureCount}/${maxFailures}):`, error);
+                        
+                        // Stop updates after too many failures
+                        if (updateFailureCount >= maxFailures) {
+                            console.error('Too many update failures, stopping periodic updates');
+                            clearInterval(updateInterval);
+                            showErrorMessage('Connection lost. Please refresh the page.');
+                        }
+                    }
+                }, 30000); // 30 seconds interval
+            }
+            
+            startPeriodicUpdates();
+            
+            // Handle page visibility changes
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    if (updateInterval) {
+                        clearInterval(updateInterval);
+                        updateInterval = null;
+                    }
+                } else {
+                    updateFailureCount = 0; // Reset failure count when page becomes visible
+                    startPeriodicUpdates();
+                    fetchAndUpdateDashboard().catch(error => {
+                        console.warn('Immediate update on page focus failed:', error);
+                    });
+                }
+            });
+        });
+
+        // --- THEME CHANGE LISTENER ---
+        window.addEventListener('themeChanged', function() {
+            console.log('Theme changed, redrawing charts...');
+            setTimeout(() => {
+                drawCharts();
+            }, 150); // Increased delay to ensure CSS is fully applied
+        });
+
+        // --- WINDOW RESIZE HANDLER ---
+        const debouncedResize = debounce(() => {
+            if (window.attendanceChart && typeof window.attendanceChart.resize === 'function') {
+                window.attendanceChart.resize();
+            }
+        }, 250);
+        
+        window.addEventListener('resize', debouncedResize);
+
+        // --- FALLBACK FOR MISSING FUNCTIONS ---
+        if (typeof toggleSidebar === 'undefined') {
+            console.warn('toggleSidebar function not defined');
+            window.toggleSidebar = function() {
+                console.log('Sidebar toggle requested but function not implemented');
+                // Attempt to find sidebar and toggle it
+                const sidebar = document.querySelector('.sidebar, [data-sidebar]');
+                if (sidebar) {
+                    sidebar.classList.toggle('show');
+                }
+            };
+        }
+
+        // --- ENHANCED LEAVE REQUEST HANDLING ---
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('button[title="Approve"], button[title="Deny"]')) {
+                e.preventDefault();
+                const action = e.target.getAttribute('title').toLowerCase();
+                const studentRow = e.target.closest('tr');
+                const studentName = studentRow ? studentRow.querySelector('td:first-child')?.textContent?.trim() : 'this student';
+                
+                const confirmed = confirm(`Are you sure you want to ${action} the leave request for ${studentName}?`);
+                
+                if (confirmed) {
+                    const form = e.target.closest('form');
+                    if (form) {
+                        // Show loading state
+                        e.target.disabled = true;
+                        e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        // Submit the form
+                        form.submit();
+                    } else {
+                        // Fallback: show success message and remove row
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                        alertDiv.innerHTML = `
+                            Leave request ${action}d successfully!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        e.target.closest('.card-body').insertAdjacentElement('afterbegin', alertDiv);
+                        
+                        if (studentRow) {
+                            studentRow.remove();
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- NETWORK STATUS MONITORING ---
+        window.addEventListener('online', function() {
+            console.log('Connection restored');
+            // Immediately fetch fresh data when connection is restored
+            fetchAndUpdateDashboard().catch(error => {
+                console.warn('Failed to update after connection restored:', error);
+            });
+        });
+
+        window.addEventListener('offline', function() {
+            console.log('Connection lost');
+            showErrorMessage('Connection lost. Updates paused until connection is restored.');
+        });
+
+        // --- ERROR BOUNDARY FOR UNCAUGHT ERRORS ---
+        window.addEventListener('error', function(e) {
+            console.error('Uncaught error:', e.error);
+            // Don't show error to user for every JS error, but log it
+        });
+    </script>
+
+{% endblock %}
+
+z

@@ -1,0 +1,11 @@
+{% extends "base_auth.html" %}
+{% block title %}Error {{ error_code }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px; font-family: sans-serif;">
+    <h1 style="font-size: 4rem; color: #dc3545;">Error {{ error_code }}</h1>
+    <p style="font-size: 1.2rem; color: #6c757d;">{{ error_message }}</p>
+    <hr style="margin: 2rem auto; width: 50%;">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Dashboard</a>
+</div>
+{% endblock %}

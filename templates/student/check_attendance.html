@@ -1,0 +1,80 @@
+{% extends "shared/base.html" %}
+{% block title %}Check Attendance Records{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 fade-in">
+<div class="row justify-content-center">
+<div class="col-lg-8">
+<h2 class="fw-bold mb-4"><i class="fas fa-search me-2 text-primary"></i>Check Attendance Records</h2>
+
+        <!-- Student ID Input Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('student.check_attendance') }}">
+                    <div class="mb-3">
+                        <label for="student_id" class="form-label">Enter Student ID / Roll Number</label>
+                        <input type="text" class="form-control" id="student_id" name="student_id" placeholder="e.g., 1230440025" value="{{ student_id_searched }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> View My Attendance
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Attendance Results Card -->
+        {% if student and attendance_records %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-bold mb-3">Showing records for: {{ student.name }} ({{ student.student_id }})</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Marked By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if attendance_records.items %}
+                                {% for record in attendance_records.items %}
+                                <tr>
+                                    <td>{{ record.date.strftime('%d %b, %Y') }}</td>
+                                    <td>{{ record.subject.name if record.subject else 'N/A' }}</td>
+                                    <td>
+                                        {% if record.status == 'present' %}
+                                            <span class="badge bg-success">Present</span>
+                                        {% elif record.status == 'absent' %}
+                                            <span class="badge bg-danger">Absent</span>
+                                        {% elif record.status == 'leave' %}
+                                            <span class="badge bg-info">On Leave</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ record.status|capitalize }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.marked_by == 'qr' %}
+                                            <span class="badge bg-primary">QR Scan</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Manual</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="4" class="text-center">No attendance records found for this student.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+</div>
+{% endblock %}

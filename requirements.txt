@@ -1,0 +1,31 @@
+# Flask & Core
+Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+itsdangerous==2.1.2
+click==8.1.7
+blinker==1.6.3
+flask-login
+# Database
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==2.0.21
+alembic==1.16.5
+greenlet==3.2.4
+
+# Email & Messaging
+Flask-Mail==0.9.1
+email-validator==2.1.1
+
+# Utilities
+pytz
+python-dotenv
+qrcode[pil]
+python-dateutil
+fpdf2
+
+# Optional but useful
+requests
+cryptography
+passlib
+python-multipart

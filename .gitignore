@@ -1,0 +1,19 @@
+# Virtual Environment
+.myvenv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# VS Code editor settings
+.vscode/
+
+# Instance folder (often contains secrets or the database)
+instance/
+
+# Environment variables file (if you use one)
+.env
+
+# Database files
+*.db
+*.sqlite3

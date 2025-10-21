@@ -1,0 +1,55 @@
+{% extends "shared/base.html" %}
+{% block title %}{{ student.name }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <img src="{{ url_for('static', filename='uploads/' + student.photo) }}" alt="Profile Photo" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    <h4 class="card-title">{{ student.name }}</h4>
+                    <p class="text-muted">{{ student.student_id }}</p>
+                    <hr>
+                    <a href="{{ url_for('student.list_students') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Roster
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2"></i>Student Details
+                </div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ student.email or 'Not provided' }}</p>
+                    <p><strong>Class/Batch:</strong> {{ student.class_batch.name if student.class_batch else 'Unassigned' }}</p>
+                    <p><strong>Joined On:</strong> {{ student.created_at.strftime('%d %b %Y') }}</p>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <i class="fas fa-file-medical me-2"></i>Medical Leave History
+                </div>
+                <div class="card-body">
+                    {% if student.medical_leaves %}
+                        <ul class="list-group">
+                        {% for leave in student.medical_leaves %}
+                            <li class="list-group-item">
+                                From <strong>{{ leave.start_date.strftime('%d %b %Y') }}</strong> to <strong>{{ leave.end_date.strftime('%d %b %Y') }}</strong>
+                                <p class="mb-0 small text-muted">Reason: {{ leave.reason }}</p>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                    <p class="text-muted">No medical leaves on record.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

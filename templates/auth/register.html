@@ -1,0 +1,158 @@
+{% extends "shared/base_auth.html" %}
+{% block title %}Register{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* Styles from your existing register.html */
+    body, html { height: 100%; font-family: 'Inter', sans-serif; }
+    .register-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1rem; background: linear-gradient(135deg, #212529 0%, #007bff 100%); }
+    .register-card { width: 100%; max-width: 550px; padding: 3rem; border: none; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.25); background-color: #ffffff; animation: fadeIn 0.6s ease-in-out; }
+    .verification-message { background-color: #e9f7ef; border: 1px solid #d0e8d9; border-radius: 10px; padding: 2rem; text-align: center; color: #28a745; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .verification-message h4 { color: #1a6f3a; font-weight: 600; margin-bottom: 1rem; }
+    .verification-message .fas, .verification-message .fa-envelope-open-text, .verification-message .fa-check-circle { font-size: 3rem; margin-bottom: 1rem; color: #28a745; }
+    .verification-message .btn-link { color: var(--theme-primary); font-weight: 500; text-decoration: none; }
+    .verification-message .btn-link:hover { text-decoration: underline; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card fade-in">
+        {% if registered_email %}
+            <div class="verification-message">
+                <i class="fas fa-envelope-open-text"></i>
+                <h4>Verification Email Sent!</h4>
+                <p>We've sent a verification email to <strong>{{ registered_email }}</strong>.</p>
+                <p>Please check your inbox (and spam folder) and click the link to activate your account.</p>
+
+                <div class="mt-4 d-flex justify-content-center gap-2">
+                    <a href="{{ url_for('auth.verify_email_otp') }}?email={{ registered_email }}" class="btn btn-outline-primary">Verify with OTP</a>
+                </div>
+
+                <div class="mt-3">
+                    <a href="{{ url_for('auth.resend_verification_otp') }}?email={{ registered_email }}" class="btn-link">Didn't receive the email? Resend verification link</a>
+                </div>
+
+                <div class="mt-3">
+                    <small class="text-muted">Already verified? <a href="{{ url_for('auth.login') }}">Login here</a></small>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center mb-4">
+                <i class="fas fa-user-plus fa-3x"></i>
+                <h2 class="fw-bold mt-3">Create an Account</h2>
+            </div>
+            
+            <form method="POST" id="registerForm" novalidate>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Username" required value="{{ request.form.username or '' }}">
+                            <label for="username">Username</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required value="{{ request.form.email or '' }}">
+                            <label for="email">Email Address</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            <label for="password">Password</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                            <label for="confirm_password">Confirm Password</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <select class="form-select" id="role" name="role">
+                                <option value="student" {% if (request.form.role or '') == 'student' %}selected{% endif %}>Student</option>
+                                <option value="teacher" {% if (request.form.role or '') == 'teacher' %}selected{% endif %}>Teacher</option>
+                                <option value="admin" {% if (request.form.role or '') == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                            <label for="role">Register as a</label>
+                        </div>
+                    </div>
+                    <div id="admin-fields" class="col-12 g-3 row d-none m-0">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="institution_name" name="institution_name" placeholder="Institution Name" value="{{ request.form.institution_name or '' }}">
+                                <label for="institution_name">Institution Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="institution_type" name="institution_type">
+                                    <option value="school">School</option>
+                                    <option value="college">College</option>
+                                </select>
+                                <label for="institution_type">Institution Type</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="inst-id-field" class="col-12 d-none">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="institution_code" name="institution_code" placeholder="Institution ID" value="{{ request.form.institution_code or '' }}">
+                            <label for="institution_code">Institution ID</label>
+                        </div>
+                    </div>
+                    <div id="student-id-field" class="col-12 d-none">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Student ID" value="{{ request.form.student_id or '' }}">
+                            <label for="student_id">Your Student ID</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button class="btn btn-primary btn-lg" type="submit">Register</button>
+                </div>
+            </form>
+            <div class="text-center mt-4">
+                <small class="text-muted">Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></small>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    (function () {
+        'use strict'
+        const form = document.getElementById('registerForm');
+        if (!form) return;
+
+        const roleSelect = document.getElementById('role');
+        const adminFields = document.getElementById('admin-fields');
+        const instIdField = document.getElementById('inst-id-field');
+        const studentIdField = document.getElementById('student-id-field');
+        const instNameInput = document.getElementById('institution_name');
+        const instCodeInput = document.getElementById('institution_code');
+        const studentIdInput = document.getElementById('student_id');
+
+       function toggleFields() {
+            const selectedRole = roleSelect.value;
+            const adminFields = document.getElementById('admin-fields');
+            const instIdField = document.getElementById('inst-id-field');
+            
+            // Hide all optional fields by default
+            adminFields.classList.add('d-none');
+            instIdField.classList.add('d-none');
+            
+            // Show fields only for the admin role
+            if (selectedRole === 'admin') {
+                adminFields.classList.remove('d-none');
+            }
+        }
+        roleSelect.addEventListener('change', toggleFields);
+        toggleFields();
+    })();
+</script>
+{% endblock %}

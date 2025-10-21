@@ -1,0 +1,158 @@
+{% extends "shared/base_auth.html" %}
+{% block title %}Login{% endblock %}
+
+{% block head_extra %}
+<style>
+    body, html {
+        height: 100%;
+    }
+    .login-logo {
+        width: 120px;
+        height: 120px; /* Corrected height property */
+        object-fit: cover;
+        margin: 0 auto 15px; /* Simplified margin */
+        border-radius: 50%; /* Changed to 50% for a perfect circle */
+        background-color: rgb(89, 10, 10);
+        padding: 5px;
+        display: block;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    }
+    .login-logo:hover {
+        transform: scale(1.05);
+    }
+    .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--theme-dark) 0%, var(--theme-primary) 100%);
+    }
+    .login-card {
+        width: 100%;
+        max-width: 450px;
+        padding: 2.5rem;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        background-color: #f9f4f4;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    .text-center.mb-4 svg {
+        color: var(--theme-primary);
+        transition: transform 0.3s ease-in-out;
+    }
+    .text-center.mb-4 svg:hover {
+        transform: scale(1.1);
+    }
+    .login-card h2 {
+        color: var(--text-color-dark);
+        font-weight: 700;
+        margin-top: 1rem;
+    }
+    .login-card p.text-muted {
+        font-size: 0.95rem;
+    }
+    .form-floating .form-control {
+        border-radius: 8px;
+        border: 1px solid #dacece;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-floating .form-control:focus {
+        border-color: var(--theme-primary);
+        box-shadow: 0 0 0 0.25rem rgba(21, 45, 71, 0.25);
+    }
+    .form-floating > label {
+        padding-left: 0.75rem;
+        color: #6c757d;
+    }
+    .btn-primary.btn-lg {
+        background-color: var(--theme-primary);
+        border-color: var(--theme-primary);
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-primary.btn-lg:hover {
+        background-color: var(--theme-primary-hover);
+        border-color: var(--theme-primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .text-center.mt-4 small a {
+        color: var(--theme-primary);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .text-center.mt-4 small a:hover {
+        text-decoration: underline;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card fade-in">
+        <div class="text-center mb-4">
+            <img src="{{ url_for('static', filename='uploads/logo2.png') }}"
+                 alt="Attendly Logo"
+                 class="login-logo">
+
+            <h2 class="fw-bold mt-3">Attendly</h2>
+            <p class="text-muted">Please sign in to continue</p>
+        </div>
+        
+        <form method="POST" class="needs-validation" novalidate>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autofocus>
+                <label for="username">Username</label>
+                <div class="invalid-feedback">Please enter your username.</div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                <label for="password">Password</label>
+                <div class="invalid-feedback">Please enter your password.</div>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button class="btn btn-primary btn-lg" type="submit"><i class="fas fa-sign-in-alt me-2"></i>Sign In</button>
+            </div>
+        </form>
+
+        <div class="auth-links">
+            <a href="{{ url_for('auth.forgot_password') }}">Forgot Password?</a>
+            <a href="{{ url_for('auth.forgot_username') }}">Forgot Username?</a>
+        </div>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">Don’t have an account? <a href="{{ url_for('auth.register') }}">Register here</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}

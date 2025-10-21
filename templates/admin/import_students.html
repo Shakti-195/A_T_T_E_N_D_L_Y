@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Import Students{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fade-in">
+    <h1 class="h2 fw-bold mb-1">Import Students</h1>
+    <p class="text-muted mb-4">Bulk upload new students using a CSV file.</p>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-upload me-2"></i>Upload CSV File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="student_csv" class="form-label">Select CSV file to upload</label>
+                            <input class="form-control" type="file" id="student_csv" name="student_csv" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-upload me-2"></i>Upload and Import</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i>File Format Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <p>Your CSV file must have the following columns in this exact order:</p>
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>name</strong> (Student's full name)</li>
+                        <li class="list-group-item"><strong>student_id</strong> (Unique ID for the student)</li>
+                        <li class="list-group-item"><strong>email</strong> (Student's email address)</li>
+                        <li class="list-group-item"><strong>class_batch_id</strong> (The ID of the class/batch)</li>
+                    </ul>
+                    <p class="mt-3 text-muted small">Note: The first row of your file should be the header with these names.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

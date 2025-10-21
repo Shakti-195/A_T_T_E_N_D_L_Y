@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Attendance System{% endblock %}</title>
+    
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Font: Inter for a modern look (consistent with base.html) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --theme-primary: #481111; /* Primary Blue */
+            --theme-primary-hover: #051b33;
+            --theme-dark: #212529; /* Dark background color */
+            --text-color-dark: #343a40; /* Dark text for light backgrounds */
+        }
+        body, html {
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Light background for auth pages */
+        }
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, var(--theme-dark) 0%, var(--theme-primary) 100%); /* Consistent gradient */
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 500px;
+            padding: 2.5rem;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background-color: #e5dbdb;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .auth-card .text-center i {
+            color: var(--theme-primary);
+            transition: transform 0.3s ease-in-out;
+        }
+        .auth-card .text-center i:hover {
+            transform: scale(1.1);
+        }
+        .auth-card h2 {
+            color: var(--text-color-dark);
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+        .auth-card p.text-muted {
+            font-size: 0.95rem;
+        }
+        .form-floating .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-floating .form-control:focus {
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .form-floating > label {
+            padding-left: 0.75rem;
+            color: #6c757d;
+        }
+        .form-select {
+            border-radius: 8px;
+            border: 1px solid #054e9b;
+        }
+        .btn-primary.btn-lg {
+            background-color: var(--theme-primary);
+            border-color: var(--theme-primary);
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary.btn-lg:hover {
+            background-color: var(--theme-primary-hover);
+            border-color: var(--theme-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .text-center.mt-4 small a {
+            color: var(--theme-primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .text-center.mt-4 small a:hover {
+            text-decoration: underline;
+        }
+        .flash-messages {
+            position: fixed;
+            top: 1rem; /* Adjusted for auth pages, no fixed header */
+            right: 1rem;
+            z-index: 1050;
+            width: 350px;
+        }
+        .alert {
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 0.75rem;
+            animation: fadeInRight 0.5s ease-out;
+        }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .alert-dismissible .btn-close {
+            padding: 0.75rem 0.75rem;
+        }
+
+        /* Links for Forgot Password/Username */
+        .auth-links {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .auth-links a {
+            display: block; /* Each link on its own line */
+            color: #6c757d; /* Muted color */
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            transition: color 0.2s ease;
+        }
+        .auth-links a:hover {
+            color: var(--theme-primary);
+            text-decoration: underline;
+        }
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <!-- Flash Messages Container -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Block for Login/Register pages -->
+    {% block content %}{% endblock %}
+    
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Optionally close flash messages after a few seconds
+            document.querySelectorAll('.alert').forEach(alertElement => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alertElement);
+                    bsAlert.close();
+                }, 5000); // Close after 5 seconds
+            });
+        });
+    </script>
+    {% block body_extra %}{% endblock %}
+</body>
+</html>

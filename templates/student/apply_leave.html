@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Apply for Leave{% endblock %}
+
+{% block content %}
+<div class="container mt-5 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <a href="{{ url_for('profile') }}" class="btn btn-light me-3" title="Back to Profile">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <h2 class="card-title fw-bold mb-0">
+                            <i class="fas fa-calendar-alt me-2 text-primary"></i>Apply for Leave
+                        </h2>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "shared/base.html" %}
+{% block title %}System Setup{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="fw-bold mb-4"><i class="fas fa-cogs me-2 text-primary"></i>System Setup</h2>
+
+            <div class="card mb-4 shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>Your Institution ID</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="lead">Share this ID with teachers and students so they can join your institution.</p>
+                    <div class="bg-light p-3 rounded d-inline-block">
+                        <h3 class="fw-bold text-primary mb-0" id="inst-code">{{ g.user.institution.institution_code }}</h3>
+                    </div>
+                    <button class="btn btn-outline-primary ms-2" onclick="copyCode()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="card-title fw-bold mb-0"><i class="fas fa-user-cog me-2"></i>User Management</h5>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students-panel" type="button" role="tab">Student Assignments</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers-panel" type="button" role="tab">Teacher Assignments</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active p-3" id="students-panel" role="tabpanel">
+                            <h6 class="mt-2">Unassigned Students</h6>
+                            <p class="text-muted small">Students who have registered but are not yet in a class.</p>
+                            <ul class="list-group">
+                                {% for student in unassigned_students %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <strong>{{ student.name }}</strong> (ID: {{ student.student_id }})
+                                    </span>
+                                    <form method="POST" action="{{ url_for('admin.assign_student_to_class', student_id=student.id) }}" class="d-flex w-50">
+                                        <select name="class_batch_id" class="form-select form-select-sm me-2" required>
+                                            <option value="">Select a class...</option>
+                                            {% for cb in classes_batches %}
+                                            <option value="{{ cb.id }}">{{ cb.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-success">Assign</button>
+                                    </form>
+                                </li>
+                                {% else %}
+                                <li class="list-group-item text-muted">No unassigned students found.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="tab-pane fade p-3" id="teachers-panel" role="tabpanel">
+                             <h6 class="mt-2">Assign Teachers to Classes</h6>
+                             <ul class="list-group">
+                                 {% for cb in classes_batches %}
+                                 <li class="list-group-item">
+                                     <div class="d-flex justify-content-between align-items-center mb-2">
+                                         <h6 class="mb-0">{{ cb.name }}</h6>
+                                         <form method="POST" action="{{ url_for('admin.assign_teacher_to_class', class_id=cb.id) }}" class="d-flex w-50">
+                                             <select name="teacher_id" class="form-select form-select-sm me-2" required>
+                                                 <option value="">Select a teacher to add...</option>
+                                                 {% for teacher in teachers %}
+                                                 <option value="{{ teacher.id }}">{{ teacher.username }}</option>
+                                                 {% endfor %}
+                                             </select>
+                                             <button type="submit" class="btn btn-sm btn-primary">Add Teacher</button>
+                                         </form>
+                                     </div>
+                                     <div class="ps-2">
+                                         <small class="text-muted">Assigned Teachers:</small>
+                                         {% if cb.teachers %}
+                                         <ul class="list-unstyled d-flex flex-wrap gap-2 mt-1">
+                                             {% for teacher in cb.teachers %}
+                                             <li class="d-flex align-items-center bg-light border rounded px-2 py-1">
+                                                 <span>{{ teacher.username }}</span>
+                                                 <form method="POST" action="{{ url_for('admin.unassign_teacher_from_class', class_id=cb.id, teacher_id=teacher.id) }}" class="ms-2">
+                                                     <button type="submit" class="btn btn-sm btn-outline-danger p-0 px-1" style="line-height: 1;">&times;</button>
+                                                 </form>
+                                             </li>
+                                             {% endfor %}
+                                         </ul>
+                                         {% else %}
+                                         <p class="small text-muted fst-italic mt-1">No teachers assigned yet.</p>
+                                         {% endif %}
+                                     </div>
+                                 </li>
+                                 {% endfor %}
+                             </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold mb-3"><i class="fas fa-users-cog me-2"></i>Manage {% if institution and institution.type == 'school' %}Classes{% else %}Batches{% endif %}</h5>
+                            <form method="POST" action="{{ url_for('admin.setup') }}" class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" name="class_batch_name" class="form-control" placeholder="New class/batch name" required>
+                                    <button class="btn btn-primary" type="submit">Add</button>
+                                </div>
+                            </form>
+                            <ul class="list-group">
+                                {% for cb in classes_batches %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ cb.name }}
+                                    <form method="POST" action="{{ url_for('admin.delete_class_batch', class_id=cb.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure? Deleting this cannot be undone.')">&times;</button>
+                                    </form>
+                                </li>
+                                {% else %}
+                                <li class="list-group-item text-muted">No classes or batches created yet.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold mb-3"><i class="fas fa-book me-2"></i>Manage Subjects</h5>
+                            <form method="POST" action="{{ url_for('admin.setup') }}" class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" name="subject_name" class="form-control" placeholder="New subject name" required>
+                                    <button class="btn btn-primary" type="submit">Add</button>
+                                </div>
+                            </form>
+                             <ul class="list-group">
+                                {% for subject in subjects %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ subject.name }}
+                                    <form method="POST" action="{{ url_for('admin.delete_subject', subject_id=subject.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure? Deleting this cannot be undone.')">&times;</button>
+                                    </form>
+                                </li>
+                                {% else %}
+                                <li class="list-group-item text-muted">No subjects created yet.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+function copyCode() {
+    const code = document.getElementById('inst-code').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+        alert('Institution ID copied to clipboard!');
+    }, (err) => {
+        alert('Failed to copy ID.');
+    });
+}
+</script>
+{% endblock %}
+
