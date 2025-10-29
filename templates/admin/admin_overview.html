@@ -1,0 +1,29 @@
+<div class="section-card animate-slide-in-left">
+    <h2 class="section-title">📊 Administrative Overview</h2>
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-card-label">Role</div>
+            <div class="info-card-value">{{ user.role | upper }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-card-label">System Access Level</div>
+            <div class="info-card-value text-red-400">FULL CONTROL</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-card-label">Last Login</div>
+            <div class="info-card-value">{{ g.user.last_login_at or 'N/A' }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-card-label">Institution ID</div>
+            <div class="info-card-value">{{ user.institution_id or 'N/A' }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="section-card animate-slide-in-right">
+    <h3 class="section-title">👤 Contact Details</h3>
+    {% include 'profile/contact_info.html' ignore missing %}
+</div>

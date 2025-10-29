@@ -1,0 +1,1447 @@
+{% extends "shared/base.html" %}
+{% block title %}{{ user.personalInfo.name }} - My Profile{% endblock %}
+{% block page_title %}User Profile{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* ==================== ENHANCED 2025 DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --surface: #0f0f0f;
+        --background: #000000;
+        --text-primary: #ffffff;
+        --text-secondary: #9ca3af;
+        --accent-blue: #3b82f6;
+        --accent-purple: #9333ea;
+        --accent-emerald: #10b981;
+        --subtle-border: #1f2937;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    
+    /* ==================== GLASSMORPHISM EFFECTS ==================== */
+    .glass-card {
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.05) 0%, 
+            rgba(255, 255, 255, 0.02) 100%);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: 
+            0 8px 32px 0 rgba(0, 0, 0, 0.37),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    }
+
+    /* ==================== ADVANCED ANIMATIONS ==================== */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    @keyframes glow-pulse {
+        0%, 100% { 
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.4),
+                        0 0 40px rgba(220, 38, 38, 0.2);
+        }
+        50% { 
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.6),
+                        0 0 60px rgba(220, 38, 38, 0.3);
+        }
+    }
+
+    @keyframes slideInFromLeft {
+        from { opacity: 0; transform: translateX(-50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInFromRight {
+        from { opacity: 0; transform: translateX(50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes countUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes borderGlow {
+        0%, 100% { border-color: rgba(220, 38, 38, 0.3); }
+        50% { border-color: rgba(220, 38, 38, 0.8); }
+    }
+
+    @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .animate-slide-in-left {
+        animation: slideInFromLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .animate-slide-in-right {
+        animation: slideInFromRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    /* ==================== PROFILE CARD CONTAINER ==================== */
+    .profile-card {
+        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        border-radius: 2rem;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            0 0 100px rgba(220, 38, 38, 0.1);
+    }
+
+    .profile-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: radial-gradient(ellipse at top, 
+            rgba(220, 38, 38, 0.15) 0%, 
+            transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ==================== ENHANCED PROFILE HERO ==================== */
+    .profile-hero {
+        background: linear-gradient(135deg, 
+            rgba(220, 38, 38, 0.1) 0%, 
+            rgba(0, 0, 0, 0.3) 50%,
+            rgba(59, 130, 246, 0.1) 100%);
+        background-size: 200% 200%;
+        animation: gradient-shift 10s ease infinite;
+        padding: 2.5rem;
+        border-bottom: 1px solid var(--glass-border);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* AI-Inspired Gradient Border */
+    .profile-hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, 
+            transparent 0%,
+            var(--primary) 25%,
+            var(--accent-blue) 50%,
+            var(--accent-purple) 75%,
+            transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+    }
+
+    .hero-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* ==================== 3D AVATAR WITH DEPTH ==================== */
+    .avatar-section {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .avatar-wrapper { 
+        position: relative;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .avatar-outer {
+        width: 7rem;
+        height: 7rem;
+        background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+        border-radius: 50%;
+        padding: 0.35rem;
+        box-shadow: 
+            0 0 40px rgba(220, 38, 38, 0.4),
+            0 20px 40px rgba(0, 0, 0, 0.4);
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .avatar-outer::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent-blue), var(--accent-purple));
+        background-size: 300% 300%;
+        animation: gradient-shift 4s ease infinite;
+        opacity: 0;
+        transition: opacity 0.4s;
+        z-index: -1;
+    }
+
+    .avatar-outer:hover {
+        transform: scale(1.1) rotate(5deg);
+        animation: glow-pulse 2s ease infinite;
+    }
+
+    .avatar-outer:hover::before {
+        opacity: 1;
+    }
+
+    .avatar-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1f2937, #000000);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid rgba(220, 38, 38, 0.3);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .avatar-inner::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 30%, 
+            rgba(255, 255, 255, 0.2) 0%, 
+            transparent 60%);
+        pointer-events: none;
+    }
+
+    .avatar-inner img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover;
+        transition: transform 0.4s;
+    }
+
+    .avatar-outer:hover .avatar-inner img {
+        transform: scale(1.1);
+    }
+
+    .avatar-emoji { font-size: 3.5rem; }
+    .avatar-initials { 
+        font-size: 2rem; 
+        font-weight: 900; 
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 3D Level Badge */
+    .level-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid #000000;
+        box-shadow: 
+            0 4px 20px rgba(239, 68, 68, 0.5),
+            inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s;
+    }
+
+    .level-badge:hover {
+        transform: scale(1.2) rotate(360deg);
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .level-badge span { 
+        color: white; 
+        font-size: 0.875rem; 
+        font-weight: 900;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ==================== ENHANCED NAME SECTION ==================== */
+    .name-section h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff 0%, #9ca3af 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        text-shadow: 0 2px 20px rgba(220, 38, 38, 0.3);
+    }
+
+    .badges-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* Modern Badge Design with Glassmorphism */
+    .hero-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.2), 
+            transparent);
+        transition: left 0.5s;
+    }
+
+    .hero-badge:hover::before {
+        left: 100%;
+    }
+
+    .hero-badge:hover {
+        transform: translateY(-2px) scale(1.05);
+    }
+
+    .badge-blue { 
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.4), rgba(59, 130, 246, 0.2)); 
+        border: 1px solid rgba(59, 130, 246, 0.6); 
+        color: #93c5fd;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .badge-purple { 
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.4), rgba(168, 85, 247, 0.2)); 
+        border: 1px solid rgba(168, 85, 247, 0.6); 
+        color: #c4b5fd;
+        box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+    }
+    
+    .badge-red { 
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.4), rgba(239, 68, 68, 0.2)); 
+        border: 1px solid rgba(239, 68, 68, 0.6); 
+        color: #fca5a5;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+    
+    .badge-emerald { 
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(52, 211, 153, 0.2)); 
+        border: 1px solid rgba(52, 211, 153, 0.6); 
+        color: #6ee7b7;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    /* ==================== FUTURISTIC EDIT BUTTON ==================== */
+    .edit-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+    }
+
+    .edit-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .edit-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .edit-btn:hover {
+        border-color: #fca5a5;
+        box-shadow: 0 8px 30px rgba(239, 68, 68, 0.6);
+        transform: translateY(-3px);
+        color: white;
+    }
+
+    .edit-btn svg {
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s;
+    }
+
+    .edit-btn span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .edit-btn:hover svg {
+        transform: rotate(15deg);
+    }
+
+    /* ==================== INFO BAR WITH ICONS ==================== */
+    .info-bar {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        font-size: 0.9375rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #e5e7eb;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s;
+    }
+
+    .info-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(220, 38, 38, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .info-icon { 
+        color: #f87171; 
+        width: 1.25rem; 
+        height: 1.25rem;
+        filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.5));
+    }
+
+    /* ==================== 3D STATS CARDS ==================== */
+    .stats-section {
+        background: linear-gradient(135deg, 
+            rgba(0, 0, 0, 0.3) 0%, 
+            rgba(17, 24, 39, 0.2) 100%);
+        padding: 2.5rem;
+        position: relative;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .stat-card {
+        border-radius: 1.25rem;
+        padding: 1.75rem;
+        border: 2px solid;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+        animation: float 2s ease-in-out infinite;
+    }
+
+    .stat-card:hover { 
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-card-red { 
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(153, 27, 27, 0.2)); 
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .stat-card-emerald { 
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.3), rgba(4, 120, 87, 0.2)); 
+        border-color: rgba(52, 211, 153, 0.4);
+    }
+    
+    .stat-card-blue { 
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(30, 64, 175, 0.2)); 
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .stat-card-purple { 
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(126, 34, 206, 0.2)); 
+        border-color: rgba(168, 85, 247, 0.4);
+    }
+
+    .stat-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        margin-bottom: 1rem; 
+    }
+    
+    .stat-icon { 
+        width: 2.5rem; 
+        height: 2.5rem; 
+        color: white;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+        transition: transform 0.3s;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.2) rotate(10deg);
+    }
+    
+    .stat-emoji { 
+        font-size: 2.5rem;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+        transition: transform 0.3s;
+    }
+
+    .stat-card:hover .stat-emoji {
+        transform: scale(1.2);
+    }
+    
+    .stat-value { 
+        font-size: 3rem; 
+        font-weight: 900; 
+        color: white; 
+        margin-bottom: 0.5rem;
+        line-height: 1;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        font-feature-settings: 'tnum';
+        font-variant-numeric: tabular-nums;
+    }
+    
+    .stat-label { 
+        font-size: 0.8125rem; 
+        font-weight: 700; 
+        text-transform: uppercase; 
+        letter-spacing: 0.1em;
+        opacity: 0.9;
+    }
+
+    /* Number Counter Animation */
+    .stat-value[data-count] {
+        animation: countUp 1s ease-out;
+    }
+
+    /* ==================== ADVANCED TAB BAR ==================== */
+    .tab-bar-wrapper {
+        background: var(--surface);
+        padding: 1rem;
+        position: relative;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .tab-bar-container {
+        position: relative;
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(220, 38, 38, 0.3) transparent;
+        gap: 0.5rem;
+    }
+
+    .tab-bar-container::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .tab-bar-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .tab-bar-container::-webkit-scrollbar-thumb {
+        background: rgba(220, 38, 38, 0.3);
+        border-radius: 2px;
+    }
+
+    .tab-pill {
+        position: absolute;
+        height: 3rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border-radius: 1rem;
+        box-shadow: 
+            0 10px 25px rgba(220, 38, 38, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .tab-button {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1.5rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        white-space: nowrap;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        flex-shrink: 0;
+        transition: all 0.3s;
+    }
+
+    .tab-button.active { 
+        color: white;
+    }
+    
+    .tab-button:not(.active) { 
+        color: var(--text-secondary);
+    }
+    
+    .tab-button:not(.active):hover { 
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .tab-icon { 
+        width: 1.25rem; 
+        height: 1.25rem;
+        transition: transform 0.3s;
+    }
+
+    .tab-button:hover .tab-icon {
+        transform: scale(1.1);
+    }
+
+    .tab-button.active .tab-icon {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    }
+
+    /* ==================== CONTENT SECTIONS WITH GLASSMORPHISM ==================== */
+    .section-card {
+        background: linear-gradient(135deg, 
+            rgba(17, 24, 39, 0.6) 0%, 
+            rgba(31, 41, 55, 0.4) 100%);
+        backdrop-filter: blur(10px);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 
+            0 10px 30px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: all 0.4s;
+    }
+
+    .section-card:hover {
+        border-color: rgba(220, 38, 38, 0.3);
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.4),
+            0 0 30px rgba(220, 38, 38, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ffffff 0%, #9ca3af 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), transparent);
+        border-radius: 2px;
+    }
+
+    /* Info Grid Layout */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s;
+    }
+
+    .info-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(220, 38, 38, 0.3);
+        transform: translateY(-5px);
+    }
+
+    .info-card-label {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Activity Timeline */
+    .activity-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, 
+            var(--primary) 0%, 
+            var(--accent-blue) 50%,
+            var(--accent-purple) 100%);
+    }
+
+    .activity-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 1.5rem;
+    }
+
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -2.5rem;
+        top: 0.25rem;
+        width: 12px;
+        height: 12px;
+        background: var(--primary);
+        border-radius: 50%;
+        border: 3px solid var(--surface);
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+    }
+
+    /* Progress Bars */
+    .progress-bar-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        height: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--accent-purple));
+        border-radius: 1rem;
+        transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    /* ==================== RESPONSIVE DESIGN ==================== */
+    @media (max-width: 768px) {
+        .profile-hero {
+            padding: 1.5rem;
+        }
+
+        .name-section h1 { 
+            font-size: 1.75rem; 
+        }
+        
+        .stats-grid { 
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+        }
+
+        .stat-value {
+            font-size: 2.25rem;
+        }
+
+        .avatar-outer {
+            width: 5rem;
+            height: 5rem;
+        }
+
+        .hero-content {
+            gap: 1rem;
+        }
+
+        .edit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .section-card {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ==================== ACCESSIBILITY ==================== */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* Focus States */
+    .tab-button:focus-visible,
+    .edit-btn:focus-visible {
+        outline: 3px solid rgba(220, 38, 38, 0.5);
+        outline-offset: 4px;
+    }
+
+    /* Dark Mode Optimization */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+    }
+
+    /* ==================== MICRO-INTERACTIONS ==================== */
+    .clickable {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .clickable:active {
+        transform: scale(0.98);
+    }
+
+    /* Skeleton Loading */
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .skeleton {
+        background: linear-gradient(90deg, 
+            rgba(255, 255, 255, 0.05) 25%, 
+            rgba(255, 255, 255, 0.1) 50%, 
+            rgba(255, 255, 255, 0.05) 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s ease-in-out infinite;
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11">
+            <div class="profile-card animate-scale-in">
+                
+                <!-- ==================== ENHANCED PROFILE HERO ==================== -->
+                <div class="profile-hero">
+                    <div class="hero-content">
+                        <div class="avatar-section animate-slide-in-left">
+                            <div class="avatar-wrapper">
+                                <div class="avatar-outer">
+                                    <div class="avatar-inner">
+                                        {% if user.personalInfo.avatar and (user.personalInfo.avatar.startswith('http') or user.personalInfo.avatar.startswith('/')) %}
+                                            <img src="{{ user.personalInfo.avatar }}" alt="{{ user.personalInfo.name }}" loading="lazy">
+                                        {% elif user.personalInfo.avatar %}
+                                            <span class="avatar-emoji">{{ user.personalInfo.avatar }}</span>
+                                        {% else %}
+                                            <span class="avatar-initials">
+                                                {% set name_parts = user.personalInfo.name.split() %}
+                                                {{ name_parts[0][0]|upper }}{% if name_parts|length > 1 %}{{ name_parts[-1][0]|upper }}{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if user.role == 'student' and user.studentInfo and user.studentInfo.semester %}
+                                    <div class="level-badge"><span>{{ user.studentInfo.semester }}</span></div>
+                                {% endif %}
+                            </div>
+
+                            <div class="name-section">
+                                <h1>{{ user.personalInfo.name }}</h1>
+                                <div class="badges-container">
+                                    <span class="hero-badge badge-blue">🆔 {{ user.attendlyId }}</span>
+                                    {% if user.enrollmentNo %}
+                                        <span class="hero-badge badge-purple">📋 {{ user.enrollmentNo }}</span>
+                                    {% endif %}
+                                    {% if user.role == 'student' and user.studentInfo.semester %}
+                                        <span class="hero-badge badge-red">🎯 Level {{ user.studentInfo.semester }}</span>
+                                    {% endif %}
+                                    <span class="hero-badge badge-emerald text-capitalize">👤 {{ user.role }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if is_own_profile %}
+                            <a href="{{ url_for('profile.edit_profile') }}" class="edit-btn animate-slide-in-right">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span>Edit Profile</span>
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {% if user.role == 'student' %}
+                        <div class="info-bar">
+                            <div class="info-item">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path>
+                                </svg>
+                                <span class="fw-semibold">{{ user.branch or 'Not specified' }}</span>
+                            </div>
+                            {% if user.personalInfo.email %}
+                                <div class="info-item">
+                                    <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>{{ user.personalInfo.email }}</span>
+                                </div>
+                            {% endif %}
+                            {% if user.personalInfo.phone %}
+                                <div class="info-item">
+                                    <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                    </svg>
+                                    <span>{{ user.personalInfo.phone }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- ==================== 3D STATS SECTION ==================== -->
+                {% if user.role == 'student' %}
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        {% if user.academics and user.academics.cgpa %}
+                        <div class="stat-card stat-card-red animate-scale-in" style="animation-delay: 0.1s;">
+                            <div class="stat-header">
+                                <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0"></path>
+                                </svg>
+                                <span class="stat-emoji">🏆</span>
+                            </div>
+                            <div class="stat-value" data-count="{{ user.academics.cgpa }}">{{ "%.1f"|format(user.academics.cgpa) }}</div>
+                            <div class="stat-label text-red-100">CGPA Score</div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.attendance %}
+                        <div class="stat-card stat-card-emerald animate-scale-in" style="animation-delay: 0.2s;">
+                            <div class="stat-header">
+                                <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                <span class="stat-emoji">🎯</span>
+                            </div>
+                            <div class="stat-value" data-count="{{ user.attendance.percentage }}">{{ user.attendance.percentage }}%</div>
+                            <div class="stat-label text-emerald-100">Attendance Rate</div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.academics and user.academics.subjects %}
+                        <div class="stat-card stat-card-blue animate-scale-in" style="animation-delay: 0.3s;">
+                            <div class="stat-header">
+                                <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5"></path>
+                                </svg>
+                                <span class="stat-emoji">📚</span>
+                            </div>
+                            <div class="stat-value" data-count="{{ user.academics.subjects|length }}">{{ user.academics.subjects|length }}</div>
+                            <div class="stat-label text-blue-100">Active Subjects</div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.achievements %}
+                        <div class="stat-card stat-card-purple animate-scale-in" style="animation-delay: 0.4s;">
+                            <div class="stat-header">
+                                <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806"></path>
+                                </svg>
+                                <span class="stat-emoji">👑</span>
+                            </div>
+                            <div class="stat-value" data-count="{{ user.achievements|length }}">{{ user.achievements|length }}</div>
+                            <div class="stat-label text-purple-100">Achievements</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- ==================== ADVANCED TAB BAR ==================== -->
+                <div class="tab-bar-wrapper">
+                    <div class="tab-bar-container" id="tabBarContainer">
+                        <div class="tab-pill" id="tabPill" style="opacity: 0;"></div>
+                        
+                        <button class="tab-button active" type="button" data-bs-toggle="tab" data-bs-target="#overview-tab" role="tab" aria-selected="true">
+                            <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span>Overview</span>
+                        </button>
+                        
+                        <button class="tab-button" type="button" data-bs-toggle="tab" data-bs-target="#academic-tab" role="tab" aria-selected="false">
+                            <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>Academic</span>
+                        </button>
+                        
+                        <button class="tab-button" type="button" data-bs-toggle="tab" data-bs-target="#contact-tab" role="tab" aria-selected="false">
+                            <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span>Contact</span>
+                        </button>
+
+                        {% if is_own_profile %}
+                        <button class="tab-button" type="button" data-bs-toggle="tab" data-bs-target="#security-tab" role="tab" aria-selected="false">
+                            <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <span>Security</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ==================== TAB CONTENT ==================== -->
+                <div class="p-4 p-md-5">
+                    <div class="tab-content" id="profileTabContent">
+                        
+                        <!-- Overview Tab -->
+<div class="tab-pane fade show active" id="overview-tab" role="tabpanel">
+    <div class="section-card animate-slide-in-left">
+        <h3 class="section-title">📊 Quick Overview</h3>
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-card-label">Role</div>
+                <div class="info-card-value text-capitalize">{{ user.role }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">Attendly ID</div>
+                <div class="info-card-value">{{ user.attendlyId }}</div>
+            </div>
+            {% if user.enrollmentNo %}
+            <div class="info-card">
+                <div class="info-card-label">Enrollment No</div>
+                <div class="info-card-value">{{ user.enrollmentNo }}</div>
+            </div>
+            {% endif %}
+            {% if user.branch %}
+            <div class="info-card">
+                <div class="info-card-label">Branch</div>
+                <div class="info-card-value">{{ user.branch }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Medical Leave Section for Students -->
+{% if user.role == 'student' and is_own_profile %}
+<div class="section-card animate-slide-in-left mt-4" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(0, 0, 0, 0.8)); border-color: rgba(168, 85, 247, 0.3);">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="section-title mb-0">🏥 Medical Leave Requests</h3>
+        <a href="{{ url_for('student.apply_leave') }}" class="btn btn-sm" style="background: linear-gradient(135deg, #9333ea, #7e22ce); color: white; padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 600; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Apply for Leave
+        </a>
+    </div>
+
+    {% if user.student_profile and user.student_profile.medical_leaves %}
+        {% set recent_leaves = user.student_profile.medical_leaves[:3] %}
+        <div class="info-grid">
+            {% for leave in recent_leaves %}
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="info-card-label">{{ leave.start_date.strftime('%d/%m/%Y') }} - {{ leave.end_date.strftime('%d/%m/%Y') }}</div>
+                    <span class="badge" style="
+                        {% if leave.status == 'pending' %}background: rgba(234, 179, 8, 0.2); color: #fbbf24; border: 1px solid #fbbf24;{% endif %}
+                        {% if leave.status == 'approved' %}background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;{% endif %}
+                        {% if leave.status == 'rejected' %}background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;{% endif %}
+                        padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700;">
+                        {{ leave.status|capitalize }}
+                    </span>
+                </div>
+                <div class="info-card-value" style="font-size: 0.875rem; opacity: 0.8;">
+                    {{ leave.reason[:80] }}{% if leave.reason|length > 80 %}...{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-3">
+            <a href="{{ url_for('student.handle_leave') }}" style="color: #c4b5fd; text-decoration: none; font-size: 0.875rem; font-weight: 600;">
+                View All Leave Requests →
+            </a>
+        </div>
+    {% else %}
+        <div class="text-center py-4" style="color: var(--text-secondary);">
+            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 1rem; opacity: 0.5;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="mb-2">No leave requests yet</p>
+            <a href="{{ url_for('student.apply_leave') }}" style="color: #c4b5fd; text-decoration: none; font-weight: 600;">Apply for your first medical leave</a>
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('student.view_leaves') }}" style="color: #c4b5fd; text-decoration: none; font-size: 0.875rem; font-weight: 600;">
+                    View All Leave Requests →
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center py-4" style="color: var(--text-secondary);">
+                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 1rem; opacity: 0.5;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="mb-2">No leave requests yet</p>
+                <a href="{{ url_for('student.apply_leave') }}" style="color: #c4b5fd; text-decoration: none; font-weight: 600;">Apply for your first medical leave</a>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+
+                        <!-- Academic Tab -->
+                        <div class="tab-pane fade" id="academic-tab" role="tabpanel">
+                            <div class="section-card animate-slide-in-left">
+                                <h3 class="section-title">🎓 Academic Information</h3>
+                                <div class="info-grid">
+                                    {% if user.academics and user.academics.semester %}
+                                    <div class="info-card">
+                                        <div class="info-card-label">Current Semester</div>
+                                        <div class="info-card-value">Semester {{ user.academics.semester }}</div>
+                                    </div>
+                                    {% endif %}
+                                    {% if user.academics and user.academics.cgpa %}
+                                    <div class="info-card">
+                                        <div class="info-card-label">CGPA</div>
+                                        <div class="info-card-value">{{ "%.2f"|format(user.academics.cgpa) }} / 10.0</div>
+                                    </div>
+                                    {% endif %}
+                                    {% if user.attendance %}
+                                    <div class="info-card">
+                                        <div class="info-card-label">Overall Attendance</div>
+                                        <div class="info-card-value">{{ user.attendance.percentage }}%</div>
+                                        <div class="progress-bar-container mt-2">
+                                            <div class="progress-bar" style="width: {{ user.attendance.percentage or 0 }}%"></div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if user.academics and user.academics.subjects %}
+                                    <div class="info-card">
+                                        <div class="info-card-label">Total Subjects</div>
+                                        <div class="info-card-value">{{ user.academics.subjects|length }} Subjects</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Tab -->
+                        <div class="tab-pane fade" id="contact-tab" role="tabpanel">
+                            <div class="section-card animate-slide-in-left">
+                                <h3 class="section-title">📞 Contact Information</h3>
+                                <div class="info-grid">
+                                    <div class="info-card">
+                                        <div class="info-card-label">Email Address</div>
+                                        <div class="info-card-value">{{ user.personalInfo.email or 'Not provided' }}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <div class="info-card-label">Phone Number</div>
+                                        <div class="info-card-value">{{ user.personalInfo.phone or 'Not provided' }}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <div class="info-card-label">Location</div>
+                                        <div class="info-card-value">{{ user.personalInfo.location or 'Not provided' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Tab - FIXED: Added fade class -->
+                        {% if is_own_profile %}
+                        <div class="tab-pane fade" id="security-tab" role="tabpanel">
+                            <div class="section-card animate-slide-in-left">
+                                <h3 class="section-title">🔐 Security Settings</h3>
+                                <div class="info-grid">
+                                    <div class="info-card clickable">
+                                        <div class="info-card-label">Change Password</div>
+                                        <div class="info-card-value text-secondary">Update your password</div>
+                                    </div>
+                                    <div class="info-card clickable">
+                                        <div class="info-card-label">Two-Factor Auth</div>
+                                        <div class="info-card-value text-secondary">Enable 2FA</div>
+                                    </div>
+                                    <div class="info-card clickable">
+                                        <div class="info-card-label">Session Management</div>
+                                        <div class="info-card-value text-secondary">View active sessions</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== ENHANCED TAB SYSTEM ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('tabBarContainer');
+        const pill = document.getElementById('tabPill');
+        const buttons = container.querySelectorAll('.tab-button');
+        
+        function updatePillPosition() {
+            const activeButton = container.querySelector('.tab-button.active');
+            if (activeButton) {
+                const { offsetWidth, offsetLeft } = activeButton;
+                pill.style.width = offsetWidth + 'px';
+                pill.style.transform = `translateX(${offsetLeft}px)`;
+                pill.style.opacity = '1';
+            }
+        }
+        
+        // Initial position
+        setTimeout(updatePillPosition, 150);
+        
+        // Handle tab switching with Bootstrap's native event
+        buttons.forEach(button => {
+            button.addEventListener('shown.bs.tab', function (event) {
+                buttons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                updatePillPosition();
+            });
+        });
+        
+        window.addEventListener('resize', updatePillPosition);
+
+        // ==================== NUMBER COUNTER ANIMATION ====================
+        const animateValue = (element, start, end, duration) => {
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            const isFloat = end % 1 !== 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = isFloat ? current.toFixed(1) : Math.round(current);
+                
+                const statLabel = element.parentElement.querySelector('.stat-label');
+                if (statLabel && statLabel.textContent.includes('Attendance')) {
+                    element.textContent += '%';
+                }
+            }, 16);
+        };
+
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        let statsAnimated = false;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !statsAnimated) {
+                    const statValues = entry.target.querySelectorAll('.stat-value[data-count]');
+                    statValues.forEach(stat => {
+                        const finalValue = parseFloat(stat.getAttribute('data-count'));
+                        animateValue(stat, 0, finalValue, 1000);
+                    });
+                    statsAnimated = true;
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        // ==================== PROGRESS BAR ANIMATION ====================
+        const progressObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const bar = entry.target;
+                    const finalWidth = bar.getAttribute('data-final-width');
+                    if (finalWidth) {
+                        bar.style.width = finalWidth;
+                        progressObserver.unobserve(bar);
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            bar.setAttribute('data-final-width', bar.style.width);
+            bar.style.width = '0%';
+            progressObserver.observe(bar);
+        });
+
+        // ==================== 3D TILT EFFECT FOR CARDS ====================
+        const cards = document.querySelectorAll('.stat-card, .info-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 15;
+                const rotateY = (centerX - x) / 15;
+                
+                card.style.transition = 'transform 0.1s ease-out';
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                card.style.transform = '';
+            });
+        });
+
+        // ==================== LAZY LOADING FOR IMAGES ====================
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.dataset.src || img.src;
+                        if (src) {
+                            img.src = src;
+                            img.classList.add('loaded');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+                if (img.dataset.src) {
+                    imageObserver.observe(img);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

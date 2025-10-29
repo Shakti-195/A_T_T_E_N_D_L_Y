@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Security Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #e4e4e7;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-card {
+            background: linear-gradient(135deg, rgba(30, 30, 46, 0.95) 0%, rgba(24, 24, 37, 0.95) 100%);
+            border-radius: 24px;
+            padding: 0;
+            margin-bottom: 32px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(99, 102, 241, 0.1);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+        }
+
+        .section-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 0 60px rgba(99, 102, 241, 0.2);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .card-header {
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .section-card:hover .card-header::before {
+            opacity: 1;
+        }
+
+        .card-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-icon::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 18px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        .password-icon {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .auth-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .privacy-icon {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        .session-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-subtitle {
+            color: #a1a1aa;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 32px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #d4d4d8;
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            background: rgba(17, 17, 27, 0.8);
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            color: #e4e4e7;
+            font-size: 15px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-input:focus {
+            background: rgba(17, 17, 27, 1);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 8px 24px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: #52525b;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #71717a;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .toggle-password:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #a1a1aa;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #93c5fd;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .info-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #bfdbfe;
+            font-size: 13px;
+        }
+
+        .check-icon {
+            width: 18px;
+            height: 18px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #60a5fa;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-red:hover {
+            box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-green:hover {
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-purple:hover {
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-orange:hover {
+            box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+        }
+
+        .feature-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #34d399;
+            flex-shrink: 0;
+        }
+
+        .feature-content h4 {
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .feature-content p {
+            color: #a1a1aa;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #d4d4d8;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-disabled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-enabled {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .toggle-info h5 {
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .toggle-info p {
+            color: #a1a1aa;
+            font-size: 13px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 28px;
+            background: rgba(39, 39, 42, 0.8);
+            border: 2px solid rgba(63, 63, 70, 0.5);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border-color: #6366f1;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .toggle-pill {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-switch.active .toggle-pill {
+            transform: translateX(28px);
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+            margin: 0;
+        }
+
+        .session-card {
+            background: linear-gradient(135deg, rgba(30, 30, 46, 0.6), rgba(24, 24, 37, 0.6));
+            border: 2px solid rgba(63, 63, 70, 0.5);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .session-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateX(4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .session-card.current {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .session-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .session-device-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .session-card.current .session-device-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .session-card:not(.current) .session-device-icon {
+            background: rgba(63, 63, 70, 0.5);
+            color: #a1a1aa;
+        }
+
+        .session-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .session-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .session-name {
+            font-weight: 700;
+            color: #e4e4e7;
+            font-size: 16px;
+        }
+
+        .current-badge {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .session-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .session-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a1a1aa;
+            font-size: 13px;
+        }
+
+        .detail-icon {
+            width: 16px;
+            height: 16px;
+            color: #71717a;
+        }
+
+        .btn-signout {
+            padding: 10px 20px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            color: #fca5a5;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-signout:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #fecaca;
+        }
+
+        .tips-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .tips-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .tips-content h4 {
+            font-weight: 700;
+            color: #e4e4e7;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .tips-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tips-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #bfdbfe;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .bullet {
+            width: 6px;
+            height: 6px;
+            background: #60a5fa;
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @media (max-width: 1100px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .card-header, .card-body {
+                padding: 24px 20px;
+            }
+
+            .session-content {
+                flex-direction: column;
+            }
+
+            .btn-signout {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Password & 2FA Grid -->
+        <div class="grid-2">
+            <!-- Change Password Card -->
+            <div class="section-card">
+                <div class="card-header">
+                    <div class="card-header-content">
+                        <div class="header-icon password-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">Change Password</h3>
+                        <p class="card-subtitle">Update your account password securely</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="current_password">Current Password</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password"
+                                    id="current_password"
+                                    class="form-input"
+                                    placeholder="Enter your current password"
+                                >
+                                <button type="button" class="toggle-password" onclick="togglePassword('current_password')">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new_password">New Password</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password"
+                                    id="new_password"
+                                    class="form-input"
+                                    placeholder="Enter your new password"
+                                >
+                                <button type="button" class="toggle-password" onclick="togglePassword('new_password')">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirm_password">Confirm New Password</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password"
+                                    id="confirm_password"
+                                    class="form-input"
+                                    placeholder="Confirm your new password"
+                                >
+                                <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <p class="info-title">Password Requirements:</p>
+                            <ul class="info-list">
+                                <li>
+                                    <span class="check-icon">✓</span>
+                                    <span>Minimum 8 characters in length</span>
+                                </li>
+                                <li>
+                                    <span class="check-icon">✓</span>
+                                    <span>At least one uppercase letter (A-Z)</span>
+                                </li>
+                                <li>
+                                    <span class="check-icon">✓</span>
+                                    <span>At least one number or special character</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-red">
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Two-Factor Authentication Card -->
+            <div class="section-card">
+                <div class="card-header">
+                    <div class="card-header-content">
+                        <div class="header-icon auth-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">Two-Factor Authentication</h3>
+                        <p class="card-subtitle">Add an extra layer of account security</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Enhanced Account Protection</h4>
+                            <p>Secure your account with an additional verification step. You'll need to enter a code from your authenticator app or SMS when signing in from new devices.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-card">
+                        <div class="status-header">
+                            <span class="status-label">2FA Status</span>
+                            <span class="status-badge status-disabled" id="status-badge">Disabled</span>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h5>Enable Two-Factor Authentication</h5>
+                                <p>Requires verification code on each login</p>
+                            </div>
+                            <div class="toggle-switch" id="2fa-toggle" onclick="toggle2FA()">
+                                <div class="toggle-pill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary btn-green" id="setup-btn" onclick="alert('Setup 2FA - Backend integration required')">
+                        Setup Two-Factor Auth
+                    </button>
+
+                    <div id="enabled-actions" style="display: none;">
+                        <button class="btn-primary btn-green" style="margin-bottom: 12px;" onclick="alert('View Recovery Codes')">
+                            View Recovery Codes
+                        </button>
+                        <button class="btn-primary btn-purple" onclick="alert('Configure Authenticator App')">
+                            Configure Authenticator App
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Settings Card -->
+        <div class="section-card">
+            <div class="card-header">
+                <div class="card-header-content">
+                    <div class="header-icon privacy-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <polyline points="17 11 19 13 23 9"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Privacy Settings</h3>
+                    <p class="card-subtitle">Control your profile visibility and data sharing</p>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <h5>Show Email Address</h5>
+                        <p>Allow other users to view your email address</p>
+                    </div>
+                    <div class="toggle-switch active" onclick="togglePrivacy(this)">
+                        <div class="toggle-pill"></div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <h5>Show Phone Number</h5>
+                        <p>Display your phone number on your public profile</p>
+                    </div>
+                    <div class="toggle-switch" onclick="togglePrivacy(this)">
+                        <div class="toggle-pill"></div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <h5>Show Location</h5>
+                        <p>Share your city and country with other users</p>
+                    </div>
+                    <div class="toggle-switch active" onclick="togglePrivacy(this)">
+                        <div class="toggle-pill"></div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <h5>Show Activity Status</h5>
+                        <p>Let others see when you're online and active</p>
+                    </div>
+                    <div class="toggle-switch active" onclick="togglePrivacy(this)">
+                        <div class="toggle-pill"></div>
+                    </div>
+                </div>
+
+                <button class="btn-primary btn-purple" style="margin-top: 24px;" onclick="alert('Privacy settings saved!')">
+                    Save Privacy Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Sessions Card -->
+        <div class="section-card">
+            <div class="card-header">
+                <div class="card-header-content">
+                    <div class="header-icon session-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                            <line x1="12" y1="18" x2="12.01" y2="18"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Active Sessions</h3>
+                    <p class="card-subtitle">Manage devices with access to your account</p>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Current Session -->
+                <div class="session-card current">
+                    <div class="session-content">
+                        <div class="session-device-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </div>
+                        <div class="session-info">
+                            <div class="session-header">
+                                <h4 class="session-name">This Device</h4>
+                                <span class="current-badge">Current</span>
+                            </div>
+                            <div class="session-details">
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                        <line x1="8" y1="21" x2="16" y2="21"/>
+                                    </svg>
+                                    <span>Chrome on Windows 11</span>
+                                </div>
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    <span>Lucknow, India</span>
+                                </div>
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span class="pulse">Active now</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- iPhone Session -->
+                <div class="session-card">
+                    <div class="session-content">
+                        <div class="session-device-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                <line x1="12" y1="18" x2="12.01" y2="18"/>
+                            </svg>
+                        </div>
+                        <div class="session-info">
+                            <div class="session-header">
+                                <h4 class="session-name">iPhone 13</h4>
+                            </div>
+                            <div class="session-details">
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                        <line x1="12" y1="18" x2="12.01" y2="18"/>
+                                    </svg>
+                                    <span>Safari on iOS 17</span>
+                                </div>
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    <span>Lucknow, India</span>
+                                </div>
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span>2 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-signout" onclick="alert('Sign out from iPhone 13')">
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MacBook Session -->
+                <div class="session-card">
+                    <div class="session-content">
+                        <div class="session-device-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </div>
+                        <div class="session-info">
+                            <div class="session-header">
+                                <h4 class="session-name">MacBook Pro</h4>
+                            </div>
+                            <div class="session-details">
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                        <line x1="8" y1="21" x2="16" y2="21"/>
+                                    </svg>
+                                    <span>Chrome on macOS</span>
+                                </div>
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    <span>Delhi, India</span>
+                                </div>
+                                <div class="session-detail">
+                                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span>1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-signout" onclick="alert('Sign out from MacBook Pro')">
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-primary btn-orange" style="margin-top: 16px;" onclick="alert('Sign out from all other sessions')">
+                    Sign Out All Other Sessions
+                </button>
+            </div>
+        </div>
+
+        <!-- Security Tips Card -->
+        <div class="tips-card">
+            <div class="tips-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+            <div class="tips-content">
+                <h4>Security Best Practices</h4>
+                <ul class="tips-list">
+                    <li>
+                        <span class="bullet"></span>
+                        <span>Never share your password with anyone, including support staff or team members</span>
+                    </li>
+                    <li>
+                        <span class="bullet"></span>
+                        <span>Enable two-factor authentication for maximum account protection</span>
+                    </li>
+                    <li>
+                        <span class="bullet"></span>
+                        <span>Review active sessions regularly and immediately sign out any unrecognized devices</span>
+                    </li>
+                    <li>
+                        <span class="bullet"></span>
+                        <span>Use a strong, unique password that combines letters, numbers, and special characters</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function toggle2FA() {
+            const toggle = document.getElementById('2fa-toggle');
+            const badge = document.getElementById('status-badge');
+            const setupBtn = document.getElementById('setup-btn');
+            const enabledActions = document.getElementById('enabled-actions');
+            
+            toggle.classList.toggle('active');
+            
+            if (toggle.classList.contains('active')) {
+                badge.textContent = 'Enabled';
+                badge.classList.remove('status-disabled');
+                badge.classList.add('status-enabled');
+                setupBtn.style.display = 'none';
+                enabledActions.style.display = 'block';
+            } else {
+                badge.textContent = 'Disabled';
+                badge.classList.remove('status-enabled');
+                badge.classList.add('status-disabled');
+                setupBtn.style.display = 'block';
+                enabledActions.style.display = 'none';
+            }
+        }
+
+        function togglePrivacy(element) {
+            element.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

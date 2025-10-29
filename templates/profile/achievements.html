@@ -1,0 +1,383 @@
+{# templates/profile/achievements.html #}
+{# This template expects the 'user' object and its 'achievements' property (a list of strings) #}
+
+{% set achievement_types = {
+    'Academic': {'emoji': '🎓', 'gradient': 'from-blue-500 to-indigo-600', 'glow': 'bg-blue-500/20', 'border': 'border-blue-500'},
+    'Sports': {'emoji': '⚽', 'gradient': 'from-green-500 to-emerald-600', 'glow': 'bg-green-500/20', 'border': 'border-green-500'},
+    'Leadership': {'emoji': '👑', 'gradient': 'from-purple-500 to-pink-600', 'glow': 'bg-purple-500/20', 'border': 'border-purple-500'},
+    'Arts': {'emoji': '🎨', 'gradient': 'from-orange-500 to-red-600', 'glow': 'bg-orange-500/20', 'border': 'border-orange-500'},
+    'Technology': {'emoji': '💻', 'gradient': 'from-cyan-500 to-blue-600', 'glow': 'bg-cyan-500/20', 'border': 'border-cyan-500'},
+    'Community': {'emoji': '🤝', 'gradient': 'from-teal-500 to-green-600', 'glow': 'bg-teal-500/20', 'border': 'border-teal-500'},
+    'Default': {'emoji': '⭐', 'gradient': 'from-yellow-500 to-orange-600', 'glow': 'bg-yellow-500/20', 'border': 'border-yellow-500'}
+} %}
+
+<style>
+    .achievements-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .achievements-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .achievements-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .achievements-header {
+        background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
+        background-size: 200% 200%;
+        animation: achievementGradientFlow 12s ease infinite;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .achievements-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+        animation: rotateGlow 25s linear infinite;
+    }
+
+    @keyframes achievementGradientFlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .achievement-badge {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .achievement-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .achievement-badge:hover {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: rgba(168, 85, 247, 0.4);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px var(--badge-glow);
+    }
+
+    .achievement-badge:hover::before {
+        left: 100%;
+    }
+
+    .achievement-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .achievement-badge:hover .achievement-icon-wrapper {
+        transform: scale(1.15) rotate(-10deg);
+    }
+
+    .achievement-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 1rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        filter: blur(20px);
+    }
+
+    .achievement-badge:hover .achievement-glow {
+        opacity: 1;
+    }
+
+    .achievement-emoji {
+        font-size: 2rem;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .achievement-badge:hover .achievement-emoji {
+        transform: scale(1.2) rotate(15deg);
+    }
+
+    .trophy-counter {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .trophy-counter:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: var(--stat-border-color);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-emoji {
+        font-size: 2.5rem;
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+
+    .stat-card:hover .stat-emoji {
+        transform: scale(1.15) rotate(-10deg);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .achievement-badge {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .achievement-badge:nth-child(1) { animation-delay: 0.1s; }
+    .achievement-badge:nth-child(2) { animation-delay: 0.15s; }
+    .achievement-badge:nth-child(3) { animation-delay: 0.2s; }
+    .achievement-badge:nth-child(4) { animation-delay: 0.25s; }
+    .achievement-badge:nth-child(5) { animation-delay: 0.3s; }
+    .achievement-badge:nth-child(6) { animation-delay: 0.35s; }
+
+    .stat-card {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.4s; }
+    .stat-card:nth-child(2) { animation-delay: 0.45s; }
+    .stat-card:nth-child(3) { animation-delay: 0.5s; }
+    .stat-card:nth-child(4) { animation-delay: 0.55s; }
+
+    .empty-state-icon {
+        width: 100px;
+        height: 100px;
+        background: rgba(71, 85, 105, 0.3);
+        border-radius: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    @media (max-width: 640px) {
+        .achievement-badge {
+            padding: 1.25rem !important;
+        }
+    }
+</style>
+
+{% if user.achievements and user.achievements|length > 0 %}
+    <div class="space-y-6 section-card">
+        <!-- Premium Header -->
+        <div class="achievements-card achievements-header rounded-2xl p-8 shadow-2xl">
+            <div class="flex items-center justify-between flex-wrap gap-6 relative z-10">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/30 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                            <path d="M4 22h16"/>
+                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight mb-1">Achievements & Awards</h2>
+                        <p class="text-white/90 text-sm md:text-base font-semibold">
+                            <span class="text-yellow-300">{{ user.achievements|length }}</span> 
+                            {{ 'achievement' if user.achievements|length == 1 else 'achievements' }} unlocked
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="trophy-counter rounded-2xl px-6 py-4 text-center">
+                    <div class="text-5xl mb-2">🏆</div>
+                    <div class="text-white font-black text-2xl">{{ user.achievements|length }}</div>
+                    <div class="text-white/80 text-xs font-semibold uppercase tracking-wider">Trophies</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievement Badges Grid -->
+        <div class="achievements-card rounded-2xl p-6 md:p-8 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                        <circle cx="12" cy="8" r="7"/>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-black text-white">Achievement Gallery</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {% for achievement_title in user.achievements %}
+                    {% set achievement_type = 'Default' %}
+                    {% for type_key in achievement_types.keys() %}
+                        {% if type_key.lower() in achievement_title.lower() %}
+                            {% set achievement_type = type_key %}
+                        {% endif %}
+                    {% endfor %}
+                    {% set style = achievement_types[achievement_type] %}
+                    
+                    <div class="achievement-badge rounded-xl p-6" style="--badge-glow: {{ style.glow }};">
+                        <div class="flex items-start gap-4">
+                            <div class="achievement-icon-wrapper bg-gradient-to-br {{ style.gradient }} shadow-xl flex-shrink-0 relative">
+                                <div class="achievement-glow {{ style.glow }}"></div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white relative z-10">
+                                    <circle cx="12" cy="8" r="7"/>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                                </svg>
+                            </div>
+                            
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <h4 class="text-white font-bold text-lg leading-tight">{{ achievement_title }}</h4>
+                                    <span class="achievement-emoji flex-shrink-0">{{ style.emoji }}</span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2 text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                    <span class="text-slate-400 font-medium">Awarded</span>
+                                </div>
+
+                                <div class="mt-3 flex items-center gap-2">
+                                    <div class="h-1 flex-1 bg-slate-700/50 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r {{ style.gradient }} rounded-full" style="width: 100%;"></div>
+                                    </div>
+                                    <span class="text-xs font-bold {{ 'text-' + style.gradient.split()[0].replace('from-', '').split('-')[0] + '-400' }}">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="stat-card rounded-xl p-5" style="--stat-border-color: rgba(168, 85, 247, 0.3);">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="stat-emoji">🏅</span>
+                    <div class="text-white font-black text-3xl">{{ user.achievements|length }}</div>
+                </div>
+                <p class="text-slate-400 text-sm font-semibold">Total Awards</p>
+            </div>
+
+            <div class="stat-card rounded-xl p-5" style="--stat-border-color: rgba(236, 72, 153, 0.3);">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="stat-emoji">⭐</span>
+                    <div class="text-white font-black text-3xl">{{ user.achievements|length }}</div>
+                </div>
+                <p class="text-slate-400 text-sm font-semibold">Badges Earned</p>
+            </div>
+
+            <div class="stat-card rounded-xl p-5" style="--stat-border-color: rgba(249, 115, 22, 0.3);">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="stat-emoji">🎯</span>
+                    <div class="text-white font-black text-3xl">100%</div>
+                </div>
+                <p class="text-slate-400 text-sm font-semibold">Completion</p>
+            </div>
+
+            <div class="stat-card rounded-xl p-5" style="--stat-border-color: rgba(34, 197, 94, 0.3);">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="stat-emoji">🔥</span>
+                    <div class="text-white font-black text-3xl">{{ user.achievements|length }}</div>
+                </div>
+                <p class="text-slate-400 text-sm font-semibold">Active Streak</p>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- Empty State -->
+    <div class="achievements-card rounded-2xl p-12 text-center shadow-2xl section-card">
+        <div class="empty-state-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                <path d="M4 22h16"/>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+            </svg>
+        </div>
+        <h3 class="text-white font-bold text-2xl mb-3">No Achievements Yet</h3>
+        <p class="text-slate-400 text-base max-w-md mx-auto mb-6">Keep working hard and reaching your goals! Your achievements will be displayed here once you unlock them.</p>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mt-8">
+            {% for type_name, type_data in achievement_types.items() %}
+                {% if type_name != 'Default' %}
+                <div class="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+                    <div class="text-3xl mb-2">{{ type_data.emoji }}</div>
+                    <div class="text-slate-300 text-sm font-semibold">{{ type_name }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

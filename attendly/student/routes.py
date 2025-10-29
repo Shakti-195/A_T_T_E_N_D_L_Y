@@ -514,6 +514,55 @@ def add_medical_leave(student_id):
     
     return render_template('student/add_leave.html', student=student)
 
+# --- Student-Facing Routes ---
+
+# -----------------------------------------------------------------
+# --- ADD THIS NEW ROUTE ---
+# -----------------------------------------------------------------
+@student_bp.route('/profile/<int:student_id>')
+@teacher_or_admin_required
+def student_profile_view(student_id):
+    """
+    Displays a detailed profile page for a specific student,
+    viewable by a teacher or admin.
+    """
+    student = db.session.get(Student, student_id)
+    
+    if not student:
+        flash('Student not found.', 'danger')
+        return redirect(url_for('student.list_students'))
+        
+    # --- SAFER SECURITY CHECK ---
+    # Check if student has a class batch first
+    if not student.class_batch:
+        flash(f'Student {student.name} is not assigned to a class.', 'warning')
+        # You might still want to show the profile, or redirect. 
+        # Let's redirect for now.
+        return redirect(url_for('student.list_students'))
+        
+    # Now, check the institution
+    if student.class_batch.institution_id != g.user.institution_id:
+        flash('You do not have permission to view this student.', 'danger')
+        return redirect(url_for('student.list_students'))
+    # --- END OF SAFER CHECK ---
+        
+    # Fetch related data, e.g., leave requests
+    leave_requests = MedicalLeave.query.filter_by(student_id=student.id)\
+                                     .order_by(desc(MedicalLeave.created_at)).all()
+                                     
+    return render_template(
+        'student/student_profile.html', 
+        student=student, 
+        leave_requests=leave_requests
+    )
+# -----------------------------------------------------------------
+# --- END OF NEW ROUTE ---
+# -----------------------------------------------------------------
+
+
+# --- THIS DUPLICATE FUNCTION HAS BEEN REMOVED ---
+
+
 # --- NEWLY ADDED ROUTES ---
 
 @student_bp.route('/handle_leave/<int:leave_id>/<action>', methods=['POST'])
@@ -616,4 +665,3 @@ def export_pdf():
         current_app.logger.error(f"Error exporting PDF: {e}")
         flash("An error occurred while generating the PDF report.", "danger")
         return redirect(url_for('dashboard.dashboard'))
-

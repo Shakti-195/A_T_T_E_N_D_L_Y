@@ -133,8 +133,14 @@
                                         {% set percent = row.attendance_percent|round(1) %}
                                         {% set bar_color = 'bg-success' if percent >= 75 else 'bg-warning' if percent >= 50 else 'bg-danger' %}
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar {{ bar_color }}" role="progressbar" style="width: {{ percent }}%;" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">
-                                                {{ percent }}%
+                                            <div class="progress-bar {{ bar_color }}" 
+                                                role="progressbar" 
+                                                data-value="{{ percent }}"
+                                                aria-valuenow="{{ percent }}" 
+                                                aria-valuemin="0" 
+                                                aria-valuemax="100"
+                                                style="width: 0px;">
+                                                {{ percent ~ '%' }}
                                             </div>
                                         </div>
                                     </td>
@@ -161,20 +167,24 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Data from backend
-    const summary = {{ summary | tojson | safe }};
-    const subjectPerformance = {{ subject_performance | tojson | safe }};
+    // Data from backend (provide safe fallbacks)
+    const summaryData = JSON.parse('{{ summary | tojson | safe }}') || {};
+    const subjectPerformanceData = JSON.parse('{{ subject_performance | tojson | safe }}') || [];
+    const subjectPerformance = Array.isArray(subjectPerformanceData) ? subjectPerformanceData : [];
 
     // 1. Attendance Distribution Chart (Doughnut)
     const distCtx = document.getElementById('attendanceDistributionChart');
     if (distCtx) {
+        const present = (summaryData && typeof summaryData.total_present !== 'undefined') ? summaryData.total_present : 0;
+        const absent = (summaryData && typeof summaryData.total_absent !== 'undefined') ? summaryData.total_absent : 0;
+
         new Chart(distCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Present', 'Absent'],
                 datasets: [{
                     label: 'Attendance',
-                    data: [summary.total_present, summary.total_absent],
+                    data: [present, absent],
                     backgroundColor: ['#198754', '#dc3545'],
                     borderColor: '#fff',
                     borderWidth: 2
@@ -219,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         max: 100,
                         ticks: {
                             callback: function(value) {
-                                return value + '%'
+                                return value + '%';
                             }
                         }
                     }
@@ -239,6 +249,15 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.font = '16px sans-serif';
         ctx.fillText('No subject performance data available.', subjectCtx.width / 2, subjectCtx.height / 2);
     }
+
+    // Set progress bar widths from data-value (avoid inline percent in template)
+    document.querySelectorAll('.progress-bar[data-value]').forEach(function(el) {
+        const val = parseFloat(el.getAttribute('data-value')) || 0;
+        el.style.width = val + '%';
+        el.setAttribute('aria-valuenow', val);
+        // ensure label shows the percent consistently
+        el.textContent = val + '%';
+    });
 });
 </script>
 {% endblock %}

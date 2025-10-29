@@ -1,0 +1,40 @@
+<div class="section-card animate-slide-in-left">
+    <h3 class="section-title">⚙️ User Management Dashboard</h3>
+    
+    <p class="text-secondary mb-5">Quick access to essential administrative tasks and user provisioning tools.</p>
+
+    {# --- ADMIN QUICK ACTION CARDS --- #}
+    <div class="info-grid mb-6">
+        <div class="info-card clickable" data-href="{{ url_for('admin.list_all_users') }}">
+            <div class="info-card-label">View & Edit Accounts</div>
+            <div class="info-card-value text-blue-400">View All Users</div>
+            <p class="text-sm text-secondary mt-2">Find, audit, or modify any user profile.</p>
+        </div>
+        
+        <div class="info-card clickable" data-href="{{ url_for('auth.register', role='staff') }}">
+            <div class="info-card-label">New Staff/Admin</div>
+            <div class="info-card-value text-purple-400">Register User</div>
+            <p class="text-sm text-secondary mt-2">Manually create a new teacher or admin account.</p>
+        </div>
+        
+        <div class="info-card clickable" data-href="{{ url_for('admin.setup') }}">
+            <div class="info-card-label">Class & Subject Configuration</div>
+            <div class="info-card-value text-emerald-400">System Setup</div>
+            <p class="text-sm text-secondary mt-2">Manage batches, subjects, and teacher assignments.</p>
+        </div>
+        <script>
+            document.querySelectorAll('.info-card.clickable').forEach(card => {
+                card.addEventListener('click', function() {
+                    window.location.href = this.dataset.href;
+                });
+            });
+        </script>
+    </div>
+
+    {# --- IMPORT STUDENTS TOOL --- #}
+    <div class="mt-8">
+        <h4 class="section-title mb-4">📥 Bulk Enrollment Tool</h4>
+        {% include 'admin/import_students_form.html' ignore missing %}
+    </div>
+
+</div>

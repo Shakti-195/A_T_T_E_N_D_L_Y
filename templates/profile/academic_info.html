@@ -1,0 +1,345 @@
+{# templates/profile/academic_info.html #}
+{# This template expects the 'user' object and uses styles from profile.html #}
+
+{# --- 1. Define Role-Specific Configuration --- #}
+{% if user.role == 'student' %}
+    {% set title = 'Academic Information' %}
+    {% set icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>' %}
+    {% set gradient = 'from-blue-500 via-indigo-500 to-purple-600' %}
+    {% set icon_bg = 'from-blue-400 to-indigo-500' %}
+{% elif user.role == 'teacher' %}
+    {% set title = 'Professional Profile' %}
+    {% set icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>' %}
+    {% set gradient = 'from-purple-500 via-pink-500 to-rose-600' %}
+    {% set icon_bg = 'from-purple-400 to-pink-500' %}
+{% elif user.role == 'admin' %}
+    {% set title = 'Administrative Details' %}
+    {% set icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>' %}
+    {% set gradient = 'from-emerald-500 via-teal-500 to-cyan-600' %}
+    {% set icon_bg = 'from-emerald-400 to-teal-500' %}
+{% else %}
+    {% set title = 'Information' %}
+    {% set icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' %}
+    {% set gradient = 'from-slate-500 via-gray-500 to-zinc-600' %}
+    {% set icon_bg = 'from-slate-400 to-gray-500' %}
+{% endif %}
+
+{# --- 2. Define Fields to Display --- #}
+{% set fields_to_display = [] %}
+
+{% if user.role == 'student' %}
+    {% if user.branch %}{% set _ = fields_to_display.append({'label': 'Branch', 'value': user.branch, 'icon': '🎓'}) %}{% endif %}
+    {% if user.academics.semester %}{% set _ = fields_to_display.append({'label': 'Semester', 'value': user.academics.semester, 'icon': '📚'}) %}{% endif %}
+    {% if user.studentInfo.batch %}{% set _ = fields_to_display.append({'label': 'Batch', 'value': user.studentInfo.batch, 'icon': '📅'}) %}{% endif %}
+    {% if user.enrollmentNo %}{% set _ = fields_to_display.append({'label': 'Enrollment No.', 'value': user.enrollmentNo, 'icon': '🆔'}) %}{% endif %}
+{% elif user.role == 'teacher' %}
+    {% if user.designation %}{% set _ = fields_to_display.append({'label': 'Designation', 'value': user.designation, 'icon': '👔'}) %}{% endif %}
+    {% if user.department %}{% set _ = fields_to_display.append({'label': 'Department', 'value': user.department, 'icon': '🏢'}) %}{% endif %}
+    {% if user.experience %}{% set _ = fields_to_display.append({'label': 'Experience', 'value': user.experience, 'icon': '⏱️'}) %}{% endif %}
+{% elif user.role == 'admin' %}
+    {% if user.designation %}{% set _ = fields_to_display.append({'label': 'Designation', 'value': user.designation or 'Administrator', 'icon': '👤'}) %}{% endif %}
+    {% if user.department %}{% set _ = fields_to_display.append({'label': 'Department', 'value': user.department, 'icon': '🏢'}) %}{% endif %}
+{% endif %}
+
+<style>
+    .academic-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .academic-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .academic-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .academic-header {
+        background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-via) 50%, var(--gradient-to) 100%);
+        background-size: 200% 200%;
+        animation: academicGradientFlow 10s ease infinite;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .academic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+        animation: rotateGlow 20s linear infinite;
+    }
+
+    @keyframes academicGradientFlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .info-item {
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.08), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .info-item:hover {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: rgba(139, 92, 246, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25), 0 0 20px rgba(139, 92, 246, 0.15);
+    }
+
+    .info-item:hover::before {
+        left: 100%;
+    }
+
+    .info-icon-emoji {
+        font-size: 1.75rem;
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+
+    .info-item:hover .info-icon-emoji {
+        transform: scale(1.2) rotate(-10deg);
+    }
+
+    .class-badge {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
+        border: 1.5px solid rgba(139, 92, 246, 0.3);
+        color: #c4b5fd;
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .class-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .class-badge:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(236, 72, 153, 0.25) 100%);
+        border-color: rgba(139, 92, 246, 0.5);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);
+        color: #e9d5ff;
+    }
+
+    .class-badge:hover::before {
+        left: 100%;
+    }
+
+    .bio-section {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.5) 100%);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(148, 163, 184, 0.15);
+        position: relative;
+    }
+
+    .bio-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+    }
+
+    .classes-section {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        position: relative;
+    }
+
+    .classes-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.4), transparent);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .info-item {
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+
+    .info-item:nth-child(1) { animation-delay: 0.1s; }
+    .info-item:nth-child(2) { animation-delay: 0.2s; }
+    .info-item:nth-child(3) { animation-delay: 0.3s; }
+    .info-item:nth-child(4) { animation-delay: 0.4s; }
+
+    .class-badge {
+        animation: fadeInUp 0.4s ease-out backwards;
+    }
+
+    @media (max-width: 640px) {
+        .info-item {
+            padding: 1rem !important;
+        }
+        
+        .class-badge {
+            font-size: 0.8125rem;
+            padding: 0.425rem 0.875rem;
+        }
+    }
+</style>
+
+<div class="academic-card rounded-2xl shadow-2xl overflow-hidden section-card" 
+     style="--gradient-from: {{ gradient.split()[0].replace('from-', 'var(--' + gradient.split()[0].replace('from-', '') + ')') }}">
+    
+    <!-- Premium Header -->
+    <div class="academic-header px-6 py-5 bg-gradient-to-r {{ gradient }}">
+        <div class="flex items-center gap-3 relative z-10">
+            <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/30 shadow-lg">
+                <div class="text-white">{{ icon_svg | safe }}</div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-white tracking-tight">{{ title }}</h3>
+                <p class="text-white/90 text-sm font-medium mt-0.5">
+                    {% if user.role == 'student' %}
+                        Student academic details
+                    {% elif user.role == 'teacher' %}
+                        Professional credentials
+                    {% elif user.role == 'admin' %}
+                        Administrative information
+                    {% else %}
+                        Profile information
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Grid -->
+    <div class="p-6">
+        {% if fields_to_display %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% for field in fields_to_display %}
+                <div class="info-item rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="info-icon-emoji">{{ field.icon }}</span>
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">{{ field.label }}</p>
+                    </div>
+                    <p class="text-white font-bold text-lg pl-10">{{ field.value }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                </div>
+                <p class="text-slate-400 font-medium">No information available for this section</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Bio Section -->
+    {% if user.bio %}
+    <div class="bio-section px-6 py-5">
+        <h4 class="text-white font-black text-lg mb-3 flex items-center gap-2.5">
+            <span class="text-2xl">✍️</span>
+            <span>About</span>
+        </h4>
+        <p class="text-slate-300 leading-relaxed text-base">{{ user.bio }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Classes Taught Section (for Teachers) -->
+    {% if user.role == 'teacher' and user.taught_classes %}
+    <div class="classes-section px-6 py-5">
+        <h4 class="text-white font-black text-lg mb-4 flex items-center gap-2.5">
+            <span class="text-2xl">📖</span>
+            <span>Classes Taught</span>
+        </h4>
+        <div class="flex flex-wrap gap-3">
+            {% for class_batch in user.taught_classes %}
+                <span class="class-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <span>{{ class_batch.name }}</span>
+                </span>
+            {% else %}
+                <div class="text-center py-4 w-full">
+                    <p class="text-sm text-slate-400">Not assigned to any classes yet</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Add stagger animation for badges
+    document.addEventListener('DOMContentLoaded', () => {
+        const badges = document.querySelectorAll('.class-badge');
+        badges.forEach((badge, index) => {
+            badge.style.animationDelay = `${0.5 + (index * 0.1)}s`;
+        });
+    });
+</script>

@@ -1,0 +1,451 @@
+{# templates/profile/academics.html #}
+{# This template expects the 'user' object #}
+
+{# --- Grade Style Map with Enhanced Colors --- #}
+{% set grade_styles = {
+    'A+': {'text': 'text-emerald-400', 'border': 'border-emerald-500', 'from': 'from-emerald-500', 'to': 'to-green-500', 'shadow': 'shadow-emerald-500/50', 'bg': 'bg-emerald-500/10', 'glow': 'bg-emerald-500/20', 'emoji': '🏆'},
+    'A':  {'text': 'text-sky-400', 'border': 'border-sky-500', 'from': 'from-sky-500', 'to': 'to-blue-500', 'shadow': 'shadow-sky-500/50', 'bg': 'bg-sky-500/10', 'glow': 'bg-sky-500/20', 'emoji': '⭐'},
+    'B+': {'text': 'text-purple-400', 'border': 'border-purple-500', 'from': 'from-purple-500', 'to': 'to-fuchsia-500', 'shadow': 'shadow-purple-500/50', 'bg': 'bg-purple-500/10', 'glow': 'bg-purple-500/20', 'emoji': '✨'},
+    'B':  {'text': 'text-indigo-400', 'border': 'border-indigo-500', 'from': 'from-indigo-500', 'to': 'to-violet-500', 'shadow': 'shadow-indigo-500/50', 'bg': 'bg-indigo-500/10', 'glow': 'bg-indigo-500/20', 'emoji': '💎'},
+    'C+': {'text': 'text-yellow-400', 'border': 'border-yellow-500', 'from': 'from-yellow-500', 'to': 'to-amber-500', 'shadow': 'shadow-yellow-500/50', 'bg': 'bg-yellow-500/10', 'glow': 'bg-yellow-500/20', 'emoji': '📚'},
+    'C':  {'text': 'text-orange-400', 'border': 'border-orange-500', 'from': 'from-orange-500', 'to': 'to-red-500', 'shadow': 'shadow-orange-500/50', 'bg': 'bg-orange-500/10', 'glow': 'bg-orange-500/20', 'emoji': '📖'},
+    'D':  {'text': 'text-red-400', 'border': 'border-red-500', 'from': 'from-red-500', 'to': 'to-rose-500', 'shadow': 'shadow-red-500/50', 'bg': 'bg-red-500/10', 'glow': 'bg-red-500/20', 'emoji': '📝'},
+    'F':  {'text': 'text-rose-500', 'border': 'border-rose-600', 'from': 'from-rose-600', 'to': 'to-pink-600', 'shadow': 'shadow-rose-600/50', 'bg': 'bg-rose-500/10', 'glow': 'bg-rose-500/20', 'emoji': '💪'},
+    'default': {'text': 'text-gray-400', 'border': 'border-gray-600', 'from': 'from-gray-500', 'to': 'to-slate-500', 'shadow': 'shadow-gray-500/40', 'bg': 'bg-gray-500/10', 'glow': 'bg-gray-500/20', 'emoji': '❓'}
+} %}
+
+{# --- Helper Dictionaries --- #}
+{% set grade_percentage_map = {'A+': 95, 'A': 88, 'B+': 82, 'B': 75, 'C+': 68, 'C': 60, 'D': 50, 'F': 30, 'default': 70} %}
+
+{% macro get_performance_text(cgpa) %}
+    {% if cgpa >= 9 %}Excellent
+    {% elif cgpa >= 8 %}Very Good
+    {% elif cgpa >= 7 %}Good
+    {% elif cgpa >= 6 %}Satisfactory
+    {% else %}Needs Improvement
+    {% endif %}
+{% endmacro %}
+
+<style>
+    .academics-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .academics-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .academics-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .academics-header {
+        background: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #eab308 100%);
+        background-size: 200% 200%;
+        animation: academicsGradientFlow 12s ease infinite;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .academics-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+        animation: rotateGlow 25s linear infinite;
+    }
+
+    @keyframes academicsGradientFlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .cgpa-badge {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cgpa-badge::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .cgpa-badge:hover {
+        transform: scale(1.05) translateY(-4px);
+        box-shadow: 0 15px 40px rgba(239, 68, 68, 0.4);
+    }
+
+    .cgpa-badge:hover::before {
+        opacity: 1;
+    }
+
+    .subject-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--subject-gradient);
+        transition: width 0.3s ease;
+    }
+
+    .subject-card:hover {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: rgba(139, 92, 246, 0.3);
+        transform: translateX(8px) translateY(-4px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 25px var(--subject-glow);
+    }
+
+    .subject-card:hover::before {
+        width: 100%;
+        opacity: 0.1;
+    }
+
+    .grade-badge {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .grade-badge:hover {
+        transform: scale(1.15) rotate(-5deg);
+    }
+
+    .grade-emoji {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 1.25rem;
+        opacity: 0;
+        transform: scale(0) rotate(-45deg);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .subject-card:hover .grade-emoji {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+
+    .progress-bar {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .stat-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--stat-gradient);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s ease;
+    }
+
+    .stat-card:hover {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: var(--stat-border);
+        transform: translateY(-6px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 25px var(--stat-glow);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.15) rotate(10deg);
+    }
+
+    .stat-glow-effect {
+        position: absolute;
+        inset: 0;
+        border-radius: 0.75rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        filter: blur(20px);
+    }
+
+    .stat-card:hover .stat-glow-effect {
+        opacity: 1;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .subject-card {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .subject-card:nth-child(1) { animation-delay: 0.1s; }
+    .subject-card:nth-child(2) { animation-delay: 0.15s; }
+    .subject-card:nth-child(3) { animation-delay: 0.2s; }
+    .subject-card:nth-child(4) { animation-delay: 0.25s; }
+    .subject-card:nth-child(5) { animation-delay: 0.3s; }
+    .subject-card:nth-child(6) { animation-delay: 0.35s; }
+
+    .stat-card {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.4s; }
+    .stat-card:nth-child(2) { animation-delay: 0.5s; }
+    .stat-card:nth-child(3) { animation-delay: 0.6s; }
+
+    @media (max-width: 640px) {
+        .subject-card {
+            padding: 1rem !important;
+        }
+    }
+</style>
+
+{# --- Check if academic data exists --- #}
+{% if user.academics and user.academics.subjects and user.academics.subjects|length > 0 %}
+    {% set cgpa = user.academics.cgpa %}
+    {% set subjects = user.academics.subjects %}
+    {% set semester = user.academics.semester %}
+    
+    {# --- Calculate Performance Stats --- #}
+    {% set total_credits = 0 %}
+    {% for s in subjects %}{% set total_credits = total_credits + (s.credits or 0) %}{% endfor %}
+    
+    {% set performance_stats = [
+        {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', 'label': 'Total Credits', 'value': total_credits, 'color': 'blue', 'gradient': 'from-blue-500 to-indigo-600'},
+        {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>', 'label': 'Subjects Enrolled', 'value': subjects|length, 'color': 'purple', 'gradient': 'from-purple-500 to-pink-600'},
+        {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>', 'label': 'Performance', 'value': get_performance_text(cgpa), 'color': 'emerald', 'gradient': 'from-emerald-500 to-green-600'}
+    ] %}
+
+    <div class="space-y-6 section-card">
+        <!-- Academic Header -->
+        <div class="academics-card academics-header rounded-2xl p-6 md:p-8 shadow-2xl">
+            <div class="flex items-center justify-between flex-wrap gap-6 relative z-10">
+                <div class="flex-1 min-w-[250px]">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center ring-2 ring-white/30 shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M12 8v4l2 2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight mb-1">Academic Performance</h2>
+                            <p class="text-white/90 text-sm md:text-base font-medium">
+                                {% if semester %}Semester {{ semester }} • Detailed Analysis{% else %}Comprehensive Overview{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if cgpa is not none %}
+                <div class="cgpa-badge rounded-2xl p-6 text-center min-w-[140px]">
+                    <div class="relative z-10">
+                        <div class="text-5xl md:text-6xl font-black text-white mb-2 tracking-tighter">
+                            {{ "%.2f"|format(cgpa) }}
+                        </div>
+                        <div class="text-white/90 font-bold uppercase text-xs tracking-widest">CGPA</div>
+                        <div class="text-white/70 text-xs mt-1 font-medium">out of 10.0</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subject Cards -->
+        <div class="academics-card rounded-2xl p-6 md:p-8 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-black text-white">Subject Grades</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {% for subject in subjects %}
+                    {% set grade = subject.grade | default('default') %}
+                    {% set styles = grade_styles[grade] or grade_styles.default %}
+                    {% set percentage = grade_percentage_map[grade] or grade_percentage_map.default %}
+                    
+                    <div class="subject-card rounded-xl p-5" 
+                         style="--subject-gradient: linear-gradient(to right, var(--tw-gradient-stops)); --subject-glow: {{ styles.glow }};">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-white text-lg mb-1 truncate">{{ subject.name }}</h4>
+                                {% if subject.code %}
+                                <p class="text-xs text-slate-400 font-mono">{{ subject.code }}</p>
+                                {% endif %}
+                                {% if subject.credits %}
+                                <div class="mt-2 inline-flex items-center gap-1.5 bg-slate-700/50 px-2 py-1 rounded-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span class="text-xs text-slate-300 font-semibold">{{ subject.credits }} Credits</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="grade-badge {{ styles.bg }} {{ styles.text }} px-4 py-2 rounded-xl text-base font-black border-2 {{ styles.border }} shadow-lg {{ styles.shadow }} relative flex-shrink-0 ml-3">
+                                {{ subject.grade or 'N/A' }}
+                                <span class="grade-emoji">{{ styles.emoji }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar h-3 bg-slate-800/50 rounded-full overflow-hidden">
+                            <div class="progress-fill bg-gradient-to-r {{ styles.from }} {{ styles.to }} rounded-full shadow-lg {{ styles.shadow }}"
+                                 style="width: 0%;"
+                                 data-width="{{ percentage }}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-slate-400 font-medium">Performance</span>
+                            <span class="text-xs {{ styles.text }} font-bold">{{ percentage }}%</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {% for stat in performance_stats %}
+                <div class="stat-card rounded-xl p-6 shadow-lg"
+                     style="--stat-gradient: linear-gradient(to right, var(--tw-gradient-stops)); --stat-border: rgba(var(--stat-color), 0.3); --stat-glow: rgba(var(--stat-color), 0.2);">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="stat-icon bg-gradient-to-br {{ stat.gradient }} shadow-xl relative">
+                            <div class="stat-glow-effect {{ stat.color }}/30"></div>
+                            <div class="text-white relative z-10">{{ stat.icon_svg | safe }}</div>
+                        </div>
+                        <span class="text-slate-400 font-bold text-sm uppercase tracking-wider">{{ stat.label }}</span>
+                    </div>
+                    <div class="pl-1">
+                        <div class="text-white font-black text-4xl mb-1">{{ stat.value }}</div>
+                        <div class="h-1 bg-gradient-to-r {{ stat.gradient }} rounded-full w-16 opacity-60"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Animate progress bars
+        document.addEventListener('DOMContentLoaded', () => {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const targetWidth = entry.target.getAttribute('data-width');
+                        setTimeout(() => {
+                            entry.target.style.width = targetWidth;
+                        }, 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            progressBars.forEach(bar => observer.observe(bar));
+        });
+    </script>
+
+{% else %}
+    {# --- Fallback if no academic data --- #}
+    <div class="academics-card rounded-2xl p-12 text-center shadow-2xl section-card">
+        <div class="w-24 h-24 bg-slate-700/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+        </div>
+        <h3 class="text-white font-bold text-xl mb-2">No Academic Data Available</h3>
+        <p class="text-slate-400 max-w-md mx-auto">Academic performance information will be displayed here once grades are recorded in the system.</p>
+    </div>
+{% endif %}

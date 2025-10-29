@@ -1,0 +1,402 @@
+{# templates/profile/contact_info.html #}
+{# This template expects the 'user' object #}
+
+{% set contact_items = [
+    {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+     'label': 'Email Address', 'value': user.personalInfo.email, 'field': 'email', 'color': 'from-blue-500 to-indigo-600', 'bg_glow': 'bg-blue-500/10'},
+    {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+     'label': 'Phone Number', 'value': user.personalInfo.phone, 'field': 'phone', 'color': 'from-green-500 to-emerald-600', 'bg_glow': 'bg-green-500/10'},
+    {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+     'label': 'Location', 'value': user.personalInfo.location or 'Not provided', 'field': 'location', 'color': 'from-purple-500 to-pink-600', 'bg_glow': 'bg-purple-500/10'}
+] %}
+
+<style>
+    /* Contact card specific styles */
+    .contact-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .contact-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .contact-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+        animation: rotateGlow 15s linear infinite;
+    }
+
+    @keyframes gradientFlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @keyframes rotateGlow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .contact-item {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .contact-item:hover {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: rgba(139, 92, 246, 0.4);
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(139, 92, 246, 0.2);
+    }
+
+    .contact-item:hover::before {
+        left: 100%;
+    }
+
+    .icon-container {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover .icon-container {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .icon-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 0.75rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        filter: blur(12px);
+    }
+
+    .contact-item:hover .icon-glow {
+        opacity: 1;
+    }
+
+    .copy-button {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .copy-button::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(139, 92, 246, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    .copy-button:hover {
+        background: rgba(139, 92, 246, 0.2);
+        border-color: rgba(139, 92, 246, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .copy-button:hover::before {
+        width: 200px;
+        height: 200px;
+    }
+
+    .copy-button:active {
+        transform: translateY(0) scale(0.95);
+    }
+
+    .copy-button.copied {
+        background: rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    @keyframes successPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .copy-button.copied {
+        animation: successPulse 0.4s ease;
+    }
+
+    .bio-section {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(148, 163, 184, 0.15);
+        position: relative;
+    }
+
+    .bio-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .contact-item {
+            padding: 1.25rem !important;
+        }
+
+        .copy-button {
+            padding: 0.625rem !important;
+        }
+    }
+
+    /* Smooth entrance animation */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .contact-item {
+        animation: slideInUp 0.5s ease-out backwards;
+    }
+
+    .contact-item:nth-child(1) { animation-delay: 0.1s; }
+    .contact-item:nth-child(2) { animation-delay: 0.2s; }
+    .contact-item:nth-child(3) { animation-delay: 0.3s; }
+</style>
+
+<div class="contact-card rounded-2xl shadow-2xl overflow-hidden section-card">
+    <!-- Premium Header -->
+    <div class="contact-header px-6 py-5">
+        <div class="flex items-center gap-3 relative z-10">
+            <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/30 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-white tracking-tight">Contact Information</h3>
+                <p class="text-purple-100 text-sm font-medium mt-0.5">Get in touch instantly</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Items -->
+    <div class="p-6 space-y-4">
+        {% for item in contact_items %}
+        <div class="contact-item rounded-xl p-5">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <!-- Icon and Info -->
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                    <div class="icon-container flex-shrink-0">
+                        <div class="icon-glow {{ item.bg_glow }}"></div>
+                        <div class="w-14 h-14 bg-gradient-to-br {{ item.color }} rounded-xl flex items-center justify-center shadow-lg relative">
+                            <div class="text-white">{{ item.icon_svg | safe }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1.5">{{ item.label }}</p>
+                        <p class="text-white font-bold text-base sm:text-lg break-all leading-tight">{{ item.value }}</p>
+                    </div>
+                </div>
+
+                <!-- Copy Button -->
+                {% if item.value and item.value != 'Not provided' %}
+                <button
+                    type="button"
+                    onclick="copyContactInfo('{{ item.value | e }}', this)"
+                    data-field="{{ item.field }}"
+                    class="copy-button flex-shrink-0 p-3 rounded-xl transition-all flex items-center gap-2.5 text-slate-300 hover:text-white group"
+                    aria-label="Copy {{ item.label }}"
+                >
+                    <!-- Copy Icon -->
+                    <span class="copy-icon transition-transform group-hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </span>
+                    <!-- Check Icon -->
+                    <span class="check-icon" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-400">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </span>
+                    <span class="copy-text text-sm font-bold hidden sm:inline">Copy</span>
+                    <span class="copied-text text-sm font-bold text-green-400 hidden sm:inline" style="display: none;">Copied!</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Bio Section -->
+    {% if user.bio %}
+    <div class="bio-section px-6 py-5">
+        <h4 class="text-white font-black text-lg mb-3 flex items-center gap-2.5">
+            <span class="text-2xl">✍️</span>
+            <span>About Me</span>
+        </h4>
+        <p class="text-slate-300 leading-relaxed text-base">{{ user.bio }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Enhanced JavaScript for Copy Functionality -->
+<script>
+    function copyContactInfo(text, buttonElement) {
+        // Use modern Clipboard API with fallback
+        const copyPromise = navigator.clipboard ? 
+            navigator.clipboard.writeText(text) : 
+            fallbackCopyTextToClipboard(text);
+
+        copyPromise.then(() => {
+            showCopySuccess(buttonElement);
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            showCopyError(buttonElement);
+        });
+    }
+
+    function showCopySuccess(button) {
+        const copyIcon = button.querySelector('.copy-icon');
+        const checkIcon = button.querySelector('.check-icon');
+        const copyText = button.querySelector('.copy-text');
+        const copiedText = button.querySelector('.copied-text');
+
+        // Add success class for animation
+        button.classList.add('copied');
+
+        // Toggle icons and text
+        if (copyIcon) copyIcon.style.display = 'none';
+        if (checkIcon) {
+            checkIcon.style.display = 'inline-block';
+            checkIcon.style.animation = 'none';
+            setTimeout(() => checkIcon.style.animation = 'successPulse 0.4s ease', 10);
+        }
+        if (copyText) copyText.style.display = 'none';
+        if (copiedText) copiedText.style.display = 'inline-block';
+
+        // Reset after 2.5 seconds
+        setTimeout(() => {
+            button.classList.remove('copied');
+            if (copyIcon) copyIcon.style.display = 'inline-block';
+            if (checkIcon) checkIcon.style.display = 'none';
+            if (copyText) copyText.style.display = 'inline-block';
+            if (copiedText) copiedText.style.display = 'none';
+        }, 2500);
+    }
+
+    function showCopyError(button) {
+        const copyText = button.querySelector('.copy-text');
+        const originalText = copyText ? copyText.textContent : '';
+        
+        if (copyText) {
+            copyText.textContent = 'Failed';
+            copyText.classList.add('text-red-400');
+            
+            setTimeout(() => {
+                copyText.textContent = originalText;
+                copyText.classList.remove('text-red-400');
+            }, 2000);
+        }
+    }
+
+    // Fallback for older browsers
+    function fallbackCopyTextToClipboard(text) {
+        return new Promise((resolve, reject) => {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '-9999px';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) {
+                    resolve();
+                } else {
+                    reject(new Error('Copy command failed'));
+                }
+            } catch (err) {
+                document.body.removeChild(textArea);
+                reject(err);
+            }
+        });
+    }
+
+    // Optional: Add keyboard accessibility
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    button.click();
+                }
+            });
+        });
+    });
+</script>
