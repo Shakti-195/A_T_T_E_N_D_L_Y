@@ -37,4 +37,5 @@ with app.app_context():
 
 # --- Only run development server locally ---
 if __name__ == '__main__':
-    app.run(debug=True)
+    from os import getenv
+    app.run(host="0.0.0.0", port=int(getenv("PORT", 5000)), debug=False)
