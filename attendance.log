@@ -1,0 +1,350 @@
+2025-10-31 14:58:17,956 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-31 14:58:18,557 - attendly - INFO - ======================================================================
+2025-10-31 14:58:18,558 - attendly - INFO - ======================================================================
+2025-10-31 14:58:18,558 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 14:58:18,558 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 14:58:18,558 - attendly - INFO - Debug Mode: True
+2025-10-31 14:58:18,560 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 14:58:18,563 - attendly - INFO - Scheduler Running: True
+2025-10-31 14:58:18,563 - attendly - INFO - GPS Enabled: True
+2025-10-31 14:58:18,563 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 14:58:18,563 - attendly - INFO - ======================================================================
+2025-10-31 14:58:18,597 - werkzeug - WARNING -  * Debugger is active!
+2025-10-31 14:58:18,600 - werkzeug - INFO -  * Debugger PIN: 542-238-827
+2025-10-31 14:58:25,777 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:25] "GET /auth/login HTTP/1.1" 200 -
+2025-10-31 14:58:25,794 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:25] "[36mGET /static/uploads/logo2.png HTTP/1.1[0m" 304 -
+2025-10-31 14:58:25,805 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:25] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 14:58:27,220 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:27] "GET /auth/login HTTP/1.1" 200 -
+2025-10-31 14:58:27,238 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:27] "GET /static/uploads/logo2.png HTTP/1.1" 200 -
+2025-10-31 14:58:27,487 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:27] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 14:58:33,152 - attendly - ERROR - Unhandled exception: (sqlite3.OperationalError) no such column: class_batch.location
+[SQL: SELECT class_batch.id AS class_batch_id, class_batch.name AS class_batch_name, class_batch.institution_id AS class_batch_institution_id, class_batch.location AS class_batch_location, class_batch.latitude AS class_batch_latitude, class_batch.longitude AS class_batch_longitude, anon_1.user_id AS anon_1_user_id 
+FROM (SELECT user.id AS user_id 
+FROM user 
+WHERE lower(user.username) = lower(?)
+ LIMIT ? OFFSET ?) AS anon_1 JOIN teacher_classes AS teacher_classes_1 ON anon_1.user_id = teacher_classes_1.user_id JOIN class_batch ON class_batch.id = teacher_classes_1.class_batch_id]
+[parameters: ('DumbleDore', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such column: class_batch.location
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendly\auth\routes.py", line 25, in login
+    user = User.query.filter(func.lower(User.username) == func.lower(request.form.get('username'))).first()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\query.py", line 2728, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 1786, in first
+    return self._only_one_row(
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 749, in _only_one_row
+    row: Optional[_InterimRowType[Any]] = onerow(hard_close=True)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 1673, in _fetchone_impl
+    return self._real_result._fetchone_impl(hard_close=hard_close)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 2259, in _fetchone_impl
+    row = next(self.iterator, _NO_ROW)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 223, in chunks
+    rows = [proc(row) for row in fetch]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 223, in <listcomp>
+    rows = [proc(row) for row in fetch]
+            ^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 1145, in _instance
+    _populate_full(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 1353, in _populate_full
+    populator(state, dict_, row)
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\strategies.py", line 2071, in load_collection_from_subq
+    collection = collections.get(tuple_getter(row), ())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\strategies.py", line 1804, in get
+    self._load()
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\strategies.py", line 1820, in _load
+    rows = list(q.params(self.params))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\query.py", line 2813, in __iter__
+    result = self._iter()
+             ^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: class_batch.location
+[SQL: SELECT class_batch.id AS class_batch_id, class_batch.name AS class_batch_name, class_batch.institution_id AS class_batch_institution_id, class_batch.location AS class_batch_location, class_batch.latitude AS class_batch_latitude, class_batch.longitude AS class_batch_longitude, anon_1.user_id AS anon_1_user_id 
+FROM (SELECT user.id AS user_id 
+FROM user 
+WHERE lower(user.username) = lower(?)
+ LIMIT ? OFFSET ?) AS anon_1 JOIN teacher_classes AS teacher_classes_1 ON anon_1.user_id = teacher_classes_1.user_id JOIN class_batch ON class_batch.id = teacher_classes_1.class_batch_id]
+[parameters: ('DumbleDore', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-31 14:58:33,181 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:33] "[35m[1mPOST /auth/login HTTP/1.1[0m" 500 -
+2025-10-31 14:58:33,200 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:33] "[36mGET /auth/login?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-10-31 14:58:33,202 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:33] "[36mGET /auth/login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-10-31 14:58:33,211 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:33] "[36mGET /auth/login?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-31 14:58:33,237 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:58:33] "[36mGET /auth/login?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-31 14:59:37,960 - attendly - ERROR - Error loading user: (sqlite3.OperationalError) no such column: class_batch.location
+[SQL: SELECT class_batch.id AS class_batch_id, class_batch.name AS class_batch_name, class_batch.institution_id AS class_batch_institution_id, class_batch.location AS class_batch_location, class_batch.latitude AS class_batch_latitude, class_batch.longitude AS class_batch_longitude, anon_1.user_id AS anon_1_user_id 
+FROM (SELECT user.id AS user_id 
+FROM user 
+WHERE user.id = ?) AS anon_1 JOIN teacher_classes AS teacher_classes_1 ON anon_1.user_id = teacher_classes_1.user_id JOIN class_batch ON class_batch.id = teacher_classes_1.class_batch_id]
+[parameters: (3,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such column: class_batch.location
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendly\__init__.py", line 357, in load_logged_in_user
+    g.user = db.session.get(User, user_id) if user_id else None
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 1060, in get
+    return self._proxied.get(
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\session.py", line 3693, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 705, in load_on_pk_identity
+    return result.one()
+           ^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 1810, in one
+    return self._only_one_row(
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 749, in _only_one_row
+    row: Optional[_InterimRowType[Any]] = onerow(hard_close=True)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 1673, in _fetchone_impl
+    return self._real_result._fetchone_impl(hard_close=hard_close)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\result.py", line 2259, in _fetchone_impl
+    row = next(self.iterator, _NO_ROW)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 223, in chunks
+    rows = [proc(row) for row in fetch]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 223, in <listcomp>
+    rows = [proc(row) for row in fetch]
+            ^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 1145, in _instance
+    _populate_full(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\loading.py", line 1353, in _populate_full
+    populator(state, dict_, row)
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\strategies.py", line 2071, in load_collection_from_subq
+    collection = collections.get(tuple_getter(row), ())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\strategies.py", line 1804, in get
+    self._load()
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\strategies.py", line 1820, in _load
+    rows = list(q.params(self.params))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\query.py", line 2813, in __iter__
+    result = self._iter()
+             ^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\orm\context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\.myvenv\Lib\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: class_batch.location
+[SQL: SELECT class_batch.id AS class_batch_id, class_batch.name AS class_batch_name, class_batch.institution_id AS class_batch_institution_id, class_batch.location AS class_batch_location, class_batch.latitude AS class_batch_latitude, class_batch.longitude AS class_batch_longitude, anon_1.user_id AS anon_1_user_id 
+FROM (SELECT user.id AS user_id 
+FROM user 
+WHERE user.id = ?) AS anon_1 JOIN teacher_classes AS teacher_classes_1 ON anon_1.user_id = teacher_classes_1.user_id JOIN class_batch ON class_batch.id = teacher_classes_1.class_batch_id]
+[parameters: (3,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-31 14:59:38,046 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:59:38] "GET /student/check_attendance/ HTTP/1.1" 200 -
+2025-10-31 14:59:38,109 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:59:38] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 14:59:40,348 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:59:40] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2025-10-31 14:59:40,355 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:59:40] "GET /auth/login HTTP/1.1" 200 -
+2025-10-31 14:59:40,372 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:59:40] "[36mGET /static/uploads/logo2.png HTTP/1.1[0m" 304 -
+2025-10-31 14:59:40,498 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 14:59:40] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 14:04:26,885 - attendly - INFO - ======================================================================
+2025-10-31 14:04:26,887 - attendly - INFO - ======================================================================
+2025-10-31 14:04:26,887 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 14:04:26,887 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 14:04:26,887 - attendly - INFO - Debug Mode: True
+2025-10-31 14:04:26,887 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 14:04:26,887 - attendly - INFO - Scheduler Running: False
+2025-10-31 14:04:26,888 - attendly - INFO - GPS Enabled: True
+2025-10-31 14:04:26,888 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 14:04:26,888 - attendly - INFO - ======================================================================
+2025-10-31 19:34:33,704 - attendly - INFO - ======================================================================
+2025-10-31 19:34:33,705 - attendly - INFO - ======================================================================
+2025-10-31 19:34:33,705 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 19:34:33,705 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 19:34:33,705 - attendly - INFO - Debug Mode: False
+2025-10-31 19:34:33,705 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 19:34:33,706 - attendly - INFO - Scheduler Running: False
+2025-10-31 19:34:33,706 - attendly - INFO - GPS Enabled: True
+2025-10-31 19:34:33,706 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 19:34:33,706 - attendly - INFO - ======================================================================
+2025-10-31 19:34:33,752 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.103:5000
+2025-10-31 19:34:33,753 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-10-31 19:34:33,754 - werkzeug - INFO -  * Restarting with stat
+2025-10-31 15:04:34,562 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-31 15:04:35,126 - attendly - INFO - ======================================================================
+2025-10-31 15:04:35,127 - attendly - INFO - ======================================================================
+2025-10-31 15:04:35,129 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 15:04:35,129 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 15:04:35,129 - attendly - INFO - Debug Mode: True
+2025-10-31 15:04:35,129 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 15:04:35,129 - attendly - INFO - Scheduler Running: True
+2025-10-31 15:04:35,129 - attendly - INFO - GPS Enabled: True
+2025-10-31 15:04:35,129 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 15:04:35,129 - attendly - INFO - ======================================================================
+2025-10-31 15:04:35,168 - werkzeug - WARNING -  * Debugger is active!
+2025-10-31 15:04:35,171 - werkzeug - INFO -  * Debugger PIN: 542-238-827
+2025-10-31 15:04:40,212 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:04:40] "POST /auth/login HTTP/1.1" 200 -
+2025-10-31 15:04:40,230 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:04:40] "[36mGET /static/uploads/logo2.png HTTP/1.1[0m" 304 -
+2025-10-31 15:04:40,259 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:04:40] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 15:04:44,121 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:04:44] "GET /auth/register HTTP/1.1" 200 -
+2025-10-31 15:04:44,159 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:04:44] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 15:05:04,063 - attendly - ERROR - Error sending email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2952696f0c8sm25544645ad.71 - gsmtp')
+2025-10-31 15:05:04,064 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:04] "[32mPOST /auth/register HTTP/1.1[0m" 302 -
+2025-10-31 15:05:04,092 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:04] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:05:04,122 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:04] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 15:05:50,478 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:50] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:05:50,629 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:50] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:05:50,860 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:50] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 15:05:51,161 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:51] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:05:51,277 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:51] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:05:51,385 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:51] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:05:51,605 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:05:51] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 14:06:01,332 - attendly - INFO - ======================================================================
+2025-10-31 14:06:01,334 - attendly - INFO - ======================================================================
+2025-10-31 14:06:01,334 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 14:06:01,334 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 14:06:01,334 - attendly - INFO - Debug Mode: True
+2025-10-31 14:06:01,334 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 14:06:01,334 - attendly - INFO - Scheduler Running: False
+2025-10-31 14:06:01,334 - attendly - INFO - GPS Enabled: True
+2025-10-31 14:06:01,334 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 14:06:01,334 - attendly - INFO - ======================================================================
+2025-10-31 19:36:05,292 - attendly - INFO - ======================================================================
+2025-10-31 19:36:05,293 - attendly - INFO - ======================================================================
+2025-10-31 19:36:05,293 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 19:36:05,294 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 19:36:05,294 - attendly - INFO - Debug Mode: False
+2025-10-31 19:36:05,294 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 19:36:05,294 - attendly - INFO - Scheduler Running: False
+2025-10-31 19:36:05,294 - attendly - INFO - GPS Enabled: True
+2025-10-31 19:36:05,294 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 19:36:05,294 - attendly - INFO - ======================================================================
+2025-10-31 19:36:05,338 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.103:5000
+2025-10-31 19:36:05,338 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-10-31 19:36:05,340 - werkzeug - INFO -  * Restarting with stat
+2025-10-31 15:06:06,177 - apscheduler.scheduler - INFO - Scheduler started
+2025-10-31 15:06:06,735 - attendly - INFO - ======================================================================
+2025-10-31 15:06:06,736 - attendly - INFO - ======================================================================
+2025-10-31 15:06:06,737 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 15:06:06,737 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 15:06:06,737 - attendly - INFO - Debug Mode: True
+2025-10-31 15:06:06,737 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 15:06:06,737 - attendly - INFO - Scheduler Running: True
+2025-10-31 15:06:06,737 - attendly - INFO - GPS Enabled: True
+2025-10-31 15:06:06,737 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 15:06:06,737 - attendly - INFO - ======================================================================
+2025-10-31 15:06:06,775 - werkzeug - WARNING -  * Debugger is active!
+2025-10-31 15:06:06,778 - werkzeug - INFO -  * Debugger PIN: 542-238-827
+2025-10-31 15:06:14,253 - attendly - WARNING - 404 error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-10-31 15:06:14,254 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:14] "[33mGET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1[0m" 404 -
+2025-10-31 15:06:14,276 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:14] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 15:06:15,737 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:15] "GET /auth/register HTTP/1.1" 200 -
+2025-10-31 15:06:15,763 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:15] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 15:06:28,493 - attendly - ERROR - Error sending email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-295269bda9csm24991765ad.104 - gsmtp')
+2025-10-31 15:06:28,494 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:28] "[32mPOST /auth/register HTTP/1.1[0m" 302 -
+2025-10-31 15:06:28,505 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:28] "GET /auth/verify_otp?email=thakurshaktisingh195@gmail.com&new_user=True HTTP/1.1" 200 -
+2025-10-31 15:06:28,546 - werkzeug - INFO - 127.0.0.1 - - [31/Oct/2025 15:06:28] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2025-10-31 14:07:17,573 - attendly - INFO - ======================================================================
+2025-10-31 14:07:17,574 - attendly - INFO - ======================================================================
+2025-10-31 14:07:17,574 - attendly - INFO - Database: sqlite:///C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\attendance.db
+2025-10-31 14:07:17,574 - attendly - INFO - Mail Server: smtp.gmail.com:587
+2025-10-31 14:07:17,574 - attendly - INFO - Debug Mode: True
+2025-10-31 14:07:17,575 - attendly - INFO - Upload Folder: C:\Users\thaku\OneDrive\Desktop\Attendly_Attendence\static\uploads
+2025-10-31 14:07:17,575 - attendly - INFO - Scheduler Running: False
+2025-10-31 14:07:17,575 - attendly - INFO - GPS Enabled: True
+2025-10-31 14:07:17,575 - attendly - INFO - Geofence Radius: 100m
+2025-10-31 14:07:17,575 - attendly - INFO - ======================================================================

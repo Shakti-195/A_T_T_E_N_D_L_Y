@@ -1,61 +1,473 @@
 {% extends "shared/base.html" %}
-{% block title %}Add New Student{% endblock %}
+{% block title %}Add New Student - Attendly{% endblock %}
 
-{% block page_title %}Add Student{% endblock %}
+{% block page_title %}
+<div class="d-flex align-items-center gap-2">
+    <i class="fas fa-user-plus text-primary"></i>
+    <span>Add Student</span>
+</div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+    :root {
+        --primary-color: #dc2626;
+        --success-color: #10b981;
+    }
+
+    body[data-theme="dark"] {
+        --primary-color: #ef4444;
+        --success-color: #34d399;
+    }
+
+    .add-student-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        padding: 2rem 1rem;
+    }
+
+    .student-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+        background: linear-gradient(135deg, transparent 0%, rgba(220, 38, 38, 0.02) 100%);
+    }
+
+    body[data-theme="dark"] .student-card {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-title i {
+        color: var(--primary-color);
+        font-size: 2rem;
+    }
+
+    .card-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating > label {
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .form-control, .form-select {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    body[data-theme="dark"] .form-control:focus,
+    body[data-theme="dark"] .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-floating > .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-floating > .form-select::placeholder {
+        color: var(--text-muted);
+    }
+
+    .required-asterisk {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-left: 0.25rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #ef4444 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.75rem;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .btn-secondary {
+        background-color: var(--border-color);
+        color: var(--text-color);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.75rem;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--card-bg);
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        border-radius: 12px;
+        border: none;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        animation: slideDown 0.3s ease-out;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #047857;
+        border-left: 4px solid #10b981;
+    }
+
+    body[data-theme="dark"] .alert-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #86efac;
+    }
+
+    .alert-danger {
+        background-color: rgba(220, 38, 38, 0.15);
+        color: #991b1b;
+        border-left: 4px solid #dc2626;
+    }
+
+    body[data-theme="dark"] .alert-danger {
+        background-color: rgba(220, 38, 38, 0.1);
+        color: #fca5a5;
+    }
+
+    .alert-warning {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #92400e;
+        border-left: 4px solid #f59e0b;
+    }
+
+    body[data-theme="dark"] .alert-warning {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #fcd34d;
+    }
+
+    .form-group-wrapper {
+        position: relative;
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .col-md-6 {
+        animation: fadeIn 0.5s ease-out;
+        animation-fill-mode: backwards;
+    }
+
+    .col-md-6:nth-child(1) { animation-delay: 0.1s; }
+    .col-md-6:nth-child(2) { animation-delay: 0.2s; }
+    .col-12:nth-child(3) { animation-delay: 0.3s; }
+    .col-12:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-divider {
+        border: none;
+        border-top: 2px dashed var(--border-color);
+        margin: 2rem 0;
+    }
+
+    .additional-fields {
+        padding: 1.5rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color);
+        margin-top: 1.5rem;
+    }
+
+    .additional-fields-toggle {
+        cursor: pointer;
+        user-select: none;
+        font-weight: 600;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .additional-fields-toggle:hover {
+        background-color: var(--card-bg);
+    }
+
+    .additional-fields-toggle i {
+        transition: transform 0.3s;
+    }
+
+    .additional-fields-toggle[aria-expanded="true"] i {
+        transform: rotate(90deg);
+    }
+
+    @media (max-width: 768px) {
+        .card-title {
+            font-size: 1.5rem;
+        }
+
+        .add-student-wrapper {
+            padding: 1rem 0.5rem;
+        }
+
+        .student-card .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    <h2 class="card-title fw-bold mb-4"><i class="fas fa-user-plus me-2 text-primary"></i>Add a New Student</h2>
-                    <p class="text-muted mb-4">
-                        This form pre-registers a student's academic record. The student can later create their own user account and link it to this record.
-                    </p>
+<div class="add-student-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card student-card shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <!-- HEADER -->
+                        <h2 class="card-title">
+                            <i class="fas fa-user-plus"></i>
+                            Add a New Student
+                        </h2>
+                        <p class="card-subtitle">
+                            This form pre-registers a student's academic record. The student can later create their own user account and link it to this record.
+                        </p>
 
-                    <form method="POST" action="{{ url_for('student.add_student') }}" novalidate>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" value="{{ request.form.get('name', '') }}" required>
-                                    <label for="name">Full Name</label>
+                        <!-- ALERTS -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'error' else 'warning' }} alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                                    <span>{{ message }}</span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Student ID" value="{{ request.form.get('student_id', '') }}" required>
-                                    <label for="student_id">Student ID</label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="Email Address (Optional)" value="{{ request.form.get('email', '') }}">
-                                    <label for="email">Email Address (Optional)</label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <select class="form-select" id="class_batch_id" name="class_batch_id" required>
-                                        <option value="" disabled selected>-- Select a Class --</option>
-                                        {% for class in classes_batches %}
-                                            <option value="{{ class.id }}" {% if (request.form.get('class_batch_id')|int) == class.id %}selected{% endif %}>
-                                                {{ class.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                    <label for="class_batch_id">Assign to Class/Batch</label>
-                                </div>
-                            </div>
-                        </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
 
-                        <div class="d-flex justify-content-end mt-4">
-                            <a href="{{ url_for('student.list_students') }}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Save Student
-                            </button>
-                        </div>
-                    </form>
+                        <!-- FORM -->
+                        <form method="POST" action="{{ url_for('student.add_student') }}" novalidate class="needs-validation">
+                            <div class="row g-3">
+                                <!-- Row 1: Name & Student ID -->
+                                <div class="col-md-6">
+                                    <div class="form-floating form-group-wrapper">
+                                        <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            id="name" 
+                                            name="name" 
+                                            placeholder="Full Name" 
+                                            value="{{ request.form.get('name', '') }}" 
+                                            required
+                                        >
+                                        <label for="name">Full Name <span class="required-asterisk">*</span></label>
+                                        <small class="help-text">Student's complete full name</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating form-group-wrapper">
+                                        <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            id="student_id" 
+                                            name="student_id" 
+                                            placeholder="Student ID" 
+                                            value="{{ request.form.get('student_id', '') }}" 
+                                            required
+                                        >
+                                        <label for="student_id">Student ID <span class="required-asterisk">*</span></label>
+                                        <small class="help-text">Unique identifier (must be unique)</small>
+                                    </div>
+                                </div>
+
+                                <!-- Row 2: Email -->
+                                <div class="col-12">
+                                    <div class="form-floating form-group-wrapper">
+                                        <input 
+                                            type="email" 
+                                            class="form-control" 
+                                            id="email" 
+                                            name="email" 
+                                            placeholder="Email Address (Optional)" 
+                                            value="{{ request.form.get('email', '') }}"
+                                        >
+                                        <label for="email">Email Address <span style="color: #999; font-size: 0.9rem;">(Optional)</span></label>
+                                        <small class="help-text">Must be unique if provided</small>
+                                    </div>
+                                </div>
+
+                                <!-- Row 3: Class Selection -->
+                                <div class="col-12">
+                                    <div class="form-floating form-group-wrapper">
+                                        <select 
+                                            class="form-select" 
+                                            id="class_batch_id" 
+                                            name="class_batch_id" 
+                                            required
+                                        >
+                                            <option value="" disabled selected>-- Select a Class --</option>
+                                            {% for class in classes_batches %}
+                                                <option value="{{ class.id }}" {% if (request.form.get('class_batch_id')|int(default=0)) == class.id %}selected{% endif %}>
+                                                    {{ class.name }}
+                                                    {% if class.section %} (Section {{ class.section }}){% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="class_batch_id">Assign to Class/Batch <span class="required-asterisk">*</span></label>
+                                        <small class="help-text">Choose the class this student belongs to</small>
+                                    </div>
+                                </div>
+
+                                <!-- OPTIONAL FIELDS (Collapsible) -->
+                                <div class="col-12 mt-2">
+                                    <button 
+                                        type="button" 
+                                        class="additional-fields-toggle" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#optionalFields" 
+                                        aria-expanded="false" 
+                                        aria-controls="optionalFields"
+                                    >
+                                        <i class="fas fa-chevron-right"></i>
+                                        <span>Additional Information (Optional)</span>
+                                    </button>
+
+                                    <div class="collapse" id="optionalFields">
+                                        <div class="additional-fields">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating form-group-wrapper">
+                                                        <input 
+                                                            type="tel" 
+                                                            class="form-control" 
+                                                            id="phone" 
+                                                            name="phone" 
+                                                            placeholder="Phone Number" 
+                                                            value="{{ request.form.get('phone', '') }}"
+                                                        >
+                                                        <label for="phone">Phone Number</label>
+                                                        <small class="help-text">e.g., 9876543210</small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="form-floating form-group-wrapper">
+                                                        <input 
+                                                            type="email" 
+                                                            class="form-control" 
+                                                            id="guardian_email" 
+                                                            name="guardian_email" 
+                                                            placeholder="Guardian Email" 
+                                                            value="{{ request.form.get('guardian_email', '') }}"
+                                                        >
+                                                        <label for="guardian_email">Guardian Email</label>
+                                                        <small class="help-text">Parent/Guardian contact</small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label for="address" class="form-label">Address</label>
+                                                    <textarea 
+                                                        class="form-control" 
+                                                        id="address" 
+                                                        name="address" 
+                                                        rows="3" 
+                                                        placeholder="Student's residential address"
+                                                        style="border-radius: 12px; border: 2px solid var(--border-color); resize: vertical;"
+                                                    >{{ request.form.get('address', '') }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FOOTER BUTTONS -->
+                            <div class="d-flex justify-content-end gap-2 mt-4 pt-2">
+                                <a href="{{ url_for('student.list_students') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,3 +475,29 @@
 </div>
 {% endblock %}
 
+{% block body_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.querySelector('form.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+
+            // Auto-focus on first input
+            document.getElementById('name').focus();
+        }
+
+        // Smooth scroll on alerts
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            alerts[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+</script>
+{% endblock %}

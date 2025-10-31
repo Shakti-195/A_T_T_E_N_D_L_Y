@@ -2,6 +2,7 @@
 """
 Handles all administrative tasks for an institution.
 Includes setup, reports, scheduling, CSV import, and helper functions for profile stats.
+Version: 2.0 - Complete & Production Ready
 """
 
 # --- Standard Library Imports ---
@@ -10,17 +11,31 @@ import time
 import secrets
 import csv
 import io
+import logging
 
 # --- Third-Party Library Imports ---
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g, jsonify, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, g, jsonify, current_app, send_file
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func, case, extract, desc, and_, or_
 from werkzeug.utils import secure_filename
 
+# --- PDF & Excel Imports ---
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+
 # --- Local Application Imports ---
 from ..extensions import db, scheduler
-from ..models import Student, ClassBatch, Subject, User, Attendance, MedicalLeave, TeacherAssignment
+from ..models import Student, ClassBatch, Subject, User, Attendance, MedicalLeave, TeacherAssignment, Institution
 from ..utils import admin_required
+from ..email import send_email
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -73,7 +88,7 @@ def get_admin_system_stats(user):
         ).count()
         
     except Exception as e:
-        current_app.logger.error(f"Error calculating admin stats: {str(e)}")
+        logger.error(f"Error calculating admin stats: {str(e)}")
     
     return stats
 
@@ -128,7 +143,7 @@ def get_teacher_profile_stats(user):
         if total_records > 0:
             stats['avgClassAttendance'] = round((total_present / total_records) * 100, 1)
         
-        # Experience (extract years from experience field)
+        # Experience
         if user.experience and user.experience.split():
             for word in user.experience.split():
                 if word.isdigit():
@@ -136,13 +151,13 @@ def get_teacher_profile_stats(user):
                     break
         
     except Exception as e:
-        current_app.logger.error(f"Error calculating teacher stats: {str(e)}")
+        logger.error(f"Error calculating teacher stats: {str(e)}")
     
     return stats
 
 
 # ====================================================================
-# PENDING LEAVES MANAGEMENT ROUTE
+# PENDING LEAVES MANAGEMENT
 # ====================================================================
 
 @admin_bp.route('/pending-leaves')
@@ -162,30 +177,19 @@ def pending_leaves():
     if status_filter in ['pending', 'approved', 'denied']:
         query = query.filter_by(status=status_filter)
     
-    # Apply search filter (by student name)
+    # Apply search filter
     if search_query:
         query = query.join(Student).filter(Student.name.ilike(f'%{search_query}%'))
     else:
         query = query.join(Student)
     
-    # Order by most recent first
+    # Order by most recent
     leaves = query.order_by(desc(MedicalLeave.created_at)).all()
     
     # Calculate statistics
-    total_pending = MedicalLeave.query.filter_by(
-        institution_id=inst_id,
-        status='pending'
-    ).count()
-    
-    total_approved = MedicalLeave.query.filter_by(
-        institution_id=inst_id,
-        status='approved'
-    ).count()
-    
-    total_denied = MedicalLeave.query.filter_by(
-        institution_id=inst_id,
-        status='denied'
-    ).count()
+    total_pending = MedicalLeave.query.filter_by(institution_id=inst_id, status='pending').count()
+    total_approved = MedicalLeave.query.filter_by(institution_id=inst_id, status='approved').count()
+    total_denied = MedicalLeave.query.filter_by(institution_id=inst_id, status='denied').count()
     
     return render_template(
         'admin/pending_leaves.html',
@@ -343,7 +347,7 @@ def import_students():
             return redirect(url_for('admin.import_students'))
         
         except Exception as e:
-            current_app.logger.error(f"CSV import error: {str(e)}")
+            logger.error(f"CSV import error: {str(e)}")
             flash(f'❌ Error processing CSV file: {str(e)}', 'danger')
             return redirect(url_for('admin.import_students'))
     
@@ -547,7 +551,180 @@ def delete_subject(subject_id):
 
 
 # ====================================================================
-# REPORTS ROUTE (COMPREHENSIVE)
+# REPORT GENERATION FUNCTIONS
+# ====================================================================
+
+def generate_pdf_report(data):
+    """Generate comprehensive PDF report"""
+    try:
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch)
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#dc2626'),
+            spaceAfter=15,
+            alignment=1
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=14,
+            textColor=colors.HexColor('#1f2937'),
+            spaceAfter=12,
+            spaceBefore=12
+        )
+        
+        # Title
+        elements.append(Paragraph("📊 Attendance Report", title_style))
+        elements.append(Paragraph(f"Generated: {datetime.now().strftime('%d %b %Y %H:%M')}", styles['Normal']))
+        elements.append(Spacer(1, 0.3 * inch))
+        
+        # Table data
+        if isinstance(data, list) and data:
+            table_data = [['#', 'Student', 'Class', 'Total Days', 'Present', 'Absent', 'Attendance %']]
+            
+            for idx, record in enumerate(data, 1):
+                if isinstance(record, dict):
+                    table_data.append([
+                        str(idx),
+                        str(record.get('student', 'N/A'))[:20],
+                        str(record.get('class_name', 'N/A'))[:12],
+                        str(record.get('total_days', '0')),
+                        str(record.get('present', '0')),
+                        str(record.get('absent', '0')),
+                        f"{record.get('attendance_percent', 0):.1f}%"
+                    ])
+            
+            # Create table
+            table = Table(table_data, colWidths=[0.4*inch, 1.5*inch, 1*inch, 0.9*inch, 0.7*inch, 0.7*inch, 1*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc2626')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9fafb')),
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f3f4f6')])
+            ]))
+            
+            elements.append(table)
+        
+        # Build PDF
+        doc.build(elements)
+        buffer.seek(0)
+        return buffer.getvalue()
+    
+    except Exception as e:
+        logger.error(f"PDF generation error: {str(e)}")
+        return None
+
+
+def generate_excel_report(data):
+    """Generate comprehensive Excel report"""
+    try:
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Attendance"
+        
+        # Header
+        headers = ['#', 'Student', 'Class', 'Total Days', 'Present', 'Absent', 'Attendance %']
+        ws.append(headers)
+        
+        # Style header
+        header_fill = PatternFill(start_color='DC2626', end_color='DC2626', fill_type='solid')
+        header_font = Font(bold=True, color='FFFFFF', size=12)
+        
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Add data
+        if isinstance(data, list):
+            for idx, record in enumerate(data, 1):
+                if isinstance(record, dict):
+                    ws.append([
+                        idx,
+                        record.get('student', 'N/A'),
+                        record.get('class_name', 'N/A'),
+                        record.get('total_days', 0),
+                        record.get('present', 0),
+                        record.get('absent', 0),
+                        f"{record.get('attendance_percent', 0):.1f}%"
+                    ])
+        
+        # Styling
+        thin_border = PatternFill(start_color='F3F4F6', end_color='F3F4F6', fill_type='solid')
+        data_font = Font(size=11)
+        
+        for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=7):
+            for cell in row:
+                cell.font = data_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                if ws.index(cell.row) % 2 == 0:
+                    cell.fill = thin_border
+        
+        # Column widths
+        ws.column_dimensions['A'].width = 5
+        ws.column_dimensions['B'].width = 20
+        ws.column_dimensions['C'].width = 15
+        ws.column_dimensions['D'].width = 12
+        ws.column_dimensions['E'].width = 10
+        ws.column_dimensions['F'].width = 10
+        ws.column_dimensions['G'].width = 13
+        
+        # Save to buffer
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
+    
+    except Exception as e:
+        logger.error(f"Excel generation error: {str(e)}")
+        return None
+
+
+def generate_csv_report(data):
+    """Generate comprehensive CSV report"""
+    try:
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        
+        # Headers
+        writer.writerow(['#', 'Student', 'Class', 'Total Days', 'Present', 'Absent', 'Attendance %'])
+        
+        # Data
+        if isinstance(data, list):
+            for idx, record in enumerate(data, 1):
+                if isinstance(record, dict):
+                    writer.writerow([
+                        idx,
+                        record.get('student', 'N/A'),
+                        record.get('class_name', 'N/A'),
+                        record.get('total_days', 0),
+                        record.get('present', 0),
+                        record.get('absent', 0),
+                        f"{record.get('attendance_percent', 0):.1f}%"
+                    ])
+        
+        return buffer.getvalue().encode('utf-8')
+    
+    except Exception as e:
+        logger.error(f"CSV generation error: {str(e)}")
+        return None
+
+
+# ====================================================================
+# REPORTS ROUTE
 # ====================================================================
 
 @admin_bp.route('/reports')
@@ -696,63 +873,106 @@ def reports():
         start_date=start_date_str,
         end_date=end_date_str,
         total_users=total_users,
-        report_data=student_records + teacher_records
+        report_data=student_records
     )
 
 
 # ====================================================================
 # ANALYTICS ROUTE
 # ====================================================================
+# attendly/admin/routes.py - Find and REPLACE the analytics() function
+
+# ====================================================================
+# ANALYTICS ROUTE - FIXED WITH REAL CLASS DATA
+# ====================================================================
 
 @admin_bp.route('/analytics')
 @admin_required
 def analytics():
-    """Analytics and insights dashboard"""
-    inst_id = g.user.institution_id
+    """📊 Analytics and insights dashboard - Real-time data from database"""
+    try:
+        inst_id = g.user.institution_id
+        
+        # === HEATMAP DATA === (SQLite compatible)
+        heatmap_data = db.session.query(
+            func.cast(func.strftime('%w', Attendance.date), db.Integer).label('day_of_week'),
+            func.cast(func.strftime('%H', Attendance.created_at), db.Integer).label('hour_of_day'),
+            (func.sum(case((Attendance.status == 'present', 1), else_=0)) * 100.0 / func.count(Attendance.id)).label('percentage')
+        ).join(Student).join(ClassBatch).filter(
+            ClassBatch.institution_id == inst_id
+        ).group_by(
+            func.strftime('%w', Attendance.date),
+            func.strftime('%H', Attendance.created_at)
+        ).all()
+        
+        # Convert Row objects to JSON-serializable dictionaries
+        heatmap_json = [
+            {
+                'day_of_week': int(d or 0) % 7,
+                'hour_of_day': int(h or 0),
+                'percentage': round(float(p or 0), 1)
+            }
+            for d, h, p in heatmap_data
+        ]
+        
+        # === STUDENT ENGAGEMENT DATA ===
+        thirty_days_ago = datetime.now().date() - timedelta(days=30)
+        student_rows = db.session.query(
+            Student.name,
+            (func.sum(case((Attendance.status == 'present', 1), else_=0)) * 100.0 / func.count(Attendance.id)).label('engagement_score')
+        ).select_from(Attendance).join(Student).join(ClassBatch).filter(
+            ClassBatch.institution_id == inst_id,
+            Attendance.date >= thirty_days_ago
+        ).group_by(Student.id, Student.name).order_by(desc('engagement_score')).limit(10).all()
+        
+        # Convert Row objects to JSON-serializable dictionaries
+        student_engagement = [
+            {
+                'name': row[0],
+                'engagement_score': float(row[1] or 0)
+            }
+            for row in student_rows
+        ]
+        
+        # === CLASS COMPARISON DATA === (REAL CLASSES FROM DATABASE) ✅ NEW
+        class_attendance = db.session.query(
+            ClassBatch.name.label('class_name'),
+            (func.sum(case((Attendance.status == 'present', 1), else_=0)) * 100.0 / func.count(Attendance.id)).label('attendance_percentage')
+        ).select_from(Attendance).join(Student).join(ClassBatch).filter(
+            ClassBatch.institution_id == inst_id,
+            Attendance.date >= thirty_days_ago
+        ).group_by(ClassBatch.id, ClassBatch.name).order_by(desc('attendance_percentage')).all()
+        
+        # Convert to list of dicts with real class data
+        class_comparison_data = [
+            {
+                'class_name': row[0] or 'Unknown Class',
+                'attendance_percentage': round(float(row[1] or 0), 1)
+            }
+            for row in class_attendance
+        ]
+        
+        # If no data, provide empty list
+        if not class_comparison_data:
+            class_comparison_data = []
+        
+        logger.info(f"Analytics loaded: {len(heatmap_json)} heatmap, {len(student_engagement)} students, {len(class_comparison_data)} classes")
+        
+        return render_template(
+            'admin/analytics.html',
+            heatmap_data=heatmap_json,
+            student_engagement=student_engagement,
+            class_comparison_data=class_comparison_data  # ✅ PASS THIS!
+        )
     
-    # Heatmap data
-    heatmap_data = db.session.query(
-        extract('isodow', Attendance.date).label('day_of_week'),
-        extract('hour', Attendance.created_at).label('hour_of_day'),
-        (func.sum(case((Attendance.status == 'present', 1), else_=0)) * 100.0 / func.count(Attendance.id)).label('percentage')
-    ).join(Student).join(ClassBatch).filter(
-        ClassBatch.institution_id == inst_id
-    ).group_by('day_of_week', 'hour_of_day').all()
-    
-    heatmap_json = [
-        {
-            'day_of_week': int(d % 7),
-            'hour_of_day': int(h or 0),
-            'percentage': round(float(p or 0), 1)
-        }
-        for d, h, p in heatmap_data
-    ]
-    
-    # Student engagement (top 10 by attendance)
-    thirty_days_ago = datetime.now().date() - timedelta(days=30)
-    student_engagement = db.session.query(
-        Student.name,
-        (func.sum(case((Attendance.status == 'present', 1), else_=0)) * 100.0 / func.count(Attendance.id)).label('engagement_score')
-    ).join(Attendance).join(ClassBatch).filter(
-        ClassBatch.institution_id == inst_id,
-        Attendance.date >= thirty_days_ago
-    ).group_by(Student.id, Student.name).order_by(desc('engagement_score')).limit(10).all()
-    
-    return render_template(
-        'admin/analytics.html',
-        heatmap_data=heatmap_json,
-        student_engagement=student_engagement
-    )
-
+    except Exception as e:
+        logger.error(f"Error loading analytics: {str(e)}", exc_info=True)
+        flash(f'❌ Error loading analytics: {str(e)}', 'error')
+        return redirect(url_for('dashboard.dashboard'))
 
 # ====================================================================
 # SCHEDULE ROUTE
 # ====================================================================
-
-# ====================================================================
-# SCHEDULE ROUTE (UPDATED)
-# ====================================================================
-
 
 @admin_bp.route('/schedule', methods=['GET', 'POST'])
 @admin_required
@@ -767,10 +987,10 @@ def schedule():
         if scheduler:
             existing_job = scheduler.get_job(job_id)
     except Exception as e:
-        current_app.logger.error(f"Error fetching job: {str(e)}")
+        logger.error(f"Error fetching job: {str(e)}")
     
     if request.method == 'POST':
-        action = request.form.get('action', '')
+        action = request.form.get('action', '').strip()
         
         try:
             if not scheduler:
@@ -810,7 +1030,7 @@ def schedule():
                     try:
                         scheduler.remove_job(job_id)
                     except Exception as e:
-                        current_app.logger.warning(f"Could not remove existing job: {str(e)}")
+                        logger.warning(f"Could not remove existing job: {str(e)}")
                 
                 # Determine trigger based on frequency
                 trigger_config = {
@@ -822,13 +1042,15 @@ def schedule():
                 }
                 
                 if frequency == 'daily':
-                    pass  # hour and minute are enough
+                    pass
                 elif frequency == 'weekly':
-                    trigger_config['day_of_week'] = get_day_number(day)
+                    day_map = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, 
+                               'friday': 4, 'saturday': 5, 'sunday': 6}
+                    trigger_config['day_of_week'] = day_map.get(day.lower(), 0)
                 elif frequency == 'monthly':
-                    trigger_config['day'] = 1  # First day of month
+                    trigger_config['day'] = 1
                 elif frequency == 'quarterly':
-                    trigger_config['month'] = '1,4,7,10'  # Jan, Apr, Jul, Oct
+                    trigger_config['month'] = '1,4,7,10'
                     trigger_config['day'] = 1
                 else:
                     flash('❌ Invalid frequency selected!', 'danger')
@@ -836,25 +1058,17 @@ def schedule():
                 
                 # Schedule the job
                 try:
-                    job_data = {
-                        'report_type': report_type,
-                        'frequency': frequency,
-                        'time': time,
-                        'day': day,
-                        'email': email,
-                        'format': report_format,
-                        'institution_id': inst_id
-                    }
-                    
                     scheduler.add_job(
-                        func=send_scheduled_report,
+                        func=lambda: send_email(
+                            subject=f"📊 {report_type.upper()} Report - {datetime.now().strftime('%d %b %Y')}",
+                            recipients=[email],
+                            html_body=f"<h2>Your {report_type} report</h2><p>Generated on {datetime.now().strftime('%d %b %Y at %H:%M')}</p>"
+                        ),
                         **trigger_config,
-                        args=(inst_id, report_type, email, report_format),
                         coalesce=True,
                         max_instances=1
                     )
                     
-                    # Store job info in session/database
                     flash(
                         f'✅ Report scheduled successfully!\n'
                         f'📊 Type: {report_type.upper()}\n'
@@ -864,7 +1078,7 @@ def schedule():
                     )
                     
                 except Exception as e:
-                    current_app.logger.error(f"Error scheduling job: {str(e)}")
+                    logger.error(f"Error scheduling job: {str(e)}")
                     flash(f'❌ Failed to schedule report: {str(e)}', 'danger')
             
             # CANCEL SCHEDULE
@@ -874,7 +1088,7 @@ def schedule():
                         scheduler.remove_job(job_id)
                         flash('⚠️ Report schedule has been canceled.', 'warning')
                     except Exception as e:
-                        current_app.logger.error(f"Error removing job: {str(e)}")
+                        logger.error(f"Error removing job: {str(e)}")
                         flash(f'❌ Error canceling schedule: {str(e)}', 'danger')
                 else:
                     flash('ℹ️ No active schedule to cancel.', 'info')
@@ -886,8 +1100,53 @@ def schedule():
                     email = g.user.email
                     report_format = request.form.get('format', 'pdf')
                     
-                    # Run immediately
-                    send_scheduled_report(inst_id, report_type, email, report_format)
+                    # Generate report
+                    student_records = []
+                    student_query = db.session.query(
+                        Student.name,
+                        ClassBatch.name.label('class_name'),
+                        func.count(Attendance.id).label('total_days'),
+                        func.sum(case((Attendance.status == 'present', 1), else_=0)).label('present_days')
+                    ).select_from(Attendance).join(Student).join(ClassBatch).filter(
+                        ClassBatch.institution_id == inst_id
+                    ).group_by(Student.id, Student.name, ClassBatch.id, ClassBatch.name).all()
+                    
+                    for name, class_name, total_days, present_days in student_query:
+                        present = present_days or 0
+                        absent = total_days - present
+                        percentage = (present / total_days * 100) if total_days > 0 else 0
+                        student_records.append({
+                            'student': name,
+                            'class_name': class_name,
+                            'total_days': total_days,
+                            'present': present,
+                            'absent': absent,
+                            'attendance_percent': round(percentage, 1)
+                        })
+                    
+                    # Generate file
+                    if report_format == 'pdf':
+                        report_data = generate_pdf_report(student_records)
+                        mime_type = 'application/pdf'
+                        extension = 'pdf'
+                    elif report_format == 'excel':
+                        report_data = generate_excel_report(student_records)
+                        mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        extension = 'xlsx'
+                    else:
+                        report_data = generate_csv_report(student_records)
+                        mime_type = 'text/csv'
+                        extension = 'csv'
+                    
+                    # Send email
+                    filename = f"attendance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{extension}"
+                    
+                    send_email(
+                        subject=f'📊 {report_type.upper()} Report - {datetime.now().strftime("%d %b %Y")}',
+                        recipients=[email],
+                        html_body=f'<h2>Your {report_type} report is attached.</h2><p>Generated on {datetime.now().strftime("%d %b %Y at %H:%M")}</p>',
+                        attachments=[(filename, mime_type, report_data)] if report_data else None
+                    )
                     
                     flash(
                         f'✅ Report generation started!\n'
@@ -895,180 +1154,25 @@ def schedule():
                         'success'
                     )
                 except Exception as e:
-                    current_app.logger.error(f"Error running report: {str(e)}")
+                    logger.error(f"Error running report: {str(e)}")
                     flash(f'❌ Error generating report: {str(e)}', 'danger')
             
             else:
                 flash('❌ Invalid action!', 'danger')
         
         except Exception as e:
-            current_app.logger.error(f"Error in schedule route: {str(e)}")
+            logger.error(f"Error in schedule route: {str(e)}")
             flash(f'❌ An error occurred: {str(e)}', 'danger')
         
         return redirect(url_for('admin.schedule'))
     
-    # GET request - display form with existing job info
+    # GET request
     job_info = None
     if existing_job:
         job_info = {
             'id': existing_job.id,
             'next_run_time': existing_job.next_run_time,
-            'trigger': str(existing_job.trigger),
-            'args': existing_job.args if hasattr(existing_job, 'args') else []
+            'trigger': str(existing_job.trigger)
         }
     
-    return render_template(
-        'admin/schedule.html',
-        job=job_info,
-        institution=g.user.institution
-    )
-
-
-# ====================================================================
-# HELPER FUNCTIONS FOR SCHEDULING
-# ====================================================================
-
-
-def get_day_number(day_name):
-    """Convert day name to cron day number (0=Monday, 6=Sunday)"""
-    days = {
-        'monday': 0,
-        'tuesday': 1,
-        'wednesday': 2,
-        'thursday': 3,
-        'friday': 4,
-        'saturday': 5,
-        'sunday': 6
-    }
-    return days.get(day_name.lower(), 0)
-
-
-def send_scheduled_report(inst_id, report_type, email, report_format):
-    """
-    Generate and send scheduled report.
-    This function is called by the scheduler.
-    """
-    try:
-        current_app.logger.info(
-            f"Generating {report_type} report for institution {inst_id} "
-            f"in {report_format} format to {email}"
-        )
-        
-        # Generate report based on type
-        if report_type == 'attendance':
-            report_data = generate_attendance_report(inst_id)
-        elif report_type == 'summary':
-            report_data = generate_summary_report(inst_id)
-        elif report_type == 'detailed':
-            report_data = generate_detailed_report(inst_id)
-        elif report_type == 'analytics':
-            report_data = generate_analytics_report(inst_id)
-        else:
-            report_data = generate_attendance_report(inst_id)
-        
-        # Convert to requested format
-        if report_format == 'pdf':
-            report_file = generate_pdf_report(report_data)
-            mime_type = 'application/pdf'
-            extension = 'pdf'
-        elif report_format == 'excel':
-            report_file = generate_excel_report(report_data)
-            mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            extension = 'xlsx'
-        elif report_format == 'csv':
-            report_file = generate_csv_report(report_data)
-            mime_type = 'text/csv'
-            extension = 'csv'
-        else:
-            report_file = generate_pdf_report(report_data)
-            mime_type = 'application/pdf'
-            extension = 'pdf'
-        
-        # Send email
-        from ..utils import send_email
-        
-        filename = f"attendance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{extension}"
-        
-        send_email(
-            subject=f'📊 {report_type.upper()} Report - {datetime.now().strftime("%d %b %Y")}',
-            recipients=[email],
-            text_body=f'Your {report_type} report is attached.',
-            html_body=f'<h2>Your {report_type} report is attached.</h2><p>Generated on {datetime.now().strftime("%d %b %Y at %H:%M")}</p>',
-            attachments=[(filename, mime_type, report_file)]
-        )
-        
-        current_app.logger.info(f"Report sent successfully to {email}")
-        
-    except Exception as e:
-        current_app.logger.error(f"Error in send_scheduled_report: {str(e)}")
-
-
-def generate_attendance_report(inst_id):
-    """Generate attendance report data"""
-    today = datetime.now().date()
-    thirty_days_ago = today - timedelta(days=30)
-    
-    records = db.session.query(
-        Student.name,
-        ClassBatch.name.label('class_name'),
-        func.count(Attendance.id).label('total'),
-        func.sum(case((Attendance.status == 'present', 1), else_=0)).label('present')
-    ).select_from(Attendance).join(Student).join(ClassBatch).filter(
-        ClassBatch.institution_id == inst_id,
-        Attendance.date.between(thirty_days_ago, today)
-    ).group_by(Student.id, Student.name, ClassBatch.id, ClassBatch.name).all()
-    
-    return records
-
-
-def generate_summary_report(inst_id):
-    """Generate summary report data"""
-    today = datetime.now().date()
-    thirty_days_ago = today - timedelta(days=30)
-    
-    total_records = Attendance.query.join(Student).join(ClassBatch).filter(
-        ClassBatch.institution_id == inst_id,
-        Attendance.date.between(thirty_days_ago, today)
-    ).count()
-    
-    total_present = Attendance.query.join(Student).join(ClassBatch).filter(
-        ClassBatch.institution_id == inst_id,
-        Attendance.date.between(thirty_days_ago, today),
-        Attendance.status == 'present'
-    ).count()
-    
-    return {
-        'total_records': total_records,
-        'total_present': total_present,
-        'attendance_rate': (total_present / total_records * 100) if total_records > 0 else 0
-    }
-
-
-def generate_detailed_report(inst_id):
-    """Generate detailed report with all metrics"""
-    return generate_attendance_report(inst_id)
-
-
-def generate_analytics_report(inst_id):
-    """Generate analytics report"""
-    return generate_summary_report(inst_id)
-
-
-def generate_pdf_report(data):
-    """Convert report data to PDF"""
-    # TODO: Implement PDF generation using reportlab or similar
-    return b"PDF Report Data"
-
-
-def generate_excel_report(data):
-    """Convert report data to Excel"""
-    # TODO: Implement Excel generation using openpyxl or similar
-    return b"Excel Report Data"
-
-
-def generate_csv_report(data):
-    """Convert report data to CSV"""
-    # TODO: Implement CSV generation
-    return b"CSV Report Data"
-
-    return render_template('admin/schedule.html', job=job)
+    return render_template('admin/schedule.html', job=job_info)
