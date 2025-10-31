@@ -4,5 +4,3 @@
 
 [build.environment]
   PYTHON_VERSION = "3.11"
-  MISE_SKIP = "true"
-  MISE_DISABLE = "1"
