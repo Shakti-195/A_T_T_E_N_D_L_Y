@@ -1,3 +1,8 @@
+[build]
+  command = "pip install -r requirements.txt"
+  publish = "public"
+
 [build.environment]
-  MISE_SKIP = "true"
   PYTHON_VERSION = "3.11"
+  MISE_SKIP = "true"
+  MISE_DISABLE = "1"
