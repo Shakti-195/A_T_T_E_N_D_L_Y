@@ -1,0 +1,542 @@
+{% extends "shared/base.html" %}
+{% block title %}Report Schedule - Attendly{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* === ROOT VARIABLES === */
+    :root {
+        --primary: #dc2626;
+        --secondary: #8b5cf6;
+        --accent: #f59e0b;
+        --success: #10b981;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* === MAIN CONTAINER === */
+    .schedule-container {
+        padding: 2rem 1rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    /* === HEADER === */
+    .schedule-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .header-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .header-title i {
+        color: var(--primary);
+        font-size: 3rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .header-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    /* === CARDS === */
+    .schedule-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .schedule-card {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .schedule-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 20px 45px rgba(220, 38, 38, 0.15);
+    }
+
+    .schedule-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card-title i {
+        color: var(--primary);
+        font-size: 1.8rem;
+    }
+
+    /* === FORM STYLES === */
+    .form-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+    }
+
+    .form-control, .form-select {
+        padding: 1rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    body[data-theme="dark"] .form-control:focus,
+    body[data-theme="dark"] .form-select:focus {
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-select option {
+        background: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    /* === GRID === */
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* === BUTTONS === */
+    .btn-schedule {
+        padding: 1rem 2.5rem;
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        color: white;
+        border: 2px solid var(--accent);
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border: none;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-schedule:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.6);
+    }
+
+    .btn-schedule:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .btn-run {
+        background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    /* === INFO BOX === */
+    .info-box {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .info-box i {
+        color: #3b82f6;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .info-box-text {
+        color: #3b82f6;
+    }
+
+    body[data-theme="dark"] .info-box-text {
+        color: #60a5fa;
+    }
+
+    /* === FEATURE LIST === */
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-list li {
+        padding: 0.75rem 0;
+        padding-left: 2rem;
+        color: var(--text-color);
+        font-weight: 500;
+        position: relative;
+    }
+
+    .feature-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--success);
+        font-weight: 900;
+        font-size: 1.25rem;
+    }
+
+    /* === BUTTON GROUP === */
+    .button-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .header-title {
+            font-size: 1.75rem;
+        }
+
+        .header-title i {
+            font-size: 2rem;
+        }
+
+        .schedule-card {
+            padding: 1.5rem;
+        }
+
+        .schedule-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .button-group {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-schedule {
+            padding: 0.9rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .schedule-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+        }
+
+        .header-title i {
+            font-size: 1.75rem;
+        }
+
+        .schedule-card {
+            padding: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="schedule-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- HEADER -->
+                <div class="schedule-header">
+                    <h1 class="header-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        Report Schedule
+                    </h1>
+                    <p class="header-subtitle">⏰ Configure automated report delivery</p>
+                </div>
+
+                <!-- INFO BOX -->
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="info-box-text">
+                        <strong>📊 Automated Reports:</strong> Set up recurring reports to be sent to your email automatically.
+                    </div>
+                </div>
+
+                <!-- SCHEDULE FORM CARD -->
+                <div class="schedule-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-clock"></i>
+                        Configure Schedule
+                    </h2>
+
+                    <form method="POST" id="scheduleForm" novalidate>
+                        <div class="schedule-grid">
+                            <!-- Report Type -->
+                            <div class="form-group">
+                                <label for="report_type" class="form-label">
+                                    <i class="fas fa-file-alt"></i> Report Type
+                                </label>
+                                <select class="form-select" id="report_type" name="report_type" required>
+                                    <option value="" selected disabled>Select report type...</option>
+                                    <option value="attendance">📊 Attendance Report</option>
+                                    <option value="summary">📈 Summary Report</option>
+                                    <option value="detailed">📄 Detailed Report</option>
+                                    <option value="analytics">📉 Analytics Report</option>
+                                </select>
+                            </div>
+
+                            <!-- Frequency -->
+                            <div class="form-group">
+                                <label for="frequency" class="form-label">
+                                    <i class="fas fa-repeat"></i> Frequency
+                                </label>
+                                <select class="form-select" id="frequency" name="frequency" required>
+                                    <option value="" selected disabled>Select frequency...</option>
+                                    <option value="daily">📅 Daily</option>
+                                    <option value="weekly">📆 Weekly</option>
+                                    <option value="monthly">📋 Monthly</option>
+                                    <option value="quarterly">📊 Quarterly</option>
+                                </select>
+                            </div>
+
+                            <!-- Time -->
+                            <div class="form-group">
+                                <label for="time" class="form-label">
+                                    <i class="fas fa-hourglass-half"></i> Time
+                                </label>
+                                <input 
+                                    type="time" 
+                                    class="form-control" 
+                                    id="time" 
+                                    name="time" 
+                                    required
+                                    value="09:00"
+                                >
+                            </div>
+
+                            <!-- Day (for Weekly/Monthly) -->
+                            <div class="form-group" id="day-group" style="display: none;">
+                                <label for="day" class="form-label">
+                                    <i class="fas fa-calendar"></i> Day
+                                </label>
+                                <select class="form-select" id="day" name="day">
+                                    <option value="monday">Monday</option>
+                                    <option value="tuesday">Tuesday</option>
+                                    <option value="wednesday">Wednesday</option>
+                                    <option value="thursday">Thursday</option>
+                                    <option value="friday">Friday</option>
+                                    <option value="saturday">Saturday</option>
+                                    <option value="sunday">Sunday</option>
+                                </select>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope"></i> Email Address
+                                </label>
+                                <input 
+                                    type="email" 
+                                    class="form-control" 
+                                    id="email" 
+                                    name="email" 
+                                    placeholder="admin@example.com"
+                                    value="{{ g.user.email }}"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Format -->
+                            <div class="form-group">
+                                <label for="format" class="form-label">
+                                    <i class="fas fa-file-export"></i> Format
+                                </label>
+                                <select class="form-select" id="format" name="format" required>
+                                    <option value="pdf">📄 PDF</option>
+                                    <option value="excel">📊 Excel</option>
+                                    <option value="csv">📋 CSV</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Features List -->
+                        <ul class="feature-list">
+                            <li>Automated report generation and delivery</li>
+                            <li>Customizable report templates</li>
+                            <li>Multi-format support (PDF, Excel, CSV)</li>
+                            <li>Email notifications with attachments</li>
+                            <li>Schedule modification anytime</li>
+                        </ul>
+
+                        <!-- Submit Button -->
+                        <div class="button-group">
+                            <button type="submit" name="action" value="schedule" class="btn-schedule">
+                                <i class="fas fa-check"></i>
+                                <span>Save Schedule</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- CURRENT SCHEDULE CARD -->
+                {% if job %}
+                <div class="schedule-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-check-square"></i>
+                        Current Schedule
+                    </h2>
+
+                    <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.15)); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 1rem; padding: 1.5rem; position: relative; z-index: 1; margin-bottom: 1.5rem;">
+                        <p style="margin: 0.5rem 0; color: var(--text-color); font-weight: 600;">
+                            <i class="fas fa-check-circle" style="color: var(--success); margin-right: 0.5rem;"></i>
+                            <strong>Status:</strong> Active Schedule
+                        </p>
+                        <p style="margin: 0.5rem 0; color: var(--text-color); font-weight: 600;">
+                            <i class="fas fa-file-alt" style="color: var(--primary); margin-right: 0.5rem;"></i>
+                            <strong>Next Run:</strong> {{ job.next_run_time.strftime('%d %b %Y at %H:%M') if job.next_run_time else 'Not scheduled' }}
+                        </p>
+                    </div>
+
+                    <div class="button-group">
+                        <form method="POST" style="display: contents;">
+                            <button type="submit" name="action" value="run_now" class="btn-schedule btn-run">
+                                <i class="fas fa-play"></i>
+                                <span>Run Now</span>
+                            </button>
+                            <button type="submit" name="action" value="cancel" class="btn-schedule btn-cancel" onclick="return confirm('❌ Cancel this schedule?');">
+                                <i class="fas fa-stop"></i>
+                                <span>Cancel Schedule</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('scheduleForm');
+        const frequencySelect = document.getElementById('frequency');
+        const dayGroup = document.getElementById('day-group');
+
+        // Show/hide day selection based on frequency
+        frequencySelect.addEventListener('change', function() {
+            if (this.value === 'weekly' || this.value === 'monthly') {
+                dayGroup.style.display = 'flex';
+            } else {
+                dayGroup.style.display = 'none';
+            }
+        });
+
+        // Form validation
+        form.addEventListener('submit', function(e) {
+            const reportType = document.getElementById('report_type').value;
+            const frequency = document.getElementById('frequency').value;
+            const time = document.getElementById('time').value;
+            const email = document.getElementById('email').value;
+            const format = document.getElementById('format').value;
+
+            if (!reportType || !frequency || !time || !email || !format) {
+                e.preventDefault();
+                alert('⚠️ Please fill all required fields!');
+                return false;
+            }
+
+            if (!email.includes('@')) {
+                e.preventDefault();
+                alert('⚠️ Please enter a valid email address!');
+                return false;
+            }
+        });
+
+        console.log('✅ Schedule page loaded');
+    });
+</script>
+{% endblock %}

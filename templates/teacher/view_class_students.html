@@ -1,5 +1,5 @@
 {% extends "shared/base.html" %}
-{% block title %}Reports Summary - Teacher Panel{% endblock %}
+{% block title %}Class Students - Teacher Panel{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -7,20 +7,21 @@
         --primary: #dc2626;
         --primary-dark: #b91c1c;
         --success: #10b981;
+        --warning: #f59e0b;
     }
 
     * {
         transition: all 0.3s ease;
     }
 
-    .reports-container {
+    .students-container {
         padding: 2rem 1.5rem;
         max-width: 1400px;
         margin: 0 auto;
     }
 
     /* === HEADER === */
-    .reports-header {
+    .students-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -31,7 +32,7 @@
         gap: 2rem;
     }
 
-    .reports-header-content h1 {
+    .students-header-content h1 {
         font-size: 3rem;
         font-weight: 900;
         margin: 0;
@@ -41,14 +42,14 @@
         gap: 1rem;
     }
 
-    .reports-header-content p {
+    .students-header-content p {
         font-size: 1.1rem;
         color: var(--text-muted);
         margin: 0.5rem 0 0 0;
         font-weight: 500;
     }
 
-    .reports-header i {
+    .students-header i {
         font-size: 3.5rem;
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         -webkit-background-clip: text;
@@ -56,46 +57,8 @@
         background-clip: text;
     }
 
-    /* === FILTER BAR === */
-    .filter-bar {
-        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
-        padding: 2rem;
-        border: 2px solid var(--border-color);
-        border-radius: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    body[data-theme="dark"] .filter-bar {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .filter-group {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: flex-end;
-    }
-
-    .filter-group input,
-    .filter-group select {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        border: 2px solid var(--border-color);
-        padding: 0.75rem 1rem;
-        border-radius: 0.75rem;
-        font-weight: 500;
-        font-size: 1rem;
-    }
-
-    .filter-group input:focus,
-    .filter-group select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-        outline: none;
-    }
-
-    .filter-btn {
+    /* === BACK BUTTON === */
+    .back-btn {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         border: none;
         color: white;
@@ -105,65 +68,106 @@
         cursor: pointer;
         transition: all 0.3s;
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .filter-btn:hover {
+    .back-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+        text-decoration: none;
+        color: white;
     }
 
-    /* === STATS === */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-    }
-
-    .stat-card {
+    /* === CLASS INFO === */
+    .class-info-card {
         background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
-        border: 2px solid var(--border-color);
+        border: 2px solid var(--primary);
         border-radius: 1.5rem;
         padding: 2rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 3rem;
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.2);
     }
 
-    body[data-theme="dark"] .stat-card {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    body[data-theme="dark"] .class-info-card {
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
     }
 
-    .stat-card:hover {
-        transform: translateY(-8px);
-        border-color: var(--primary);
-        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
+    .class-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
     }
 
-    body[data-theme="dark"] .stat-card:hover {
-        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.5);
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
     }
 
-    .stat-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
-
-    .stat-number {
-        font-size: 3.5rem;
-        font-weight: 900;
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        background: rgba(220, 38, 38, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
         color: var(--primary);
-        line-height: 1;
-        margin-bottom: 0.5rem;
     }
 
-    .stat-label {
-        font-size: 1rem;
+    .info-content h3 {
+        font-size: 0.9rem;
         color: var(--text-muted);
         text-transform: uppercase;
         font-weight: 700;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.05em;
+        margin: 0;
+    }
+
+    .info-content p {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin: 0.5rem 0 0 0;
+    }
+
+    /* === SEARCH BAR === */
+    .search-bar {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        padding: 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body[data-theme="dark"] .search-bar {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .search-input {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        font-size: 1rem;
+        width: 100%;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    .search-input::placeholder {
+        color: var(--text-muted);
     }
 
     /* === TABLE === */
@@ -173,24 +177,23 @@
         border-radius: 1.5rem;
         overflow: hidden;
         box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
-        margin-bottom: 2rem;
     }
 
     body[data-theme="dark"] .table-wrapper {
         box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
     }
 
-    .reports-table {
+    .students-table {
         width: 100%;
         border-collapse: collapse;
         background: transparent;
     }
 
-    .reports-table thead {
+    .students-table thead {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     }
 
-    .reports-table th {
+    .students-table th {
         padding: 1.5rem;
         text-align: left;
         color: white;
@@ -200,7 +203,7 @@
         letter-spacing: 0.08em;
     }
 
-    .reports-table td {
+    .students-table td {
         padding: 1.5rem;
         color: var(--text-color);
         border-bottom: 2px solid var(--border-color);
@@ -208,21 +211,21 @@
         font-weight: 500;
     }
 
-    .reports-table tbody tr {
+    .students-table tbody tr {
         transition: all 0.3s;
     }
 
-    .reports-table tbody tr:hover {
+    .students-table tbody tr:hover {
         background: rgba(220, 38, 38, 0.08);
         transform: scale(1.01);
     }
 
-    body[data-theme="dark"] .reports-table tbody tr:hover {
+    body[data-theme="dark"] .students-table tbody tr:hover {
         background: rgba(220, 38, 38, 0.15);
     }
 
-    /* === STATUS BADGES === */
-    .badge {
+    /* === ATTENDANCE BADGES === */
+    .attendance-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
@@ -235,26 +238,33 @@
         border: 2px solid;
     }
 
-    .badge-success {
+    .badge-excellent {
         background: rgba(16, 185, 129, 0.15);
         color: #10b981;
         border-color: #10b981;
     }
 
-    .badge-warning {
+    .badge-good {
         background: rgba(245, 158, 11, 0.15);
         color: #f59e0b;
         border-color: #f59e0b;
     }
 
-    .badge-danger {
+    .badge-low {
         background: rgba(239, 68, 68, 0.15);
         color: #ef4444;
         border-color: #ef4444;
     }
 
-    /* === PROGRESS BAR === */
-    .progress-container {
+    /* === ATTENDANCE DETAILS === */
+    .attendance-details {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .attendance-bar {
+        flex: 1;
         background: rgba(220, 38, 38, 0.1);
         border-radius: 1rem;
         height: 12px;
@@ -262,11 +272,18 @@
         border: 1px solid var(--primary);
     }
 
-    .progress-bar {
+    .attendance-progress {
         height: 100%;
         background: linear-gradient(90deg, var(--primary), var(--primary-dark));
         border-radius: 1rem;
-        transition: width 1s ease;
+        transition: width 0.5s ease;
+    }
+
+    .attendance-percent {
+        min-width: 60px;
+        text-align: right;
+        font-weight: 700;
+        font-size: 1rem;
     }
 
     /* === EMPTY STATE === */
@@ -311,92 +328,93 @@
 
     /* === RESPONSIVE === */
     @media (max-width: 1024px) {
-        .reports-header {
+        .students-header {
             flex-direction: column;
             align-items: flex-start;
         }
 
-        .reports-header-content h1 {
+        .students-header-content h1 {
             font-size: 2.25rem;
         }
     }
 
     @media (max-width: 768px) {
-        .reports-container {
+        .students-container {
             padding: 1.5rem 1rem;
         }
 
-        .reports-header-content h1 {
+        .students-header-content h1 {
             font-size: 1.75rem;
             gap: 0.5rem;
         }
 
-        .reports-header-content h1 i {
+        .students-header-content h1 i {
             font-size: 2rem;
         }
 
-        .stats-grid {
+        .class-info-grid {
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1.5rem;
         }
 
-        .stat-number {
-            font-size: 2.5rem;
-        }
-
-        .filter-group {
+        .info-item {
             flex-direction: column;
+            text-align: center;
         }
 
-        .filter-group input,
-        .filter-group select,
-        .filter-btn {
+        .students-table th,
+        .students-table td {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .attendance-details {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .attendance-bar {
             width: 100%;
         }
 
-        .reports-table th,
-        .reports-table td {
-            padding: 1rem;
-            font-size: 0.9rem;
+        .attendance-percent {
+            width: 100%;
+            text-align: center;
         }
     }
 
     @media (max-width: 480px) {
-        .reports-container {
+        .students-container {
             padding: 1rem;
         }
 
-        .reports-header-content h1 {
+        .students-header-content h1 {
             font-size: 1.5rem;
             flex-direction: column;
         }
 
-        .stats-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        .stat-card {
+        .class-info-card {
             padding: 1.5rem 1rem;
         }
 
-        .stat-number {
-            font-size: 2rem;
+        .class-info-grid {
+            grid-template-columns: 1fr;
         }
 
-        .stat-label {
-            font-size: 0.85rem;
-        }
-
-        .reports-table th,
-        .reports-table td {
+        .students-table th,
+        .students-table td {
             padding: 0.75rem 0.5rem;
             font-size: 0.8rem;
         }
 
-        .badge {
+        .attendance-badge {
             font-size: 0.75rem;
             padding: 0.35rem 0.75rem;
+        }
+
+        .back-btn {
+            width: 100%;
+            justify-content: center;
         }
 
         .empty-icon {
@@ -409,11 +427,11 @@
     }
 
     /* === THEME SUPPORT === */
-    body[data-theme="dark"] .reports-header {
+    body[data-theme="dark"] .students-header {
         border-bottom-color: rgba(255, 255, 255, 0.1);
     }
 
-    body[data-theme="dark"] .reports-table td {
+    body[data-theme="dark"] .students-table td {
         border-bottom-color: rgba(255, 255, 255, 0.1);
     }
 
@@ -428,157 +446,140 @@
 {% endblock %}
 
 {% block content %}
-<div class="reports-container">
+<div class="students-container">
     <!-- ===== HEADER ===== -->
-    <div class="reports-header">
-        <div class="reports-header-content">
+    <div class="students-header">
+        <div class="students-header-content">
             <h1>
-                <i class="fas fa-chart-bar"></i>
-                Reports Summary
+                <i class="fas fa-users"></i>
+                Class Students
             </h1>
-            <p>📊 View attendance and performance reports for your classes</p>
+            <p>👥 View all students in {{ class_batch.name }}</p>
+        </div>
+        <a href="{{ url_for('teacher.teacher_classes') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Classes</span>
+        </a>
+    </div>
+
+    <!-- ===== CLASS INFO ===== -->
+    <div class="class-info-card">
+        <div class="class-info-grid">
+            <!-- Class Name -->
+            <div class="info-item">
+                <div class="info-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="info-content">
+                    <h3>📚 Class Name</h3>
+                    <p>{{ class_batch.name }}</p>
+                </div>
+            </div>
+
+            <!-- Total Students -->
+            <div class="info-item">
+                <div class="info-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="info-content">
+                    <h3>👥 Total Students</h3>
+                    <p>{{ students|length }}</p>
+                </div>
+            </div>
+
+            <!-- Average Attendance -->
+            <div class="info-item">
+                <div class="info-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="info-content">
+                    <h3>📊 Avg Attendance</h3>
+                    <p>
+                        {% if students|length > 0 %}
+                            {% set total_pct = (student_stats.values() | map(attribute='percentage') | sum) / student_stats|length %}
+                            {{ (total_pct|round(1))|int }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ===== FILTER BAR ===== -->
-    <div class="filter-bar">
-        <form method="GET" class="filter-group">
-            <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;">📅 Start Date</label>
-                <input type="date" name="start_date" value="{{ start_date or '' }}" style="width: 100%;">
-            </div>
-
-            <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;">📆 End Date</label>
-                <input type="date" name="end_date" value="{{ end_date or '' }}" style="width: 100%;">
-            </div>
-
-            <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;">🏫 Class</label>
-                <select name="class_id" style="width: 100%;">
-                    <option value="">All Classes</option>
-                    {% for cls in classes %}
-                    <option value="{{ cls.id }}" {% if cls.id == selected_class_id %}selected{% endif %}>
-                        {{ cls.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <button type="submit" class="filter-btn" style="min-width: 120px;">
-                <i class="fas fa-search me-2"></i>Generate Report
-            </button>
-        </form>
+    <!-- ===== SEARCH BAR ===== -->
+    <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search students by name...">
     </div>
 
-    <!-- ===== STATISTICS ===== -->
-    {% if report_data %}
-    <div class="stats-grid">
-        <!-- Total Classes Card -->
-        <div class="stat-card">
-            <span class="stat-icon">📚</span>
-            <div class="stat-number">{{ classes|length }}</div>
-            <div class="stat-label">📖 Classes</div>
-        </div>
-
-        <!-- Average Attendance Card -->
-        <div class="stat-card">
-            <span class="stat-icon">📊</span>
-            <div class="stat-number">{{ summary.overall_attendance_percent|round(1)|int }}%</div>
-            <div class="stat-label">📈 Avg Attendance</div>
-        </div>
-
-        <!-- Present Card -->
-        <div class="stat-card">
-            <span class="stat-icon">✅</span>
-            <div class="stat-number">{{ summary.total_present }}</div>
-            <div class="stat-label">✓ Present</div>
-        </div>
-
-        <!-- Absent Card -->
-        <div class="stat-card">
-            <span class="stat-icon">❌</span>
-            <div class="stat-number">{{ summary.total_absent }}</div>
-            <div class="stat-label">✗ Absent</div>
-        </div>
-    </div>
-
-    <!-- ===== REPORTS TABLE ===== -->
+    <!-- ===== STUDENTS TABLE ===== -->
+    {% if students %}
     <div class="table-wrapper">
-        <table class="reports-table">
+        <table class="students-table">
             <thead>
                 <tr>
                     <th>👤 Student Name</th>
-                    <th>📚 Class</th>
-                    <th>📅 Total Days</th>
+                    <th>🆔 Student ID</th>
                     <th>✅ Present</th>
-                    <th>❌ Absent</th>
-                    <th>📊 Attendance %</th>
-                    <th>📈 Status</th>
+                    <th>📊 Total Days</th>
+                    <th>📈 Attendance %</th>
+                    <th>📌 Status</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for record in report_data %}
-                <tr>
+            <tbody id="studentsTableBody">
+                {% for student in students %}
+                <tr class="student-row" data-name="{{ student.name|lower }}">
                     <!-- Student Name -->
                     <td>
-                        <strong>{{ record.student }}</strong>
+                        <strong>{{ student.name }}</strong>
                     </td>
 
-                    <!-- Class -->
+                    <!-- Student ID -->
                     <td>
                         <span style="background: rgba(220, 38, 38, 0.1); padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: var(--primary); font-weight: 700;">
-                            {{ record.class_name if record.class_name else 'N/A' }}
+                            {{ student.student_id if student.student_id else 'N/A' }}
                         </span>
-                    </td>
-
-                    <!-- Total Days -->
-                    <td>
-                        <strong>{{ record.total_days }}</strong>
                     </td>
 
                     <!-- Present -->
                     <td>
-                        <span class="badge badge-success">
-                            <i class="fas fa-check"></i>
-                            <span>{{ record.present }}</span>
-                        </span>
+                        <strong style="color: var(--success);">
+                            {{ student_stats[student.id]['present'] }}
+                        </strong>
                     </td>
 
-                    <!-- Absent -->
+                    <!-- Total Days -->
                     <td>
-                        <span class="badge badge-danger">
-                            <i class="fas fa-times"></i>
-                            <span>{{ record.absent }}</span>
-                        </span>
+                        <strong>
+                            {{ student_stats[student.id]['total'] }}
+                        </strong>
                     </td>
 
-                    <!-- Attendance % -->
+                    <!-- Attendance % with Progress Bar -->
                     <td>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div style="flex: 1;">
-                                <div class="progress-container">
-                                    <div class="progress-bar" style="width: {{ record.attendance_percent }}%;"></div>
-                                </div>
+                        <div class="attendance-details">
+                            <div class="attendance-bar">
+                                <div class="attendance-progress" style="width: {{ student_stats[student.id]['percentage'] }}%;"></div>
                             </div>
-                            <strong style="min-width: 50px; text-align: right;">{{ record.attendance_percent }}%</strong>
+                            <div class="attendance-percent">{{ student_stats[student.id]['percentage'] }}%</div>
                         </div>
                     </td>
 
-                    <!-- Status -->
+                    <!-- Status Badge -->
                     <td>
-                        {% if record.attendance_percent >= 90 %}
-                        <span class="badge badge-success">
+                        {% set pct = student_stats[student.id]['percentage'] %}
+                        {% if pct >= 90 %}
+                        <span class="attendance-badge badge-excellent">
                             <i class="fas fa-star"></i>
                             <span>Excellent</span>
                         </span>
-                        {% elif record.attendance_percent >= 75 %}
-                        <span class="badge badge-warning">
+                        {% elif pct >= 75 %}
+                        <span class="attendance-badge badge-good">
                             <i class="fas fa-check-circle"></i>
                             <span>Good</span>
                         </span>
                         {% else %}
-                        <span class="badge badge-danger">
+                        <span class="attendance-badge badge-low">
                             <i class="fas fa-exclamation-triangle"></i>
                             <span>Low</span>
                         </span>
@@ -590,12 +591,12 @@
         </table>
     </div>
 
-    <!-- ===== EMPTY STATE ===== -->
+    <!-- ===== EMPTY STATE (NO STUDENTS) ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📊</div>
-        <h2 class="empty-title">No Report Data Available! 📈</h2>
-        <p class="empty-text">Please select a date range and class above to generate your attendance report.</p>
+        <div class="empty-icon">👥</div>
+        <h2 class="empty-title">No Students in This Class! 📚</h2>
+        <p class="empty-text">This class currently has no students assigned to it.<br>Please add students to this class from the admin panel.</p>
     </div>
     {% endif %}
 </div>
@@ -603,7 +604,27 @@
 
 {% block body_extra %}
 <script>
-    // Theme switching support
+    // ===== SEARCH FUNCTIONALITY =====
+    const searchInput = document.getElementById('searchInput');
+    const studentsTableBody = document.getElementById('studentsTableBody');
+    const studentRows = studentsTableBody ? studentsTableBody.querySelectorAll('.student-row') : [];
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+
+            studentRows.forEach(row => {
+                const studentName = row.dataset.name;
+                if (studentName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // ===== THEME SWITCHING =====
     document.addEventListener('DOMContentLoaded', function() {
         const themeButtons = document.querySelectorAll('.theme-btn');
         const body = document.body;

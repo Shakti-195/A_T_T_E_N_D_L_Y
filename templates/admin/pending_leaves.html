@@ -1,0 +1,697 @@
+{% extends "shared/base.html" %}
+{% block title %}Pending Leaves - Admin Panel{% endblock %}
+
+{% block head_extra %}
+<style>
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --success: #10b981;
+        --warning: #f59e0b;
+    }
+
+    * {
+        transition: all 0.3s ease;
+    }
+
+    .schedule-container {
+        padding: 2rem 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    .schedule-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 3px solid var(--primary);
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .schedule-header-content h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin: 0;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .schedule-header-content p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin: 0.5rem 0 0 0;
+        font-weight: 500;
+    }
+
+    .schedule-header i {
+        font-size: 3.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* === STATS GRID === */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-box {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body[data-theme="dark"] .stat-box {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-box:hover {
+        transform: translateY(-8px);
+        border-color: var(--primary);
+        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
+    }
+
+    body[data-theme="dark"] .stat-box:hover {
+        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.5);
+    }
+
+    .stat-number {
+        font-size: 4rem;
+        font-weight: 900;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* === FILTER BAR === */
+    .filter-bar {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        padding: 2rem;
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body[data-theme="dark"] .filter-bar {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    .filter-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    .filter-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+    }
+
+    /* === TABLE === */
+    .table-wrapper {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    body[data-theme="dark"] .table-wrapper {
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .leaves-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: transparent;
+    }
+
+    .leaves-table thead {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .leaves-table th {
+        padding: 1.5rem;
+        text-align: left;
+        color: white;
+        font-weight: 900;
+        font-size: 1.05rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .leaves-table td {
+        padding: 1.5rem;
+        color: var(--text-color);
+        border-bottom: 2px solid var(--border-color);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .leaves-table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .leaves-table tbody tr:hover {
+        background: rgba(220, 38, 38, 0.08);
+        transform: scale(1.01);
+    }
+
+    body[data-theme="dark"] .leaves-table tbody tr:hover {
+        background: rgba(220, 38, 38, 0.15);
+    }
+
+    /* === STATUS BADGE === */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 2px solid;
+    }
+
+    .status-pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border-color: #f59e0b;
+    }
+
+    /* === ACTION BUTTONS === */
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-approve,
+    .btn-deny {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.6rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .btn-approve {
+        background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-approve:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-deny {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-deny:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-approve:active,
+    .btn-deny:active {
+        transform: translateY(-1px);
+    }
+
+    /* === EMPTY STATE === */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 3px dashed var(--border-color);
+        border-radius: 2rem;
+        transition: all 0.3s;
+    }
+
+    .empty-state:hover {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .empty-title {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-text {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .success-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+        border: 2px solid var(--success);
+        color: var(--success);
+        font-weight: 700;
+        font-size: 1.1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .success-badge i {
+        font-size: 1.3rem;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+        .schedule-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .schedule-header-content h1 {
+            font-size: 2.25rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .schedule-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .schedule-header-content h1 {
+            font-size: 1.75rem;
+            gap: 0.5rem;
+        }
+
+        .schedule-header-content h1 i {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        .filter-group {
+            flex-direction: column;
+        }
+
+        .filter-group input,
+        .filter-group select,
+        .filter-btn {
+            width: 100%;
+        }
+
+        .leaves-table th,
+        .leaves-table td {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-approve,
+        .btn-deny {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .schedule-container {
+            padding: 1rem;
+        }
+
+        .schedule-header-content h1 {
+            font-size: 1.5rem;
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .stat-box {
+            padding: 1.5rem 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+        }
+
+        .leaves-table th,
+        .leaves-table td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-approve,
+        .btn-deny {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* === THEME SUPPORT === */
+    body[data-theme="dark"] .schedule-header {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body[data-theme="dark"] .leaves-table td {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body[data-theme="dark"] .empty-state {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body[data-theme="dark"] .empty-state:hover {
+        border-color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="schedule-container">
+    <!-- ===== HEADER ===== -->
+    <div class="schedule-header">
+        <div class="schedule-header-content">
+            <h1>
+                <i class="fas fa-calendar-check"></i>
+                Pending Leaves
+            </h1>
+            <p>📋 Manage and approve student leave requests</p>
+        </div>
+    </div>
+
+    <!-- ===== STATISTICS ===== -->
+    {% if leaves %}
+    <div class="stats-grid">
+        <!-- Pending Card -->
+        <div class="stat-box">
+            <span class="stat-icon">⏳</span>
+            <div class="stat-number">{{ total_pending }}</div>
+            <div class="stat-label">⌛ Pending</div>
+        </div>
+
+        <!-- Approved Card -->
+        <div class="stat-box">
+            <span class="stat-icon">✅</span>
+            <div class="stat-number">{{ total_approved }}</div>
+            <div class="stat-label">✓ Approved</div>
+        </div>
+
+        <!-- Denied Card -->
+        <div class="stat-box">
+            <span class="stat-icon">❌</span>
+            <div class="stat-number">{{ total_denied }}</div>
+            <div class="stat-label">✗ Denied</div>
+        </div>
+
+        <!-- Total Card -->
+        <div class="stat-box">
+            <span class="stat-icon">📊</span>
+            <div class="stat-number">{{ total_pending + total_approved + total_denied }}</div>
+            <div class="stat-label">📈 Total</div>
+        </div>
+    </div>
+
+    <!-- ===== FILTER BAR ===== -->
+    <div class="filter-bar">
+        <form method="GET" class="filter-group">
+            <input type="text" name="search" placeholder="🔍 Search by student name..." value="{{ search_query or '' }}" style="flex: 1; min-width: 250px;">
+            
+            <select name="status" style="min-width: 150px;">
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>✅ Approved</option>
+                <option value="denied" {% if status_filter == 'denied' %}selected{% endif %}>❌ Denied</option>
+                <option value="" {% if status_filter == '' %}selected{% endif %}>📋 All Status</option>
+            </select>
+
+            <button type="submit" class="filter-btn">
+                <i class="fas fa-filter me-2"></i>Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- ===== LEAVES TABLE ===== -->
+    <div class="table-wrapper">
+        <table class="leaves-table">
+            <thead>
+                <tr>
+                    <th>👤 Student Name</th>
+                    <th>📅 Start Date</th>
+                    <th>📆 End Date</th>
+                    <th>📝 Reason</th>
+                    <th>⏱️ Days</th>
+                    <th>📌 Status</th>
+                    <th>🎯 Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr>
+                    <!-- Student Name -->
+                    <td>
+                        <strong>{{ leave.student.name if leave.student else 'Unknown' }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ leave.student.student_id if leave.student else 'N/A' }}</small>
+                    </td>
+
+                    <!-- Start Date -->
+                    <td>
+                        <strong>{{ leave.start_date.strftime('%d-%m-%Y') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ leave.start_date.strftime('%A') }}</small>
+                    </td>
+
+                    <!-- End Date -->
+                    <td>
+                        <strong>{{ leave.end_date.strftime('%d-%m-%Y') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ leave.end_date.strftime('%A') }}</small>
+                    </td>
+
+                    <!-- Reason -->
+                    <td>
+                        <span title="{{ leave.reason if leave.reason else 'No reason provided' }}">
+                            {{ (leave.reason if leave.reason else 'No reason provided')[:50] }}{% if leave.reason and leave.reason|length > 50 %}...{% endif %}
+                        </span>
+                    </td>
+
+                    <!-- Days -->
+                    <td>
+                        <strong style="color: var(--primary); font-size: 1.1rem;">
+                            {{ (leave.end_date - leave.start_date).days + 1 }} 📅
+                        </strong>
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>Pending</span>
+                        </span>
+                    </td>
+
+                    <!-- Action -->
+                    <td>
+                        <div class="action-buttons">
+                            <form method="POST" action="{{ url_for('admin.handle_leave_request', leave_id=leave.id, action='approve') }}" style="display: inline;">
+                                <button type="submit" class="btn-approve" title="Approve this leave request">
+                                    <i class="fas fa-check"></i>
+                                    <span>Approve</span>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.handle_leave_request', leave_id=leave.id, action='deny') }}" style="display: inline;">
+                                <button type="submit" class="btn-deny" title="Deny this leave request">
+                                    <i class="fas fa-times"></i>
+                                    <span>Deny</span>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== EMPTY STATE ===== -->
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">✨</div>
+        <h2 class="empty-title">No Pending Leaves! 🎉</h2>
+        <p class="empty-text">All leave requests have been processed. Everything is up to date!</p>
+        <div style="margin-top: 2rem;">
+            <span class="success-badge">
+                <i class="fas fa-check-circle"></i>
+                <span>All requests approved or processed!</span>
+            </span>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    // Theme switching support
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        const body = document.body;
+        
+        const applyTheme = (theme) => {
+            body.setAttribute('data-theme', theme);
+            themeButtons.forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            localStorage.setItem('attendance_theme', theme);
+        };
+
+        themeButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const theme = button.dataset.theme;
+                applyTheme(theme);
+            });
+        });
+
+        const savedTheme = localStorage.getItem('attendance_theme');
+        if (savedTheme && ['light', 'dark', 'sepia'].includes(savedTheme)) {
+            applyTheme(savedTheme);
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark ? 'dark' : 'light');
+        }
+
+        // Prevent form submission for confirmation
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const action = this.querySelector('button').textContent.trim().split('\n')[0];
+                if (!confirm(`Are you sure you want to ${action.toLowerCase()} this leave request?`)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

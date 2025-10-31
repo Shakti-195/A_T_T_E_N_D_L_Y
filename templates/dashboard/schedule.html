@@ -1,66 +1,524 @@
-{% extends "base.html" %}
-{% block title %}Schedule Reports{% endblock %}
+{% extends "shared/base.html" %}
+{% block title %}Schedule Reports - Attendly{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* === ROOT VARIABLES === */
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --accent: #FFD700;
+        --success: #10b981;
+        --warning: #f59e0b;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* === MAIN CONTAINER === */
+    .schedule-container {
+        padding: 2rem 1rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    /* === HEADER === */
+    .schedule-header {
+        margin-bottom: 3rem;
+        animation: slideIn 0.6s ease-out;
+    }
+
+    .header-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-color);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .header-title i {
+        color: var(--primary);
+        font-size: 3rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .header-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* === STATUS CARDS === */
+    .status-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .status-card {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .status-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.15);
+    }
+
+    .status-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+    }
+
+    .status-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .status-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .status-icon.active {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .status-icon.inactive {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: white;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .status-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text-color);
+    }
+
+    .status-message {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .status-next {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .status-next strong {
+        color: var(--primary);
+    }
+
+    /* === FORM CARD === */
+    .form-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .form-card {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.15);
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-title i {
+        color: var(--primary);
+        font-size: 1.8rem;
+    }
+
+    /* === FORM STYLES === */
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-control, .form-select {
+        padding: 0.9rem 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    body[data-theme="dark"] .form-control:focus,
+    body[data-theme="dark"] .form-select:focus {
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-select option {
+        background: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    /* === FORM GROUP === */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* === BUTTONS === */
+    .button-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-schedule {
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        color: white;
+        border: 2px solid var(--accent);
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        width: 100%;
+    }
+
+    .btn-schedule:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.6);
+    }
+
+    .btn-schedule:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border-color: #fca5a5;
+    }
+
+    .btn-cancel:hover {
+        box-shadow: 0 15px 40px rgba(239, 68, 68, 0.6);
+    }
+
+    /* === DIVIDER === */
+    .divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        margin: 2rem 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .header-title {
+            font-size: 1.75rem;
+        }
+
+        .header-title i {
+            font-size: 2rem;
+        }
+
+        .form-card, .status-card {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .button-group {
+            grid-template-columns: 1fr;
+        }
+
+        .status-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .schedule-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+        }
+
+        .header-title i {
+            font-size: 1.75rem;
+        }
+
+        .form-card, .status-card {
+            padding: 1.25rem;
+        }
+
+        .form-title {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h2 class="card-title mb-4"><i class="fas fa-clock me-2"></i>Schedule Weekly Report</h2>
+<div class="schedule-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- HEADER -->
+                <div class="schedule-header">
+                    <h1 class="header-title">
+                        <i class="fas fa-clock"></i>
+                        Schedule Reports
+                    </h1>
+                    <p class="header-subtitle">⏰ Set up weekly attendance reports</p>
+                </div>
 
-            {% if job %}
-            <div class="alert alert-success">
-                <h5 class="alert-heading">Schedule is Active!</h5>
-                <p>The weekly report is currently scheduled to be sent out automatically.</p>
-                <hr>
-                <p class="mb-0">Next scheduled run: <strong>{{ job.next_run.strftime('%A, %d %b %Y at %I:%M %p') if job.next_run else 'Not scheduled' }}</strong></p>
-            </div>
-            {% else %}
-            <div class="alert alert-warning">
-                <h5 class="alert-heading">Schedule is Inactive</h5>
-                <p>The weekly report is not currently scheduled to run automatically.</p>
-            </div>
-            {% endif %}
-
-            <hr>
-
-            <form method="POST">
-                <input type="hidden" name="action" value="schedule">
-                <h4 class="mb-3">Set or Update Schedule</h4>
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <label for="day_of_week" class="form-label">Day of the Week</label>
-                        <select name="day_of_week" id="day_of_week" class="form-select">
-                            <option value="mon">Monday</option>
-                            <option value="tue">Tuesday</option>
-                            <option value="wed">Wednesday</option>
-                            <option value="thu">Thursday</option>
-                            <option value="fri" selected>Friday</option>
-                            <option value="sat">Saturday</option>
-                            <option value="sun">Sunday</option>
-                        </select>
+                <!-- STATUS CARD -->
+                {% if job %}
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon active">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <div class="status-title">Schedule Active ✅</div>
+                            <div class="status-message">Your weekly report is configured and will be sent automatically.</div>
+                        </div>
                     </div>
-                    <div class="col-md-5">
-                        <label for="hour" class="form-label">Time of Day (24-hour format)</label>
-                        <select name="hour" id="hour" class="form-select">
-                            {% for i in range(24) %}
-                            <option value="{{ i }}" {% if i == 17 %}selected{% endif %}>{{ "%02d:00"|format(i) }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Update</button>
+                    <div class="status-next">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        <strong>Next Run:</strong> {{ job.next_run_time.strftime('%A, %d %b %Y at %I:%M %p') if job.next_run_time else 'Not scheduled' }}
                     </div>
                 </div>
-            </form>
+                {% else %}
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon inactive">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div>
+                            <div class="status-title">Schedule Inactive ⚠️</div>
+                            <div class="status-message">No weekly report is currently configured. Set one up below.</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
 
-            {% if job %}
-            <hr>
-            <form method="POST" onsubmit="return confirm('Are you sure you want to cancel the schedule?')">
-                <input type="hidden" name="action" value="cancel">
-                <button type="submit" class="btn btn-danger">Cancel Schedule</button>
-            </form>
-            {% endif %}
+                <!-- FORM CARD -->
+                <div class="form-card">
+                    <h2 class="form-title">
+                        <i class="fas fa-cog"></i>
+                        Set or Update Schedule
+                    </h2>
+
+                    <form method="POST">
+                        <input type="hidden" name="action" value="schedule">
+
+                        <div class="form-grid">
+                            <!-- Day of Week -->
+                            <div class="form-group">
+                                <label for="day_of_week" class="form-label">
+                                    <i class="fas fa-calendar-day"></i> Day of Week
+                                </label>
+                                <select name="day_of_week" id="day_of_week" class="form-select" required>
+                                    <option value="mon">Monday</option>
+                                    <option value="tue">Tuesday</option>
+                                    <option value="wed">Wednesday</option>
+                                    <option value="thu">Thursday</option>
+                                    <option value="fri" selected>Friday</option>
+                                    <option value="sat">Saturday</option>
+                                    <option value="sun">Sunday</option>
+                                </select>
+                            </div>
+
+                            <!-- Time of Day -->
+                            <div class="form-group">
+                                <label for="hour" class="form-label">
+                                    <i class="fas fa-hourglass-half"></i> Time (24-hour)
+                                </label>
+                                <select name="hour" id="hour" class="form-select" required>
+                                    {% for i in range(24) %}
+                                    <option value="{{ i }}" {% if i == 17 %}selected{% endif %}>
+                                        {{ "%02d:00"|format(i) }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-schedule">
+                            <i class="fas fa-save"></i>
+                            <span>Update Schedule</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- CANCEL SCHEDULE CARD -->
+                {% if job %}
+                <div class="form-card">
+                    <h2 class="form-title">
+                        <i class="fas fa-trash"></i>
+                        Manage Schedule
+                    </h2>
+
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; position: relative; z-index: 1;">
+                        Cancel the automatic weekly report delivery. You can set it up again anytime.
+                    </p>
+
+                    <div class="button-group">
+                        <form method="POST" class="w-100">
+                            <input type="hidden" name="action" value="cancel">
+                            <button type="submit" class="btn-schedule btn-cancel" onclick="return confirm('⚠️ Are you sure you want to cancel the schedule?');">
+                                <i class="fas fa-times-circle"></i>
+                                <span>Cancel Schedule</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const daySelect = document.getElementById('day_of_week');
+        const hourSelect = document.getElementById('hour');
+
+        // Restore previous selections from localStorage
+        const savedDay = localStorage.getItem('schedule_day');
+        const savedHour = localStorage.getItem('schedule_hour');
+
+        if (savedDay) daySelect.value = savedDay;
+        if (savedHour) hourSelect.value = savedHour;
+
+        // Save selections to localStorage
+        daySelect.addEventListener('change', function() {
+            localStorage.setItem('schedule_day', this.value);
+        });
+
+        hourSelect.addEventListener('change', function() {
+            localStorage.setItem('schedule_hour', this.value);
+        });
+
+        console.log('✅ Schedule page loaded');
+    });
+</script>
 {% endblock %}

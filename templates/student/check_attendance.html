@@ -1,80 +1,647 @@
 {% extends "shared/base.html" %}
 {% block title %}Check Attendance Records{% endblock %}
 
+{% block head_extra %}
+<style>
+    /* === ROOT VARIABLES === */
+    :root {
+        --primary: #dc2626;
+        --secondary: #8b5cf6;
+        --accent: #f59e0b;
+        --success: #10b981;
+        --danger: #ef4444;
+        --info: #06b6d4;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* === MAIN CONTAINER === */
+    .check-container {
+        padding: 2rem 1rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    /* === HEADER SECTION === */
+    .check-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .header-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: var(--text-color);
+    }
+
+    .header-title i {
+        color: var(--primary);
+        font-size: 3rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .header-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* === SEARCH CARD === */
+    .search-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .search-card {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .search-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 20px 45px rgba(220, 38, 38, 0.15);
+    }
+
+    .search-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+    }
+
+    .search-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .search-title i {
+        color: var(--primary);
+        font-size: 1.5rem;
+    }
+
+    /* === FORM STYLES === */
+    .form-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+    }
+
+    .form-control {
+        padding: 1rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    body[data-theme="dark"] .form-control:focus {
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .btn-search {
+        padding: 1rem 2.5rem;
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        color: white;
+        border: 2px solid var(--accent);
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-search:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.6);
+        border-color: white;
+    }
+
+    .btn-search:active {
+        transform: translateY(-1px);
+    }
+
+    /* === RESULTS CARD === */
+    .results-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    body[data-theme="dark"] .results-card {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .results-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    }
+
+    /* === STUDENT INFO BANNER === */
+    .student-banner {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.15));
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s;
+    }
+
+    .student-banner:hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.25));
+    }
+
+    .student-avatar {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--secondary), #3b82f6);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        font-weight: 900;
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        flex-shrink: 0;
+    }
+
+    .student-info {
+        flex: 1;
+    }
+
+    .student-name {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .student-id {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .student-id i {
+        color: var(--secondary);
+    }
+
+    /* === TABLE STYLES === */
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 1rem;
+        border: 2px solid var(--border-color);
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: transparent;
+    }
+
+    .attendance-table thead {
+        background: linear-gradient(135deg, var(--secondary), #3b82f6);
+    }
+
+    .attendance-table thead th {
+        padding: 1.25rem;
+        text-align: left;
+        color: white;
+        font-weight: 900;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .attendance-table tbody td {
+        padding: 1.25rem;
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-color);
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .attendance-table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .attendance-table tbody tr:hover {
+        background: rgba(139, 92, 246, 0.08);
+        transform: scale(1.005);
+    }
+
+    body[data-theme="dark"] .attendance-table tbody tr:hover {
+        background: rgba(139, 92, 246, 0.15);
+    }
+
+    /* === STATUS BADGES === */
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-present {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .status-absent {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .status-leave {
+        background: linear-gradient(135deg, #06b6d4, #22d3ee);
+        color: white;
+        box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+    }
+
+    .status-other {
+        background: linear-gradient(135deg, #6366f1, #818cf8);
+        color: white;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    /* === MARKED BY BADGES === */
+    .marked-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .marked-qr {
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        color: white;
+    }
+
+    .marked-manual {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: white;
+    }
+
+    /* === SUBJECT BADGE === */
+    .subject-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        background: linear-gradient(135deg, #ec4899, #f472b6);
+        color: white;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    /* === DATE TEXT === */
+    .date-text {
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    /* === EMPTY STATE === */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: linear-gradient(135deg, var(--card-bg), var(--bg-color));
+        border: 3px dashed var(--border-color);
+        border-radius: 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .header-title {
+            font-size: 1.75rem;
+        }
+
+        .header-title i {
+            font-size: 2rem;
+        }
+
+        .search-card, .results-card {
+            padding: 1.5rem;
+        }
+
+        .student-banner {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .student-avatar {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+
+        .student-name {
+            font-size: 1.25rem;
+        }
+
+        .attendance-table thead th,
+        .attendance-table tbody td {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .check-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+        }
+
+        .header-title i {
+            font-size: 1.75rem;
+        }
+
+        .search-card, .results-card {
+            padding: 1.25rem;
+        }
+
+        .btn-search {
+            padding: 0.9rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .attendance-table thead th,
+        .attendance-table tbody td {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+        }
+
+        .marked-badge, .subject-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="check-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- HEADER -->
+                <div class="check-header">
+                    <h1 class="header-title">
+                        <i class="fas fa-search"></i>
+                        Check Attendance Records
+                    </h1>
+                    <p class="header-subtitle">🔍 Enter your Student ID to view your attendance history</p>
+                </div>
 
-<div class="container mt-4 fade-in">
-<div class="row justify-content-center">
-<div class="col-lg-8">
-<h2 class="fw-bold mb-4"><i class="fas fa-search me-2 text-primary"></i>Check Attendance Records</h2>
+                <!-- SEARCH CARD -->
+                <div class="search-card">
+                    <h3 class="search-title">
+                        <i class="fas fa-id-card"></i>
+                        Student Search
+                    </h3>
+                    <form method="POST" action="{{ url_for('student.check_attendance') }}">
+                        <div class="mb-4">
+                            <label for="student_id" class="form-label">
+                                <i class="fas fa-hashtag"></i>
+                                Enter Student ID / Roll Number
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="student_id" 
+                                name="student_id" 
+                                placeholder="e.g., 1230440025" 
+                                value="{{ student_id_searched }}" 
+                                required
+                                autocomplete="off"
+                            >
+                        </div>
+                        <button type="submit" class="btn-search">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>View My Attendance</span>
+                        </button>
+                    </form>
+                </div>
 
-        <!-- Student ID Input Card -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <form method="POST" action="{{ url_for('student.check_attendance') }}">
-                    <div class="mb-3">
-                        <label for="student_id" class="form-label">Enter Student ID / Roll Number</label>
-                        <input type="text" class="form-control" id="student_id" name="student_id" placeholder="e.g., 1230440025" value="{{ student_id_searched }}" required>
+                <!-- RESULTS CARD -->
+                {% if student and attendance_records %}
+                <div class="results-card">
+                    <!-- STUDENT BANNER -->
+                    <div class="student-banner">
+                        <div class="student-avatar">
+                            {{ student.name[0]|upper }}
+                        </div>
+                        <div class="student-info">
+                            <div class="student-name">{{ student.name }}</div>
+                            <div class="student-id">
+                                <i class="fas fa-id-badge"></i>
+                                <span>ID: {{ student.student_id }}</span>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-1"></i> View My Attendance
-                    </button>
-                </form>
-            </div>
-        </div>
 
-        <!-- Attendance Results Card -->
-        {% if student and attendance_records %}
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h5 class="card-title fw-bold mb-3">Showing records for: {{ student.name }} ({{ student.student_id }})</h5>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Subject</th>
-                                <th>Status</th>
-                                <th>Marked By</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if attendance_records.items %}
+                    <!-- TABLE -->
+                    <div class="table-wrapper">
+                        {% if attendance_records.items %}
+                        <table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>📅 Date</th>
+                                    <th>📚 Subject</th>
+                                    <th>✓ Status</th>
+                                    <th>👤 Marked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {% for record in attendance_records.items %}
                                 <tr>
-                                    <td>{{ record.date.strftime('%d %b, %Y') }}</td>
-                                    <td>{{ record.subject.name if record.subject else 'N/A' }}</td>
+                                    <td class="date-text">{{ record.date.strftime('%d %b, %Y') }}</td>
+                                    <td>
+                                        {% if record.subject %}
+                                            <span class="subject-badge">{{ record.subject.name }}</span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/A</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if record.status == 'present' %}
-                                            <span class="badge bg-success">Present</span>
+                                            <span class="status-badge status-present">✓ Present</span>
                                         {% elif record.status == 'absent' %}
-                                            <span class="badge bg-danger">Absent</span>
+                                            <span class="status-badge status-absent">✗ Absent</span>
                                         {% elif record.status == 'leave' %}
-                                            <span class="badge bg-info">On Leave</span>
+                                            <span class="status-badge status-leave">📄 Leave</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">{{ record.status|capitalize }}</span>
+                                            <span class="status-badge status-other">{{ record.status|capitalize }}</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if record.marked_by == 'qr' %}
-                                            <span class="badge bg-primary">QR Scan</span>
+                                            <span class="marked-badge marked-qr">📱 QR Scan</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">Manual</span>
+                                            <span class="marked-badge marked-manual">✍️ Manual</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
-                            {% else %}
-                                <tr><td colspan="4" class="text-center">No attendance records found for this student.</td></tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <h5 class="empty-title">No Records Found</h5>
+                            <p class="empty-text">No attendance records found for this student.</p>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
     </div>
 </div>
+{% endblock %}
 
-</div>
+{% block body_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('student_id');
+        
+        // Auto-focus on input
+        if (input && !input.value) {
+            input.focus();
+        }
+
+        // Input validation
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+
+        console.log('✅ Check Attendance page loaded');
+    });
+</script>
 {% endblock %}

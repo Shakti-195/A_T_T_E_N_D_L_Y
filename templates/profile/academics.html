@@ -17,12 +17,14 @@
 {# --- Helper Dictionaries --- #}
 {% set grade_percentage_map = {'A+': 95, 'A': 88, 'B+': 82, 'B': 75, 'C+': 68, 'C': 60, 'D': 50, 'F': 30, 'default': 70} %}
 
+{# --- FIXED: Macro to handle None CGPA --- #}
 {% macro get_performance_text(cgpa) %}
-    {% if cgpa >= 9 %}Excellent
-    {% elif cgpa >= 8 %}Very Good
-    {% elif cgpa >= 7 %}Good
-    {% elif cgpa >= 6 %}Satisfactory
-    {% else %}Needs Improvement
+    {% if cgpa is not none and cgpa >= 9 %}Excellent
+    {% elif cgpa is not none and cgpa >= 8 %}Very Good
+    {% elif cgpa is not none and cgpa >= 7 %}Good
+    {% elif cgpa is not none and cgpa >= 6 %}Satisfactory
+    {% elif cgpa is not none %}Needs Improvement
+    {% else %}Not Set
     {% endif %}
 {% endmacro %}
 
@@ -287,7 +289,7 @@
     }
 </style>
 
-{# --- Check if academic data exists --- #}
+{# --- FIXED: Check if academic data exists and handle None values --- #}
 {% if user.academics and user.academics.subjects and user.academics.subjects|length > 0 %}
     {% set cgpa = user.academics.cgpa %}
     {% set subjects = user.academics.subjects %}
@@ -297,10 +299,12 @@
     {% set total_credits = 0 %}
     {% for s in subjects %}{% set total_credits = total_credits + (s.credits or 0) %}{% endfor %}
     
+    {# --- FIXED: Handle None CGPA in performance_stats --- #}
+    {% set performance_text = get_performance_text(cgpa) %}
     {% set performance_stats = [
         {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', 'label': 'Total Credits', 'value': total_credits, 'color': 'blue', 'gradient': 'from-blue-500 to-indigo-600'},
         {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>', 'label': 'Subjects Enrolled', 'value': subjects|length, 'color': 'purple', 'gradient': 'from-purple-500 to-pink-600'},
-        {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>', 'label': 'Performance', 'value': get_performance_text(cgpa), 'color': 'emerald', 'gradient': 'from-emerald-500 to-green-600'}
+        {'icon_svg': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>', 'label': 'Performance', 'value': performance_text, 'color': 'emerald', 'gradient': 'from-emerald-500 to-green-600'}
     ] %}
 
     <div class="space-y-6 section-card">
@@ -324,6 +328,7 @@
                     </div>
                 </div>
                 
+                {# --- FIXED: Check if CGPA is not None before displaying --- #}
                 {% if cgpa is not none %}
                 <div class="cgpa-badge rounded-2xl p-6 text-center min-w-[140px]">
                     <div class="relative z-10">
@@ -332,6 +337,16 @@
                         </div>
                         <div class="text-white/90 font-bold uppercase text-xs tracking-widest">CGPA</div>
                         <div class="text-white/70 text-xs mt-1 font-medium">out of 10.0</div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="cgpa-badge rounded-2xl p-6 text-center min-w-[140px]">
+                    <div class="relative z-10">
+                        <div class="text-5xl md:text-6xl font-black text-white/40 mb-2 tracking-tighter">
+                            —
+                        </div>
+                        <div class="text-white/90 font-bold uppercase text-xs tracking-widest">CGPA</div>
+                        <div class="text-white/70 text-xs mt-1 font-medium">Not Set</div>
                     </div>
                 </div>
                 {% endif %}

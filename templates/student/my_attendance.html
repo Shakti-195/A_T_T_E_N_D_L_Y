@@ -1,64 +1,396 @@
 {% extends "shared/base.html" %}
-{% block title %}My Attendance{% endblock %}
+{% block title %}My Attendance - Attendly{% endblock %}
+
+{% block head_extra %}
+<style>
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+    }
+
+    .attendance-container {
+        padding: 2rem;
+    }
+
+    .attendance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .attendance-title {
+        font-size: 2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff 0%, #9ca3af 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.95) 0%, rgba(31, 41, 55, 0.98) 100%);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(220, 38, 38, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #dc2626;
+    }
+
+    .stat-percentage {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    .progress-bar-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        height: 12px;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626, #ef4444);
+        border-radius: 1rem;
+        transition: width 1.5s ease;
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.6) 0%, rgba(31, 41, 55, 0.4) 100%);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .attendance-table thead {
+        background: rgba(30, 41, 59, 0.8);
+    }
+
+    .attendance-table th {
+        padding: 1.25rem;
+        text-align: left;
+        color: #cbd5e1;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .attendance-table td {
+        padding: 1.25rem;
+        color: #e2e8f0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .attendance-table tbody tr:hover {
+        background: rgba(220, 38, 38, 0.05);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .status-present {
+        background: rgba(34, 197, 94, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-absent {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-leave {
+        background: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.6) 0%, rgba(31, 41, 55, 0.4) 100%);
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: #94a3b8;
+    }
+
+    .date-filter {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-label {
+        color: #cbd5e1;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-input {
+        background: rgba(30, 41, 59, 0.8) !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        border-radius: 0.5rem !important;
+        padding: 0.625rem !important;
+        color: #e2e8f0 !important;
+    }
+
+    .filter-btn {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        border: none;
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .filter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .attendance-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .attendance-table {
+            font-size: 0.875rem;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 0.75rem;
+        }
+
+        .date-filter {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-input {
+            width: 100%;
+        }
+
+        .filter-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4 fade-in">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    <h2 class="card-title fw-bold mb-4"><i class="fas fa-user-check me-2 text-primary"></i>My Attendance Records</h2>
-
-                    {% if student and records %}
-                        <h5 class="mb-3">Showing records for: <strong>{{ student.name }} ({{ student.student_id }})</strong></h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Subject</th>
-                                        <th>Status</th>
-                                        <th>Marked By</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for record in records %}
-                                    <tr>
-                                        <td>{{ record.date.strftime('%d %b, %Y') }}</td>
-                                        <td>{{ record.subject.name }}</td>
-                                        <td>
-                                            {% if record.status == 'present' %}
-                                                <span class="badge bg-success">Present</span>
-                                            {% elif record.status == 'absent' %}
-                                                <span class="badge bg-danger">Absent</span>
-                                            {% elif record.status == 'leave' %}
-                                                <span class="badge bg-info">On Leave</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ record.status|capitalize }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if record.marked_by == 'qr' %}
-                                                <i class="fas fa-qrcode" title="Marked by QR Scan"></i> QR Scan
-                                            {% else %}
-                                                <i class="fas fa-edit" title="Marked Manually"></i> Manual
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center p-5 text-muted">
-                            <i class="fas fa-inbox fa-3x mb-3"></i>
-                            <h5>No attendance records found.</h5>
-                            <p>It looks like no attendance has been marked for you yet.</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+<div class="attendance-container">
+    <!-- Header -->
+    <div class="attendance-header">
+        <div>
+            <h1 class="attendance-title">
+                <i class="fas fa-chart-pie me-2"></i>My Attendance
+            </h1>
+            <p style="color: #94a3b8; margin-top: 0.5rem; margin-bottom: 0;">View your attendance records</p>
         </div>
     </div>
+
+    {% if student %}
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-label">Total Days</div>
+            <div class="stat-value">{{ records|length }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Present</div>
+            <div class="stat-value" style="color: #10b981;">
+                {{ records|selectattr('status', 'equalto', 'present')|list|length }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-label">Absent</div>
+            <div class="stat-value" style="color: #ef4444;">
+                {{ records|selectattr('status', 'equalto', 'absent')|list|length }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-label">On Leave</div>
+            <div class="stat-value" style="color: #3b82f6;">
+                {{ records|selectattr('status', 'equalto', 'leave')|list|length }}
+            </div>
+            {% set present_count = records|selectattr('status', 'equalto', 'present')|list|length %}
+            {% set total_count = records|length %}
+            {% if total_count > 0 %}
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: {{ (present_count / total_count * 100)|round(1) }}%;"></div>
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem;">
+                {{ ((present_count / total_count * 100)|round(1))|string }}% Attendance
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if records %}
+    <!-- Attendance Table -->
+    <table class="attendance-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Marked At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>
+                    <strong>{{ record.date.strftime('%d-%m-%Y') }}</strong>
+                </td>
+                <td>
+                    {% if record.subject %}
+                        {{ record.subject.name }}
+                    {% else %}
+                        <span style="color: #94a3b8;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.status == 'present' %}
+                    <span class="status-badge status-present">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Present</span>
+                    </span>
+                    {% elif record.status == 'absent' %}
+                    <span class="status-badge status-absent">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Absent</span>
+                    </span>
+                    {% elif record.status == 'leave' %}
+                    <span class="status-badge status-leave">
+                        <i class="fas fa-calendar-times"></i>
+                        <span>On Leave</span>
+                    </span>
+                    {% else %}
+                    <span class="status-badge" style="background: rgba(75, 85, 99, 0.2); color: #9ca3af;">
+                        {{ record.status|capitalize }}
+                    </span>
+                    {% endif %}
+                </td>
+                <td style="color: #94a3b8; font-size: 0.875rem;">
+                    {% if record.created_at %}
+                        {{ record.created_at.strftime('%d-%m-%Y %H:%M') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h2 class="empty-title">No Attendance Records</h2>
+        <p class="empty-text">Your attendance records will appear here once they are marked by your teacher.</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Student Profile -->
+    <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h2 class="empty-title">Student Profile Not Found</h2>
+        <p class="empty-text">Your student profile is not linked to your account. Please contact your administrator.</p>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

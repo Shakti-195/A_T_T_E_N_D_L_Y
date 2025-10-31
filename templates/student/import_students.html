@@ -1,39 +1,724 @@
 {% extends "shared/base.html" %}
-{% block title %}Import Students{% endblock %}
+{% block title %}Import Students - Admin Panel{% endblock %}
+
+{% block head_extra %}
+<style>
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --success: #10b981;
+        --info: #3b82f6;
+    }
+
+    * {
+        transition: all 0.3s ease;
+    }
+
+    .import-container {
+        padding: 2rem 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    .import-header {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 3px solid var(--primary);
+    }
+
+    .import-header h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin: 0;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .import-header i {
+        font-size: 3.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .import-header p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin: 0.75rem 0 0 0;
+        font-weight: 500;
+    }
+
+    /* === MAIN GRID === */
+    .import-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    /* === UPLOAD CARD === */
+    .upload-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    body[data-theme="dark"] .upload-card {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .upload-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+    .upload-header h2 {
+        font-size: 1.5rem;
+        font-weight: 900;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .upload-body {
+        padding: 3rem;
+    }
+
+    /* === DRAG DROP AREA === */
+    .drag-drop-zone {
+        border: 3px dashed var(--border-color);
+        border-radius: 1rem;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: rgba(220, 38, 38, 0.02);
+    }
+
+    .drag-drop-zone:hover {
+        border-color: var(--primary);
+        background: rgba(220, 38, 38, 0.05);
+        transform: scale(1.02);
+    }
+
+    .drag-drop-zone.dragover {
+        border-color: var(--primary);
+        background: rgba(220, 38, 38, 0.1);
+        transform: scale(1.03);
+    }
+
+    .drag-drop-icon {
+        font-size: 3.5rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        display: block;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .drag-drop-title {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .drag-drop-text {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .browse-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2.5rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .browse-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+        text-decoration: none;
+        color: white;
+    }
+
+    /* === FILE INFO === */
+    .file-info {
+        background: rgba(220, 38, 38, 0.1);
+        border: 2px solid var(--primary);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        display: none;
+    }
+
+    .file-info.show {
+        display: block;
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .file-info-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .file-details {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .file-icon {
+        font-size: 2.5rem;
+        color: var(--primary);
+    }
+
+    .file-name {
+        font-weight: 700;
+        color: var(--text-color);
+        font-size: 1.1rem;
+    }
+
+    .file-size {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .remove-file-btn {
+        background: #ef4444;
+        border: none;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.6rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .remove-file-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* === UPLOAD BUTTON === */
+    .upload-btn-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .upload-btn {
+        flex: 1;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .upload-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .upload-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .cancel-btn {
+        background: #6b7280;
+        border: none;
+        color: white;
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cancel-btn:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+    }
+
+    /* === INSTRUCTIONS CARD === */
+    .instructions-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    body[data-theme="dark"] .instructions-card {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .instructions-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+    .instructions-header h2 {
+        font-size: 1.25rem;
+        font-weight: 900;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .instructions-body {
+        padding: 2rem;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    /* === COLUMNS LIST === */
+    .columns-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .column-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid #3b82f6;
+        border-radius: 0.5rem;
+    }
+
+    .column-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+
+    .column-details h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .column-details p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0 0 0;
+    }
+
+    /* === SAMPLE CSV === */
+    .sample-csv {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        overflow-x: auto;
+    }
+
+    .sample-csv code {
+        font-size: 0.8rem;
+        color: var(--text-color);
+        font-family: 'Courier New', monospace;
+        line-height: 1.6;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+        .import-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .import-header h1 {
+            font-size: 2.25rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .import-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .import-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .upload-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .instructions-body {
+            padding: 1.5rem;
+        }
+
+        .file-info-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .upload-btn-container {
+            flex-direction: column;
+        }
+
+        .upload-btn,
+        .cancel-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .import-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .drag-drop-icon {
+            font-size: 2.5rem;
+        }
+
+        .column-item {
+            padding: 0.75rem;
+        }
+
+        .browse-btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* === THEME SUPPORT === */
+    body[data-theme="dark"] .import-header {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    <h2 class="card-title fw-bold mb-4"><i class="fas fa-file-csv me-2 text-primary"></i>Import Students from CSV</h2>
+<div class="import-container">
+    <!-- ===== HEADER ===== -->
+    <div class="import-header">
+        <h1>
+            <i class="fas fa-file-import"></i>
+            Import Students
+        </h1>
+        <p>📤 Bulk upload new students using a CSV file. Fast, easy, and efficient!</p>
+    </div>
 
-                    <div class="alert alert-info">
-                        <strong>Instructions:</strong>
-                        <p class="mb-1">Your CSV file must have the following columns in this exact order:</p>
-                        <code>name, student_id, email, class_batch_id</code>
-                        <ul class="mt-2 small text-muted">
-                            <li>The <code>email</code> column is optional.</li>
-                            <li>The <code>class_batch_id</code> is the numerical ID of the class, which you can find in the Setup page.</li>
-                        </ul>
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="import-grid">
+        <!-- ===== UPLOAD SECTION ===== -->
+        <div class="upload-card">
+            <div class="upload-header">
+                <h2>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload CSV File
+                </h2>
+            </div>
+
+            <div class="upload-body">
+                <div class="drag-drop-zone" id="dragDropZone">
+                    <i class="fas fa-file-csv drag-drop-icon"></i>
+                    <div class="drag-drop-title">Drag & Drop Your CSV File Here</div>
+                    <div class="drag-drop-text">or click the button below to browse</div>
+                    <button type="button" class="browse-btn" id="browseBtn">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Browse Files</span>
+                    </button>
+                    <input type="file" id="csvFile" class="file-input" accept=".csv" />
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info" id="fileInfo">
+                    <div class="file-info-content">
+                        <div class="file-details">
+                            <i class="fas fa-file-check file-icon"></i>
+                            <div>
+                                <div class="file-name" id="fileName">file.csv</div>
+                                <div class="file-size" id="fileSize">Size: 0 KB</div>
+                            </div>
+                        </div>
+                        <button type="button" class="remove-file-btn" id="removeFileBtn">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Buttons -->
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <input type="file" id="csvFileHidden" name="student_csv" accept=".csv" style="display: none;" />
+                    <div class="upload-btn-container">
+                        <button type="submit" class="upload-btn" id="uploadBtn" disabled>
+                            <i class="fas fa-upload"></i>
+                            <span>Upload & Import</span>
+                        </button>
+                        <button type="button" class="cancel-btn" id="cancelBtn">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== INSTRUCTIONS SECTION ===== -->
+        <div class="instructions-card">
+            <div class="instructions-header">
+                <h2>
+                    <i class="fas fa-book"></i>
+                    CSV Format Guide
+                </h2>
+            </div>
+
+            <div class="instructions-body">
+                <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">Required Columns:</h3>
+
+                <div class="columns-list">
+                    <!-- Column 1: Name -->
+                    <div class="column-item">
+                        <div class="column-icon">1️⃣</div>
+                        <div class="column-details">
+                            <h4>Name</h4>
+                            <p>Student's full name (e.g., "John Doe")</p>
+                        </div>
                     </div>
 
-                    <form method="post" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="student_csv" class="form-label">Upload CSV File</label>
-                            <input class="form-control" type="file" id="student_csv" name="student_csv" accept=".csv" required>
+                    <!-- Column 2: Student ID -->
+                    <div class="column-item">
+                        <div class="column-icon">2️⃣</div>
+                        <div class="column-details">
+                            <h4>Student ID</h4>
+                            <p>Unique identifier (e.g., "STU001")</p>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <a href="{{ url_for('student.list_students') }}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-upload me-1"></i> Upload and Import
-                            </button>
+                    </div>
+
+                    <!-- Column 3: Email -->
+                    <div class="column-item">
+                        <div class="column-icon">3️⃣</div>
+                        <div class="column-details">
+                            <h4>Email</h4>
+                            <p>Student's email address</p>
                         </div>
-                    </form>
+                    </div>
+
+                    <!-- Column 4: Class Batch ID -->
+                    <div class="column-item">
+                        <div class="column-icon">4️⃣</div>
+                        <div class="column-details">
+                            <h4>Class Batch ID</h4>
+                            <p>ID of the class they belong to</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample CSV -->
+                <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin: 1.5rem 0 0.75rem 0; text-transform: uppercase; letter-spacing: 0.05em;">Sample CSV Format:</h3>
+                <div class="sample-csv">
+                    <code>
+name,student_id,email,class_batch_id<br>
+John Doe,STU001,john@example.com,1<br>
+Jane Smith,STU002,jane@example.com,1<br>
+Mike Johnson,STU003,mike@example.com,2
+                    </code>
+                </div>
+
+                <!-- Tips -->
+                <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem;">
+                    <h4 style="font-size: 0.9rem; font-weight: 700; color: #10b981; margin: 0 0 0.5rem 0;">💡 Tips:</h4>
+                    <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+                        <li>Max 1000 students per upload</li>
+                        <li>Email must be unique</li>
+                        <li>Student ID must be unique</li>
+                        <li>Class Batch ID must exist</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    // ===== FILE UPLOAD HANDLING =====
+    const dragDropZone = document.getElementById('dragDropZone');
+    const csvFileInput = document.getElementById('csvFile');
+    const csvFileHidden = document.getElementById('csvFileHidden');
+    const browseBtn = document.getElementById('browseBtn');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFileBtn = document.getElementById('removeFileBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    // Browse button click
+    browseBtn.addEventListener('click', () => csvFileInput.click());
+
+    // File input change
+    csvFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            displayFileInfo(file);
+            csvFileHidden.files = e.target.files;
+        }
+    });
+
+    // Drag and drop events
+    dragDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragDropZone.classList.add('dragover');
+    });
+
+    dragDropZone.addEventListener('dragleave', () => {
+        dragDropZone.classList.remove('dragover');
+    });
+
+    dragDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragDropZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                csvFileInput.files = files;
+                csvFileHidden.files = files;
+                displayFileInfo(file);
+            } else {
+                alert('❌ Please drop a CSV file!');
+            }
+        }
+    });
+
+    // Display file info
+    function displayFileInfo(file) {
+        const sizeInKB = (file.size / 1024).toFixed(2);
+        fileName.textContent = file.name;
+        fileSize.textContent = `Size: ${sizeInKB} KB`;
+        fileInfo.classList.add('show');
+        uploadBtn.disabled = false;
+    }
+
+    // Remove file
+    removeFileBtn.addEventListener('click', () => {
+        csvFileInput.value = '';
+        csvFileHidden.value = '';
+        fileInfo.classList.remove('show');
+        uploadBtn.disabled = true;
+    });
+
+    // Cancel button
+    cancelBtn.addEventListener('click', () => {
+        csvFileInput.value = '';
+        csvFileHidden.value = '';
+        fileInfo.classList.remove('show');
+        uploadBtn.disabled = true;
+    });
+
+    // Form submission validation
+    uploadForm.addEventListener('submit', (e) => {
+        if (!csvFileHidden.files || csvFileHidden.files.length === 0) {
+            e.preventDefault();
+            alert('❌ Please select a CSV file!');
+        }
+    });
+
+    // Theme switching support
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        const body = document.body;
+        
+        const applyTheme = (theme) => {
+            body.setAttribute('data-theme', theme);
+            themeButtons.forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            localStorage.setItem('attendance_theme', theme);
+        };
+
+        themeButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const theme = button.dataset.theme;
+                applyTheme(theme);
+            });
+        });
+
+        const savedTheme = localStorage.getItem('attendance_theme');
+        if (savedTheme && ['light', 'dark', 'sepia'].includes(savedTheme)) {
+            applyTheme(savedTheme);
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark ? 'dark' : 'light');
+        }
+    });
+</script>
 {% endblock %}

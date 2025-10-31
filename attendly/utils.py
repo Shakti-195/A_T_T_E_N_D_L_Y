@@ -19,10 +19,7 @@ from sqlalchemy import func, case, desc, extract
 from sqlalchemy.orm import joinedload
 
 # --- Local Application Imports ---
-# NOTE: We only import extensions at the top level to avoid circular imports.
-# Models will be imported INSIDE the functions that need them.
 from .extensions import mail, db
-
 
 # --- Timezone and File Helpers ---
 
@@ -43,12 +40,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
-
 # --- Code and Token Generators ---
 
 def generate_unique_code():
     """Generates a unique 6-character code for an institution."""
-    # Import model here to break the circular dependency
     from .models import Institution
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -115,7 +110,7 @@ def get_ai_insights(institution_id, class_id=None):
     
     at_risk_count = db.session.query(func.count(subquery.c.student_id)).filter(subquery.c.percentage.between(75, 80)).scalar()
     insights['at_risk_count'] = at_risk_count
-    insights['anomaly_message'] = None # Placeholder for future anomaly detection
+    insights['anomaly_message'] = None
     return insights
 
 def get_live_chart_data(institution_id, class_id=None):
@@ -215,8 +210,7 @@ def get_live_student_lists(institution_id, date, class_id=None):
         "absent": absent_list
     }
 
-
-# --- Decorators for Route Protection ---
+# --- ===== DECORATORS FOR ROUTE PROTECTION ===== ---
 
 def login_required(f):
     """Decorator to ensure a user is logged in before accessing a page."""
@@ -235,7 +229,29 @@ def admin_required(f):
     @login_required
     def decorated_function(*args, **kwargs):
         if g.user.role != 'admin':
-            flash('You do not have permission to access this page.', 'danger')
+            flash('❌ You do not have permission to access this page.', 'danger')
+            return redirect(url_for('dashboard.dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def teacher_required(f):
+    """Decorator to ensure the logged-in user is a teacher."""
+    @wraps(f)
+    @login_required
+    def decorated_function(*args, **kwargs):
+        if g.user.role != 'teacher':
+            flash('❌ Only teachers can access this page.', 'danger')
+            return redirect(url_for('dashboard.dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def student_required(f):
+    """Decorator to ensure the logged-in user is a student."""
+    @wraps(f)
+    @login_required
+    def decorated_function(*args, **kwargs):
+        if g.user.role != 'student':
+            flash('❌ Only students can access this page.', 'danger')
             return redirect(url_for('dashboard.dashboard'))
         return f(*args, **kwargs)
     return decorated_function
@@ -246,13 +262,12 @@ def teacher_or_admin_required(f):
     @login_required
     def decorated_function(*args, **kwargs):
         if g.user.role not in ['admin', 'teacher']:
-            flash('You do not have permission to access this page.', 'danger')
+            flash('❌ You do not have permission to access this page.', 'danger')
             return redirect(url_for('dashboard.dashboard'))
         return f(*args, **kwargs)
     return decorated_function
 
-
-# --- Email Sending Functions ---
+# --- ===== EMAIL SENDING FUNCTIONS ===== ---
 
 def send_email(subject, recipients, body):
     """Generic function to send an email."""
@@ -288,21 +303,17 @@ def send_username_email(user):
     body = f"Hello,\n\nYour username is: {user.username}"
     return send_email("Your Username", [user.email], body)
 
-
-# --- Scheduled Tasks ---
+# --- ===== SCHEDULED TASKS ===== ---
 
 def email_reports_job():
     """
     A background task that generates and emails a PDF attendance report
     to all admins of every institution.
     """
-    # This job needs its own app context to work outside of a request
     from flask import current_app
     from fpdf import FPDF
-    # Import models HERE, inside the function
     from .models import Institution, Attendance, Student, ClassBatch, User
 
-    # Helper PDF class for the report
     class PDF(FPDF):
         def header(self):
             self.set_font('Helvetica', 'B', 12)
@@ -341,7 +352,6 @@ def email_reports_job():
                     pdf.cell(sum(col_widths), 10, 'No attendance data for this period.', border=1, ln=1, align='C')
                 else:
                     for record in records:
-                        # Encode to latin-1 to handle potential unicode characters that FPDF doesn't support
                         pdf.cell(col_widths[0], 10, record.student.name.encode('latin-1', 'replace').decode('latin-1'), border=1)
                         pdf.cell(col_widths[1], 10, record.student.student_id.encode('latin-1', 'replace').decode('latin-1'), border=1)
                         pdf.cell(col_widths[2], 10, (record.student.class_batch.name if record.student.class_batch else 'N/A').encode('latin-1', 'replace').decode('latin-1'), border=1)
@@ -366,4 +376,3 @@ def email_reports_job():
                 print(f"Report sent for institution: {institution.name}")
         except Exception as e:
             current_app.logger.error(f"Error in scheduled job: {e}")
-

@@ -9,23 +9,19 @@ import datetime
 import secrets
 from datetime import datetime as dt, timedelta
 
-
 # --- Third-Party Library Imports ---
 from flask import (Blueprint, render_template, request, redirect, url_for, flash, g, session, current_app)
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func 
 from werkzeug.utils import secure_filename
 
-
 # --- Local Application Imports ---
 from ..extensions import db
-from ..models import User, Student, Attendance, ClassBatch, MedicalLeave
+from ..models import User, Student, Attendance, ClassBatch, MedicalLeave, TeacherAssignment, Subject
 from ..utils import login_required, allowed_file, send_verification_email
-
 
 # --- Blueprint Configuration ---
 profile_bp = Blueprint('profile', __name__)
-
 
 # --- Mock Data for Template Fix ---
 GRADE_STYLES = {
@@ -40,8 +36,7 @@ GRADE_STYLES = {
     'F': {'color': 'text-red-500', 'icon': '💪'},
 }
 
-
-# --- Profile View Route (FIXED) ---
+# --- Profile View Route (UPDATED FOR TEACHERS) ---
 @profile_bp.route('/profile', methods=['GET', 'POST'])
 @profile_bp.route('/profile/<attendly_id>', methods=['GET'])
 @login_required
@@ -50,10 +45,10 @@ def profile_view(attendly_id=None):
     Display user profile page using profile.html template.
     Handles password change POST request.
     Now supports viewing ANY user's profile by their Attendly ID.
+    UPDATED: Includes teacher tabs data
     """
     # Define current user's ID safely for comparison
     current_user_attendly_id = g.user.attendly_id.upper() if g.user and g.user.attendly_id else None
-
 
     if request.method == 'POST':
         # Only allow password change for own profile
@@ -71,7 +66,6 @@ def profile_view(attendly_id=None):
             else:
                 flash('Incorrect current password.', 'danger')
             return redirect(url_for('profile.profile_view'))
-
 
     user_to_view = None
     is_own_profile = False
@@ -92,32 +86,81 @@ def profile_view(attendly_id=None):
             return redirect(url_for('profile.search_profile'))
         is_own_profile = False
 
-
     if not user_to_view:
         flash('Could not load user profile.', 'danger')
         return redirect(url_for('dashboard.dashboard'))
     
-    # ====== FIX: Calculate stats based on role but use UNIFIED template ======
+    # ====== UPDATED: Calculate stats based on role ======
     stats = None
+    class_subjects = {}
+    classes = []
+    records = []
+    total_present = 0
+    total_absent = 0
+    average_attendance = 0
+    selected_class_id = None
+    selected_date = None
+    
     if user_to_view.role == 'admin':
         stats = get_admin_stats(user_to_view)
     elif user_to_view.role == 'teacher':
-        stats = get_teacher_stats(user_to_view)  # <<<< FIXED - Use dedicated teacher stats
+        stats = get_teacher_stats(user_to_view)
+        # ====== NEW: Get teacher-specific data for tabs ======
+        assignments = TeacherAssignment.query.filter_by(teacher_id=user_to_view.id).all()
+        
+        for assignment in assignments:
+            class_id = assignment.class_batch_id
+            if class_id not in class_subjects:
+                class_subjects[class_id] = []
+            if assignment.subject not in class_subjects[class_id]:
+                class_subjects[class_id].append(assignment.subject)
+        
+        classes = list({a.class_batch.id: a.class_batch for a in assignments}.values())
+        
+        # Get filter parameters
+        selected_class_id = request.args.get('class_id', type=int)
+        selected_date = request.args.get('date')
+        
+        # Build attendance query
+        records_query = Attendance.query.join(Student).join(ClassBatch)\
+            .filter(ClassBatch.institution_id == user_to_view.institution_id)
+        
+        if selected_class_id:
+            records_query = records_query.filter(ClassBatch.id == selected_class_id)
+        
+        if selected_date:
+            try:
+                date_obj = datetime.datetime.strptime(selected_date, '%Y-%m-%d').date()
+                records_query = records_query.filter(Attendance.date == date_obj)
+            except (ValueError, TypeError):
+                pass
+        
+        records = records_query.order_by(Attendance.date.desc()).all()
+        total_present = sum(1 for r in records if r.status == 'present')
+        total_absent = sum(1 for r in records if r.status == 'absent')
+        average_attendance = round((total_present / len(records) * 100), 1) if records else 0
     else:  # student
         stats = calculate_profile_stats(user_to_view)
 
-
-    # ====== CRITICAL FIX: Use profile/profile.html for ALL roles ======
+    # ====== UPDATED: Pass teacher-specific data to template ======
     return render_template(
-        'profile/profile.html',  # <<<< UNIFIED TEMPLATE FOR ALL ROLES
+        'profile/profile.html',
         user=user_to_view, 
         is_own_profile=is_own_profile,
         stats=stats,
-        grade_styles=GRADE_STYLES
+        grade_styles=GRADE_STYLES,
+        # Teacher tabs data
+        class_subjects=class_subjects,
+        classes=classes,
+        records=records,
+        total_present=total_present,
+        total_absent=total_absent,
+        average_attendance=average_attendance,
+        selected_class_id=selected_class_id,
+        selected_date=selected_date
     )
 
-
-# --- Edit Profile Route (No change) ---
+# --- Edit Profile Route ---
 @profile_bp.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -128,14 +171,11 @@ def edit_profile():
     """
     user = User.query.options(joinedload(User.student_profile)).get(g.user.id)
 
-
     if not user:
         flash('User not found.', 'danger')
         return redirect(url_for('dashboard.dashboard'))
 
-
     student_profile = user.student_profile if user.role == 'student' else None
-
 
     if user.role == 'student' and not student_profile:
         if not user.institution_id:
@@ -145,14 +185,12 @@ def edit_profile():
             flash('Student profile data missing. Please contact an administrator.', 'danger')
             return redirect(url_for('dashboard.dashboard'))
 
-
     if request.method == 'POST':
         try:
             avatar_saved = False
             avatar_error = False
             email_changed = False
             old_email = user.email
-
 
             # --- Handle Avatar Upload ---
             if 'avatar' in request.files:
@@ -175,7 +213,6 @@ def edit_profile():
                             base, ext = os.path.splitext(file.filename)
                             filename = secure_filename(f"avatar_{user.id}_{secrets.token_hex(8)}{ext}")
 
-
                             # Delete old avatar
                             if user.avatar and not user.avatar.startswith('http') and user.avatar != 'uploads/default.png':
                                 old_avatar_path = os.path.join(current_app.static_folder, user.avatar)
@@ -185,7 +222,6 @@ def edit_profile():
                                     except Exception as e:
                                         current_app.logger.warning(f"Could not delete old avatar: {str(e)}")
 
-
                             file.save(os.path.join(upload_folder, filename))
                             user.avatar = f'uploads/{filename}'
                             avatar_saved = True
@@ -193,26 +229,21 @@ def edit_profile():
             if avatar_error:
                 raise ValueError("Avatar upload failed, rolling back changes.")
 
-
             # --- Update Basic Fields ---
             new_email = request.form.get('email', '').strip()
             if new_email and new_email != old_email:
-                # Check if email already exists
                 existing_user = User.query.filter(User.email == new_email, User.id != user.id).first()
                 if existing_user:
                     flash('This email is already registered.', 'danger')
                     raise ValueError("Email already exists.")
                 
-                # Email changed - require verification
                 user.email = new_email
                 user.email_verified = False
                 email_changed = True
 
-
             user.phone = request.form.get('phone', '').strip()
             user.location = request.form.get('location', '').strip()
             user.biography = request.form.get('bio', '').strip()
-
 
             # --- Role-specific updates ---
             if user.role == 'student' and student_profile:
@@ -265,10 +296,8 @@ def edit_profile():
                 user.username = request.form.get('name', '').strip()
                 user.department = request.form.get('department', '').strip()
 
-
             db.session.commit()
             
-            # Send verification email if email changed
             if email_changed:
                 try:
                     send_verification_email(user)
@@ -283,15 +312,12 @@ def edit_profile():
             
             return redirect(url_for('profile.profile_view'))
 
-
         except Exception as e:
             db.session.rollback()
             if "Avatar upload failed" not in str(e) and "Email already exists" not in str(e):
                 current_app.logger.error(f"Error updating profile: {str(e)}")
                 flash(f'An error occurred while updating your profile.', 'danger')
 
-
-    # --- Render edit form ---
     class DummyForm:
         def __init__(self):
             self.csrf_token = ''
@@ -299,41 +325,31 @@ def edit_profile():
     form = DummyForm()
     current_year = datetime.datetime.now().year
 
-
     if request.method == 'POST':
         user = User.query.options(joinedload(User.student_profile)).get(g.user.id)
-
 
     return render_template('profile/edit_profile.html',
                            user=user,
                            form=form,
                            current_year=current_year)
 
-
-# --- Profile Search Route (No change) ---
+# --- Profile Search Route ---
 @profile_bp.route('/search', methods=['GET', 'POST'])
 @login_required
 def search_profile():
     """
     Search for user profiles by Attendly ID.
-    Redirects directly to their FULL profile page (not public view).
-    Also populates quick access list with other user IDs.
     """
-    # Fetch list of other active users for Quick Access section
-    # Fetch max 3 other users that are not the current user, prioritizing Students/Teachers
     quick_searches = User.query.filter(User.id != g.user.id).order_by(User.role).limit(3).all()
     
-    # Format for template consumption (assuming the template expects a dictionary list)
     quick_searches_data = [
         {'id': user.attendly_id, 'role': user.role, 'label': user.username or user.role.capitalize()}
         for user in quick_searches
     ]
 
-
     if request.method == 'POST':
         search_id = request.form.get('search_id', '').strip()
         
-        # Remove common prefixes
         if search_id.startswith('#'):
             search_id = search_id[1:]
         
@@ -341,46 +357,32 @@ def search_profile():
         
         if not search_id:
             flash('Please enter an Attendly ID to search.', 'warning')
-            # Pass data even on warning/failure so the Quick Access cards still render
             return render_template('profile/search_profiles.html', quick_searches=quick_searches_data)
 
-
-        # FIX: Use case-insensitive search with func.upper
         user = User.query.options(
             joinedload(User.student_profile)
         ).filter(
             func.upper(User.attendly_id) == search_id.upper()
         ).first()
 
-
         if user:
-            # Check if searching for own profile (using the safe check logic from profile_view)
             current_user_id = g.user.attendly_id.upper() if g.user.attendly_id else None
             
             if current_user_id and user.attendly_id.upper() == current_user_id:
-                # Redirect to own profile (without attendly_id in URL)
                 return redirect(url_for('profile.profile_view'))
             else:
-                # FIXED: Redirect to OTHER user's FULL profile view
                 return redirect(url_for('profile.profile_view', attendly_id=user.attendly_id))
         else:
             flash(f'No profile found with Attendly ID: {search_id.upper()}', 'danger')
-            # Pass data even on warning/failure so the Quick Access cards still render
             return render_template('profile/search_profiles.html', quick_searches=quick_searches_data)
     
     return render_template('profile/search_profiles.html', quick_searches=quick_searches_data)
 
-
-# --- Public Profile Route (KEPT FOR FUTURE USE) ---
+# --- Public Profile Route ---
 @profile_bp.route('/u/<attendly_id>')
 @login_required
 def public_profile(attendly_id):
-    """
-    Instagram-style public profile view for searched users.
-    Shows limited information - kept for future public sharing feature.
-    NOTE: Currently not used - search redirects to full profile instead.
-    """
-    # FIX: Use case-insensitive search
+    """Instagram-style public profile view."""
     user_to_view = User.query.options(
         joinedload(User.student_profile)
     ).filter(
@@ -391,17 +393,13 @@ def public_profile(attendly_id):
         flash(f'No profile found with Attendly ID: {attendly_id}', 'danger')
         return redirect(url_for('profile.search_profile'))
     
-    # Check if viewing own profile
     is_own_profile = (g.user.id == user_to_view.id)
     
-    # If viewing own profile, redirect to full profile
     if is_own_profile:
         return redirect(url_for('profile.profile_view'))
     
-    # Calculate profile stats
     stats = calculate_profile_stats(user_to_view)
     
-    # Render Instagram-style public profile
     return render_template(
         'profile/public_profile.html',
         user=user_to_view,
@@ -410,9 +408,9 @@ def public_profile(attendly_id):
         is_own_profile=False
     )
 
-
+# --- Helper Functions ---
 def calculate_profile_stats(user):
-    """Calculate statistics for profile display"""
+    """Calculate statistics for student profile display"""
     stats = {
         'cgpa': 0.0,
         'attendance_rate': 0,
@@ -426,23 +424,18 @@ def calculate_profile_stats(user):
     if user.role == 'student' and user.student_profile:
         student = user.student_profile
         
-        # CGPA
         stats['cgpa'] = student.cgpa or 0.0
         
-        # Achievements count
         if student.achievements:
-            # Handle both comma-separated and single achievements
             achievements_list = [a.strip() for a in student.achievements.split(',') if a.strip()]
             stats['achievements'] = len(achievements_list) if achievements_list else 0
         
-        # Attendance calculation
         attendance_records = Attendance.query.filter_by(student_id=student.id).all()
         if attendance_records:
             stats['total_classes'] = len(attendance_records)
             stats['present'] = sum(1 for a in attendance_records if a.status == 'present')
             stats['absent'] = stats['total_classes'] - stats['present']
             
-            # Calculate percentage
             if stats['total_classes'] > 0:
                 stats['attendance_rate'] = round((stats['present'] / stats['total_classes']) * 100)
             else:
@@ -450,7 +443,6 @@ def calculate_profile_stats(user):
         else:
             stats['attendance_rate'] = 100
         
-        # Active subjects (enrolled classes)
         try:
             if hasattr(student, 'enrolled_classes') and student.enrolled_classes:
                 stats['active_subjects'] = len(student.enrolled_classes)
@@ -460,8 +452,6 @@ def calculate_profile_stats(user):
     
     return stats
 
-
-# ====== NEW FUNCTION: Teacher Stats ======
 def get_teacher_stats(user):
     """Calculate statistics for teacher profile display"""
     stats = {
@@ -472,7 +462,6 @@ def get_teacher_stats(user):
         'total_classes': 0,
         'present': 0,
         'absent': 0,
-        # Teacher-specific stats
         'total_students': 0,
     }
     
@@ -480,21 +469,15 @@ def get_teacher_stats(user):
         return stats
     
     try:
-        # Get all class batches in the same institution
-        # Since we don't have a direct teacher_id field, we'll count all batches in institution
         batches = ClassBatch.query.filter_by(institution_id=user.institution_id).all()
         
-        # Count total students in institution
         stats['total_students'] = Student.query.join(ClassBatch).filter(
             ClassBatch.institution_id == user.institution_id
         ).count()
         
-        # Count active classes/batches as subjects
         stats['active_subjects'] = len(batches)
         
-        # Calculate average attendance rate (last 30 days)
-        from datetime import date, timedelta
-        thirty_days_ago = date.today() - timedelta(days=30)
+        thirty_days_ago = datetime.date.today() - datetime.timedelta(days=30)
         
         attendance_query = Attendance.query.join(Student).join(ClassBatch).filter(
             ClassBatch.institution_id == user.institution_id,
@@ -508,13 +491,12 @@ def get_teacher_stats(user):
         if stats['total_classes'] > 0:
             stats['attendance_rate'] = round((stats['present'] / stats['total_classes']) * 100)
         else:
-            stats['attendance_rate'] = 100  # Default to 100% if no data
+            stats['attendance_rate'] = 100
         
     except Exception as e:
         current_app.logger.error(f"Error calculating teacher stats: {str(e)}")
     
     return stats
-
 
 def get_admin_stats(user):
     """Calculate statistics for admin profile display"""
@@ -526,7 +508,6 @@ def get_admin_stats(user):
         'total_classes': 0,
         'present': 0,
         'absent': 0,
-        # Admin-specific stats
         'total_students': 0,
         'total_teachers': 0,
         'total_batches': 0,
@@ -536,25 +517,20 @@ def get_admin_stats(user):
         return stats
     
     try:
-        # Get total students in institution
         stats['total_students'] = Student.query.join(ClassBatch).filter(
             ClassBatch.institution_id == user.institution_id
         ).count()
         
-        # Get total teachers in institution
         stats['total_teachers'] = User.query.filter_by(
             role='teacher',
             institution_id=user.institution_id
         ).count()
         
-        # Get total classes/batches
         stats['total_batches'] = ClassBatch.query.filter_by(
             institution_id=user.institution_id
         ).count()
         
-        # Calculate overall attendance rate (last 30 days)
-        from datetime import date, timedelta
-        thirty_days_ago = date.today() - timedelta(days=30)
+        thirty_days_ago = datetime.date.today() - datetime.timedelta(days=30)
         
         attendance_query = Attendance.query.join(Student).join(ClassBatch).filter(
             ClassBatch.institution_id == user.institution_id,
@@ -568,10 +544,8 @@ def get_admin_stats(user):
         if stats['total_classes'] > 0:
             stats['attendance_rate'] = round((stats['present'] / stats['total_classes']) * 100)
         else:
-            stats['attendance_rate'] = 100  # Default to 100% if no data
+            stats['attendance_rate'] = 100
         
-        # Get active subjects count
-        from ..models import Subject
         stats['active_subjects'] = Subject.query.count()
         
     except Exception as e:
@@ -579,25 +553,20 @@ def get_admin_stats(user):
     
     return stats
 
-
-# --- Email Verification Routes (No change) ---
+# --- Email Verification Routes ---
 @profile_bp.route('/verify-email/<token>')
 def verify_email(token):
-    """
-    Verify user email using the token sent via email.
-    """
+    """Verify user email using the token sent via email."""
     user = User.query.filter_by(email_verification_token=token).first()
     
     if not user:
         flash('Invalid or expired verification link.', 'danger')
         return redirect(url_for('auth.login'))
     
-    # Check if token is expired (24 hours validity)
     if user.token_expiry and user.token_expiry < dt.utcnow():
         flash('Verification link has expired. Please request a new one.', 'danger')
         return redirect(url_for('profile.resend_verification'))
     
-    # Verify the email
     user.email_verified = True
     user.email_verification_token = None
     user.token_expiry = None
@@ -606,25 +575,20 @@ def verify_email(token):
     flash('Email verified successfully! You can now access all features.', 'success')
     return redirect(url_for('dashboard.dashboard'))
 
-
 @profile_bp.route('/resend-verification', methods=['GET', 'POST'])
 @login_required
 def resend_verification():
-    """
-    Resend email verification link.
-    """
+    """Resend email verification link."""
     if g.user.email_verified:
         flash('Your email is already verified.', 'info')
         return redirect(url_for('profile.profile_view'))
     
     if request.method == 'POST':
         try:
-            # Generate new verification token
             g.user.email_verification_token = secrets.token_urlsafe(32)
             g.user.token_expiry = dt.utcnow() + timedelta(hours=24)
             db.session.commit()
             
-            # Send verification email
             send_verification_email(g.user)
             flash('Verification email sent! Please check your inbox.', 'success')
             return redirect(url_for('profile.profile_view'))
@@ -634,14 +598,11 @@ def resend_verification():
     
     return render_template('profile/resend_verification.html', user=g.user)
 
-
-# --- Security Settings (No change) ---
+# --- Security Settings ---
 @profile_bp.route('/security-settings', methods=['GET', 'POST'])
 @login_required
 def security_settings():
-    """
-    Manage security settings including 2FA.
-    """
+    """Manage security settings including 2FA."""
     if request.method == 'POST':
         action = request.form.get('action')
         
@@ -671,14 +632,11 @@ def security_settings():
     
     return render_template('profile/security_settings.html', user=g.user)
 
-
-# --- Role Switching (No change) ---
+# --- Role Switching ---
 @profile_bp.route('/switch_role/<new_role>')
 @login_required
 def switch_role(new_role):
-    """
-    Allow admin to switch between different role views.
-    """
+    """Allow admin to switch between different role views."""
     if g.user.role == 'admin':
         if new_role in ['teacher', 'student']:
             session['view_as'] = new_role
@@ -693,14 +651,11 @@ def switch_role(new_role):
     
     return redirect(url_for('dashboard.dashboard'))
 
-
-# --- Account Deletion (No change) ---
+# --- Account Deletion ---
 @profile_bp.route('/delete_account', methods=['POST'])
 @login_required
 def delete_account():
-    """
-    Permanently delete user account with email confirmation.
-    """
+    """Permanently delete user account with email confirmation."""
     email_confirmation = request.form.get('email_confirm', '').strip()
     
     if not email_confirmation:
@@ -714,7 +669,6 @@ def delete_account():
     try:
         user_to_delete = g.user
         
-        # Delete avatar file
         if user_to_delete.avatar and not user_to_delete.avatar.startswith('http') and user_to_delete.avatar != 'uploads/default.png':
             avatar_path = os.path.join(current_app.static_folder, user_to_delete.avatar)
             if os.path.exists(avatar_path):
@@ -723,11 +677,9 @@ def delete_account():
                 except Exception as e:
                     current_app.logger.warning(f"Could not delete avatar file: {str(e)}")
         
-        # Delete user from database
         db.session.delete(user_to_delete)
         db.session.commit()
         
-        # Clear session
         session.clear()
         
         flash('Your account has been permanently deleted. We hope to see you again!', 'success')

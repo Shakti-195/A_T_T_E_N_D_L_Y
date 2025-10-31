@@ -1,225 +1,696 @@
 {% extends "shared/base.html" %}
-{% block title %}Mark Attendance{% endblock %}
+{% block title %}My Attendance Records{% endblock %}
 
 {% block head_extra %}
 <style>
-    /* Custom styles for the radio button toggle group */
-    .btn-check:checked+.btn-outline-success {
-        background-color: #198754;
+    /* === ROOT VARIABLES === */
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --accent: #FFD700;
+    }
+
+    /* === THEME SUPPORT === */
+    body[data-theme="dark"] {
+        --primary: #ef5350;
+    }
+
+    /* === MAIN CONTAINER === */
+    .attendance-container {
+        padding: 2rem 1rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+    }
+
+    /* === HEADER SECTION === */
+    .attendance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-title {
+        font-size: 2rem;
+        font-weight: 900;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-color);
+    }
+
+    .header-title i {
+        color: var(--primary);
+        font-size: 2.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* === INFO ALERT === */
+    .info-alert {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        color: #3b82f6;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .info-alert {
+        color: #60a5fa;
+    }
+
+    .info-alert:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(14, 165, 233, 0.25) 100%);
+    }
+
+    .info-alert i {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    /* === FILTER SECTION === */
+    .filter-section {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    body[data-theme="dark"] .filter-section {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filter-title i {
+        color: var(--primary);
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    body[data-theme="dark"] .form-control:focus,
+    body[data-theme="dark"] .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-select option {
+        background: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .btn-filter {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    /* === STATS GRID === */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    body[data-theme="dark"] .stat-card {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    body[data-theme="dark"] .stat-card:hover {
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.2);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--primary);
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card.present {
+        --primary: #10b981;
+    }
+
+    .stat-card.absent {
+        --primary: #ef4444;
+    }
+
+    .stat-card.leave {
+        --primary: #3b82f6;
+    }
+
+    .stat-card.percentage {
+        --primary: #f59e0b;
+    }
+
+    /* === TABLE SECTION === */
+    .table-section {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    body[data-theme="dark"] .table-section {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: transparent;
+    }
+
+    .attendance-table thead {
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+    }
+
+    .attendance-table thead th {
+        padding: 1.25rem;
+        text-align: left;
+        color: white;
+        font-weight: 900;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .attendance-table tbody td {
+        padding: 1.25rem;
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-color);
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .attendance-table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .attendance-table tbody tr:hover {
+        background: rgba(220, 38, 38, 0.08);
+        transform: scale(1.005);
+    }
+
+    body[data-theme="dark"] .attendance-table tbody tr:hover {
+        background: rgba(220, 38, 38, 0.15);
+    }
+
+    .date-text {
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .subject-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-present {
+        background: linear-gradient(135deg, #10b981, #34d399);
         color: white;
     }
-    .btn-check:checked+.btn-outline-danger {
-        background-color: #dc3545;
+
+    .status-absent {
+        background: linear-gradient(135deg, #ef4444, #f87171);
         color: white;
     }
-    .btn-check:checked+.btn-outline-info {
-        background-color: #0dcaf0;
+
+    .status-leave {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
         color: white;
     }
-    .border-dashed {
-        border: 2px dashed var(--border-color) !important;
+
+    .marked-by {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* === EMPTY STATE === */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: linear-gradient(135deg, var(--card-bg), var(--bg-color));
+        border: 3px dashed var(--border-color);
+        border-radius: 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+    }
+
+    /* === PAGINATION === */
+    .pagination-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .attendance-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-filter {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .attendance-table thead th,
+        .attendance-table tbody td {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .pagination-section {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .attendance-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+        }
+
+        .header-title i {
+            font-size: 1.75rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-section {
+            padding: 1rem;
+        }
+
+        .attendance-table thead th,
+        .attendance-table tbody td {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .subject-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+        }
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-section, .table-section {
+        animation: slideIn 0.5s ease-out;
+    }
+
+    .attendance-table tbody tr {
+        animation: slideIn 0.3s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .attendance-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+    .attendance-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+    .attendance-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+    .attendance-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+    .attendance-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+
+    /* === RECORD COUNTER === */
+    .record-counter {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        padding: 1rem;
+        text-align: right;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 fade-in">
-    <div class="row justify-content-center">
-        <div class="col-lg-11">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4" id="page-header">
-                        <h2 class="card-title fw-bold mb-0"><i class="fas fa-edit me-2 text-primary"></i>Mark Attendance</h2>
-                        <!-- QR Code Button is added here by JavaScript if students are loaded -->
-                    </div>
-                    
-                    <!-- Form 1: For selecting class, subject, date and loading students (uses GET) -->
-                    <form method="GET" action="{{ url_for('student.mark_attendance') }}" class="mb-4 p-3 bg-light rounded border">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label for="class_batch_id" class="form-label fw-medium">Select Your Class</label>
-                                <select class="form-select" id="class_batch_id" name="class_batch_id" required>
-                                    <option value="" {% if not selected_class_id %}selected{% endif %} disabled>Choose a class...</option>
-                                    {% for class_batch in taught_classes %}
-                                        <option value="{{ class_batch.id }}" {% if class_batch.id == selected_class_id %}selected{% endif %}>
-                                            {{ class_batch.name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                             <div class="col-md-3">
-                                <label for="subject_id" class="form-label fw-medium">Select Subject</label>
-                                <select class="form-select" id="subject_id" name="subject_id" required>
-                                     <option value="" {% if not selected_subject_id %}selected{% endif %} disabled>Choose a subject...</option>
-                                    {% for subject in subjects %}
-                                    <option value="{{ subject.id }}" {% if subject.id == selected_subject_id %}selected{% endif %}>{{ subject.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="date" class="form-label fw-medium">Date</label>
-                                <input type="date" class="form-control" id="date" name="date" value="{{ selected_date }}">
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-dark w-100">
-                                    <i class="fas fa-users me-1"></i> Load
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+<div class="attendance-container">
+    <!-- HEADER -->
+    <div class="attendance-header">
+        <h1 class="header-title">
+            <i class="fas fa-clipboard-check"></i>
+            My Attendance Records
+        </h1>
+    </div>
 
-                    {% if students %}
-                    <!-- Form 2: For submitting attendance data (uses POST) -->
-                    <form method="POST" action="{{ url_for('student.mark_attendance') }}">
-                        <input type="hidden" name="class_batch_id" value="{{ selected_class_id }}">
-                        <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
-                        <input type="hidden" name="date" value="{{ selected_date }}">
+    <!-- INFO ALERT -->
+    <div class="info-alert">
+        <i class="fas fa-info-circle"></i>
+        <div>
+            <strong>📊 View Your Attendance:</strong> Below you can see your attendance records for all subjects. Use the filters to find specific records based on subject or date.
+        </div>
+    </div>
 
-                        {% set subject_name = subjects|selectattr('id', 'equalto', selected_subject_id)|map(attribute='name')|first %}
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="mb-0">Student List for {{ subject_name }}</h4>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('present')">Mark All Present</button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('absent')">Mark All Absent</button>
-                            </div>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Name</th>
-                                        <th>Student ID</th>
-                                        <th class="text-center" style="width: 250px;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for student in students %}
-                                    <tr>
-                                        <td>{{ loop.index }}</td>
-                                        <td class="fw-medium">{{ student.name }}</td>
-                                        <td><span class="badge bg-secondary">{{ student.student_id }}</span></td>
-                                       <td class="text-center">
-                                            <div class="btn-group" role="group">
-                                                <input type="radio" class="btn-check" name="status_{{ student.id }}" id="present_{{ student.id }}" value="present" autocomplete="off" 
-                                                    {% if attendance_statuses.get(student.id) == 'present' %}checked{% endif %}>
-                                                <label class="btn btn-outline-success" for="present_{{ student.id }}">Present</label>
-
-                                                <input type="radio" class="btn-check" name="status_{{ student.id }}" id="absent_{{ student.id }}" value="absent" autocomplete="off"
-                                                    {% if attendance_statuses.get(student.id) == 'absent' or not attendance_statuses.get(student.id) %}checked{% endif %}>
-                                                <label class="btn btn-outline-danger" for="absent_{{ student.id }}">Absent</label>
-
-                                                <input type="radio" class="btn-check" name="status_{{ student.id }}" id="leave_{{ student.id }}" value="leave" autocomplete="off"
-                                                    {% if attendance_statuses.get(student.id) == 'leave' %}checked{% endif %}>
-                                                <label class="btn btn-outline-info" for="leave_{{ student.id }}">Leave</label>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-save me-2"></i>Save Attendance
-                            </button>
-                        </div>
-                    </form>
-                    {% else %}
-                    <div class="text-center p-5 text-muted border-dashed rounded-3">
-                        <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
-                        <h5>Select Class, Subject & Date</h5>
-                        <p>Please make a selection from all fields above and click "Load" to begin.</p>
-                    </div>
-                    {% endif %}
-                </div>
+    <!-- FILTER SECTION -->
+    <div class="filter-section">
+        <div class="filter-title">
+            <i class="fas fa-sliders-h"></i>
+            Filter Records
+        </div>
+        <form method="GET" action="{{ url_for('student.mark_attendance') }}" class="filter-form">
+            <div class="form-group">
+                <label for="subject_id" class="form-label">📚 Subject</label>
+                <select class="form-select" id="subject_id" name="subject_id">
+                    <option value="">All Subjects</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}" {% if subject.id|string == selected_subject %}selected{% endif %}>
+                        {{ subject.name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- QR Code Modal -->
-<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="qrModalLabel">Scan to Mark Attendance</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center" id="qrModalBody">
-        <div id="qr-image-container">
-            <!-- QR image will be injected here -->
-        </div>
-        <div id="qr-spinner" class="spinner-border" role="status" style="display: none;">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="text-muted mt-3">This code is valid for 2 minutes.</p>
-      </div>
+            <div class="form-group">
+                <label for="from_date" class="form-label">📅 From Date</label>
+                <input 
+                    type="date" 
+                    class="form-control" 
+                    id="from_date" 
+                    name="from_date" 
+                    value="{{ from_date or '' }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-search"></i> Filter Records
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
+
+    <!-- STATISTICS CARDS -->
+    {% if attendance_records %}
+    <div class="stats-grid">
+        <div class="stat-card present">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Present</div>
+            <div class="stat-value">{{ total_present }}</div>
+        </div>
+
+        <div class="stat-card absent">
+            <div class="stat-icon">❌</div>
+            <div class="stat-label">Absent</div>
+            <div class="stat-value">{{ total_absent }}</div>
+        </div>
+
+        <div class="stat-card leave">
+            <div class="stat-icon">📅</div>
+            <div class="stat-label">Leave</div>
+            <div class="stat-value">{{ total_leave }}</div>
+        </div>
+
+        <div class="stat-card percentage">
+            <div class="stat-icon">📊</div>
+            <div class="stat-label">Percentage</div>
+            <div class="stat-value">{{ attendance_percentage }}%</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- TABLE SECTION -->
+    <div class="table-section">
+        <div class="table-wrapper">
+            {% if attendance_records %}
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>📅 Date</th>
+                        <th>📚 Subject</th>
+                        <th>✓ Status</th>
+                        <th>👤 Marked By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="date-text">{{ record.date.strftime('%d %b, %Y') }}</td>
+                        <td><span class="subject-badge">{{ record.subject.name }}</span></td>
+                        <td>
+                            {% if record.status == 'present' %}
+                                <span class="status-badge status-present">✓ Present</span>
+                            {% elif record.status == 'absent' %}
+                                <span class="status-badge status-absent">✗ Absent</span>
+                            {% elif record.status == 'leave' %}
+                                <span class="status-badge status-leave">📄 Leave</span>
+                            {% else %}
+                                <span class="status-badge" style="background: linear-gradient(135deg, #6366f1, #818cf8); color: white;">{{ record.status|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="marked-by">{{ record.marked_by or 'Manual' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="record-counter">
+                Showing {{ attendance_records|length }} record{{ 's' if attendance_records|length != 1 else '' }}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h5 class="empty-title">No Attendance Records Found</h5>
+                <p class="empty-text">Your attendance records will appear here once your teachers mark your attendance. Check back later!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block body_extra %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    {% if students %}
-    // Only add the button and its logic if students are loaded
-    const header = document.getElementById('page-header');
-    const qrButton = document.createElement('button');
-    qrButton.className = 'btn btn-outline-primary';
-    qrButton.innerHTML = '<i class="fas fa-qrcode me-2"></i>Generate QR Code';
-    qrButton.id = 'generateQrBtn';
-    qrButton.setAttribute('data-bs-toggle', 'modal');
-    qrButton.setAttribute('data-bs-target', '#qrModal');
-    header.appendChild(qrButton);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit filter on subject change
+        const subjectSelect = document.getElementById('subject_id');
+        const filterForm = document.querySelector('.filter-form');
 
-    qrButton.addEventListener('click', function() {
-        const qrImageContainer = document.getElementById('qr-image-container');
-        const spinner = document.getElementById('qr-spinner');
-        
-        qrImageContainer.innerHTML = '';
-        spinner.style.display = 'block';
+        if (subjectSelect) {
+            subjectSelect.addEventListener('change', function() {
+                // Optional: auto-submit on subject change
+                // filterForm.submit();
+            });
+        }
 
-        fetch("{{ url_for('student.generate_qr') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                class_batch_id: '{{ selected_class_id }}',
-                subject_id: '{{ selected_subject_id }}'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            spinner.style.display = 'none';
-            if (data.qr_image) {
-                const img = document.createElement('img');
-                img.src = 'data:image/png;base64,' + data.qr_image;
-                img.className = 'img-fluid';
-                qrImageContainer.appendChild(img);
-            } else {
-                qrImageContainer.textContent = data.error || 'Failed to generate QR code.';
-            }
-        })
-        .catch(error => {
-            spinner.style.display = 'none';
-            qrImageContainer.textContent = 'An error occurred.';
-            console.error('Error:', error);
-        });
+        // Real-time date validation
+        const fromDateInput = document.getElementById('from_date');
+        if (fromDateInput) {
+            fromDateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const today = new Date();
+                
+                if (selectedDate > today) {
+                    alert('⚠️ Future dates are not allowed!');
+                    this.value = '';
+                }
+            });
+        }
+
+        console.log('✅ My Attendance page loaded');
     });
-    {% endif %}
-});
-
-// NEW FUNCTION: Mark all students with a given status
-function markAll(status) {
-    const radioButtons = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
-    radioButtons.forEach(radio => {
-        radio.checked = true;
-    });
-}
 </script>
 {% endblock %}
-

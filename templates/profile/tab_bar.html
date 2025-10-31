@@ -49,62 +49,7 @@
         {% endif %}
         {% endif %}
 
-        {# -------------------------------------------------------------------- #}
-        {# --- 3. TEACHER-SPECIFIC TABS (NEWLY ADDED) --- #}
-        {# -------------------------------------------------------------------- #}
-        {% if user.role == 'teacher' %}
-        <button
-            class="tab-button"
-            type="button"
-            data-tab-target="#teacher-classes-tab"
-            aria-selected="false"
-        >
-            <span class="tab-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20h-4.5"/><path d="M18 10h-2"/><path d="M18 6h-2"/></svg>
-            </span>
-            <span>My Classes</span>
-        </button>
-        <button
-            class="tab-button"
-            type="button"
-            data-tab-target="#teacher-reports-tab"
-            aria-selected="false"
-        >
-            <span class="tab-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            </span>
-            <span>Performance</span>
-        </button>
-        {% endif %}
-        
-        {# -------------------------------------------------------------------- #}
-        {# --- 4. ADMIN-SPECIFIC TABS (NEWLY ADDED) --- #}
-        {# -------------------------------------------------------------------- #}
-        {% if user.role == 'admin' %}
-        <button
-            class="tab-button"
-            type="button"
-            data-tab-target="#admin-management-tab"
-            aria-selected="false"
-        >
-            <span class="tab-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/><path d="M15 9l-1.4 1.4"/></svg>
-            </span>
-            <span>User Management</span>
-        </button>
-        <button
-            class="tab-button"
-            type="button"
-            data-tab-target="#admin-reports-tab"
-            aria-selected="false"
-        >
-            <span class="tab-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17l-3-2-6 5-3-4"/></svg>
-            </span>
-            <span>System Reports</span>
-        </button>
-        {% endif %}
-
+    
         {# -------------------------------------------------------------------- #}
         {# --- 5. GENERIC TABS (Shared by all roles) --- #}
         {# -------------------------------------------------------------------- #}

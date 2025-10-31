@@ -16,7 +16,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor
 
 # --- Local Application Imports ---
-from .extensions import db, mail, scheduler, migrate, login_manager  # <-- ADD login_manager
+from .extensions import db, mail, scheduler, migrate, login_manager
 from .utils import email_reports_job
 
 def create_app():
@@ -43,6 +43,10 @@ def create_app():
     app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+    # --- Development Settings (Auto-reload & No Cache) ---
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable static file caching in development
+    
     # --- Mail Configuration ---
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
@@ -65,7 +69,7 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
     migrate.init_app(app, db)
-    login_manager.init_app(app)  # <-- INITIALIZE LOGIN MANAGER
+    login_manager.init_app(app)
     
     if not scheduler.running:
         scheduler.init_app(app)
@@ -82,12 +86,14 @@ def create_app():
     from .auth.routes import auth_bp
     from .dashboard.routes import dashboard_bp
     from .student.routes import student_bp
+    from .teacher.routes import teacher_bp  # ✅ ADD THIS LINE
     from .profile.routes import profile_bp
     from .admin.routes import admin_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth') 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(student_bp, url_prefix='/student')
+    app.register_blueprint(teacher_bp, url_prefix='/teacher')  # ✅ ADD THIS LINE
     app.register_blueprint(profile_bp, url_prefix='/profile')
     app.register_blueprint(admin_bp, url_prefix='/admin')
 

@@ -1,41 +1,767 @@
-{% extends "base.html" %}
-{% block title %}Apply for Leave{% endblock %}
+{% extends "shared/base.html" %}
+{% block title %}Apply for Leave - Attendly{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* === ROOT VARIABLES === */
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --accent: #FFD700;
+    }
+
+    /* === THEME SUPPORT === */
+    body[data-theme="dark"] {
+        --primary: #ef5350;
+    }
+
+    body[data-theme="oceanic"] {
+        --primary: #0ea5e9;
+    }
+
+    body[data-theme="sunset"] {
+        --primary: #ff6b35;
+    }
+
+    body[data-theme="forest"] {
+        --primary: #10b981;
+    }
+
+    body[data-theme="cyberpunk"] {
+        --primary: #00ffff;
+    }
+
+    body[data-theme="lavender"] {
+        --primary: #a78bfa;
+    }
+
+    body[data-theme="midnight"] {
+        --primary: #4f46e5;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* === PAGE CONTAINER === */
+    .page-container {
+        animation: fadeIn 0.6s ease-out;
+        padding: 2rem 1rem;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: var(--bg-color);
+    }
+
+    /* === LEAVE CARD === */
+    .leave-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 1.5rem;
+        border: 2px solid var(--border-color);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .leave-card {
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .leave-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 35px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    body[data-theme="dark"] .leave-card:hover {
+        box-shadow: 0 35px 60px rgba(220, 38, 38, 0.2);
+    }
+
+    .leave-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 250px;
+        background: radial-gradient(ellipse at top, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* === CARD HEADER === */
+    .card-header-custom {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, transparent 100%);
+        padding: 2.5rem 2rem;
+        border-bottom: 2px solid var(--border-color);
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-top {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .back-button {
+        width: 2.75rem;
+        height: 2.75rem;
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        border: 2px solid var(--accent);
+        border-radius: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    .back-button:hover {
+        transform: translateX(-5px) translateY(-3px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: slideIn 0.6s ease-out 0.2s both;
+    }
+
+    .page-title i {
+        color: var(--primary);
+        font-size: 2.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* === CARD BODY === */
+    .card-body-custom {
+        padding: 2.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* === INFO BADGE === */
+    .info-badge {
+        background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        color: #3b82f6;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+        transition: all 0.3s;
+    }
+
+    body[data-theme="dark"] .info-badge {
+        color: #60a5fa;
+    }
+
+    .info-badge:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(14, 165, 233, 0.25) 100%);
+    }
+
+    .info-badge i {
+        font-size: 1.5rem;
+        color: #3b82f6;
+        flex-shrink: 0;
+    }
+
+    .info-badge span {
+        line-height: 1.6;
+    }
+
+    /* === FORM STYLES === */
+    .form-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+
+    .required-star {
+        color: #ef4444;
+        margin-left: 0.25rem;
+    }
+
+    .form-control, .form-select {
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 0.9rem 1.25rem;
+        color: var(--text-color);
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background: var(--bg-color);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+        color: var(--text-color);
+    }
+
+    body[data-theme="dark"] .form-control:focus,
+    body[data-theme="dark"] .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-select option {
+        background: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    textarea.form-control {
+        min-height: 140px;
+        resize: vertical;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* === FORM GROUP === */
+    .form-group {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    /* === DATE RANGE CONTAINER === */
+    .date-range-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    /* === CHARACTER COUNTER === */
+    .char-counter {
+        text-align: right;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .char-counter.warning {
+        color: #f59e0b;
+    }
+
+    .char-counter.danger {
+        color: #ef4444;
+    }
+
+    /* === LEAVE TYPE INFO === */
+    .leave-type-info {
+        background: linear-gradient(135deg, var(--card-bg), var(--bg-color));
+        border: 2px dashed var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: none;
+    }
+
+    .leave-type-info.show {
+        display: block;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* === SUBMIT BUTTON === */
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        border: 2px solid var(--accent);
+        border-radius: 0.875rem;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: 900;
+        color: white;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.6);
+        border-color: white;
+    }
+
+    .submit-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .submit-btn i {
+        position: relative;
+        z-index: 1;
+    }
+
+    .submit-btn span {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .page-title i {
+            font-size: 1.75rem;
+        }
+
+        .date-range-container {
+            grid-template-columns: 1fr;
+        }
+
+        .card-body-custom, .card-header-custom {
+            padding: 1.5rem;
+        }
+
+        .header-top {
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+        }
+
+        .page-title i {
+            font-size: 1.5rem;
+        }
+
+        .leave-card {
+            border-radius: 1rem;
+        }
+
+        .card-body-custom, .card-header-custom {
+            padding: 1.25rem;
+        }
+
+        .submit-btn {
+            padding: 0.9rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .info-badge {
+            font-size: 0.85rem;
+            padding: 1rem;
+        }
+    }
+
+    /* === VALIDATION FEEDBACK === */
+    .invalid-feedback {
+        display: block;
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #ef4444;
+    }
+
+    .form-control.is-valid, .form-select.is-valid {
+        border-color: #10b981;
+    }
+
+    /* === SUCCESS MESSAGE === */
+    .success-message {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.15));
+        border: 2px solid #10b981;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        color: #10b981;
+        font-weight: 600;
+        display: none;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5 fade-in">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    <div class="d-flex align-items-center mb-4">
-                        <a href="{{ url_for('profile') }}" class="btn btn-light me-3" title="Back to Profile">
-                            <i class="fas fa-arrow-left"></i>
-                        </a>
-                        <h2 class="card-title fw-bold mb-0">
-                            <i class="fas fa-calendar-alt me-2 text-primary"></i>Apply for Leave
-                        </h2>
+<div class="page-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-6 col-lg-7 col-md-9">
+                <div class="leave-card">
+                    <!-- HEADER -->
+                    <div class="card-header-custom">
+                        <div class="header-top">
+                            <a href="{{ url_for('profile.profile_view') }}" class="back-button">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                            <div>
+                                <h1 class="page-title">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Apply for Leave
+                                </h1>
+                                <p class="page-subtitle">📝 Submit your leave request for approval</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    <!-- BODY -->
+                    <div class="card-body-custom">
+                        <!-- INFO BADGE -->
+                        <div class="info-badge">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Your leave request will be reviewed by the admin. You'll be notified via email once it's processed.</span>
                         </div>
-                        <div class="mb-3">
-                            <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+
+                        <!-- SUCCESS MESSAGE -->
+                        <div class="success-message" id="successMessage">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span>✅ Leave request submitted successfully! You'll be notified soon.</span>
                         </div>
-                        <div class="mb-3">
-                            <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-                        </div>
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary">Submit Request</button>
-                        </div>
-                    </form>
+
+                        <!-- FORM -->
+                        <form method="POST" id="leaveForm" novalidate>
+                            <!-- DATE RANGE -->
+                            <div class="date-range-container">
+                                <div class="form-group">
+                                    <label for="start_date" class="form-label">
+                                        <i class="fas fa-calendar-day"></i>
+                                        Start Date
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <input 
+                                        type="date" 
+                                        class="form-control" 
+                                        id="start_date" 
+                                        name="start_date" 
+                                        required
+                                    >
+                                    <div class="invalid-feedback" id="startDateError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="end_date" class="form-label">
+                                        <i class="fas fa-calendar-check"></i>
+                                        End Date
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <input 
+                                        type="date" 
+                                        class="form-control" 
+                                        id="end_date" 
+                                        name="end_date" 
+                                        required
+                                    >
+                                    <div class="invalid-feedback" id="endDateError"></div>
+                                </div>
+                            </div>
+
+                            <!-- LEAVE TYPE -->
+                            <div class="form-group">
+                                <label for="leave_type" class="form-label">
+                                    <i class="fas fa-list-ul"></i>
+                                    Leave Type
+                                    <span class="required-star">*</span>
+                                </label>
+                                <select class="form-select" id="leave_type" name="leave_type" required>
+                                    <option value="" selected disabled>Select leave type...</option>
+                                    <option value="sick">🤒 Sick Leave</option>
+                                    <option value="casual">📅 Casual Leave</option>
+                                    <option value="emergency">🚨 Emergency Leave</option>
+                                    <option value="personal">🏠 Personal Leave</option>
+                                    <option value="other">📝 Other</option>
+                                </select>
+                                <div class="leave-type-info" id="leaveTypeInfo"></div>
+                                <div class="invalid-feedback" id="leaveTypeError"></div>
+                            </div>
+
+                            <!-- REASON -->
+                            <div class="form-group">
+                                <label for="reason" class="form-label">
+                                    <i class="fas fa-comment-alt"></i>
+                                    Reason for Leave
+                                    <span class="required-star">*</span>
+                                </label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="reason" 
+                                    name="reason" 
+                                    rows="6" 
+                                    placeholder="Please provide a detailed reason for your leave request..."
+                                    required
+                                    maxlength="500"
+                                ></textarea>
+                                <div class="char-counter" id="charCounter">0 / 500</div>
+                                <div class="invalid-feedback" id="reasonError"></div>
+                            </div>
+
+                            <!-- SUBMIT BUTTON -->
+                            <div class="mt-5">
+                                <button type="submit" class="submit-btn" id="submitBtn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Submit Leave Request</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('leaveForm');
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const leaveTypeSelect = document.getElementById('leave_type');
+        const reasonTextarea = document.getElementById('reason');
+        const charCounter = document.getElementById('charCounter');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.setAttribute('min', today);
+        endDateInput.setAttribute('min', today);
+
+        // Leave type descriptions
+        const leaveTypeDescriptions = {
+            sick: '🤒 Sick leave is for medical reasons. Please provide doctor\'s certificate if more than 2 days.',
+            casual: '📅 Casual leave for personal reasons. Limited to 12 days per year.',
+            emergency: '🚨 Emergency leave for urgent situations. Requires approval within 24 hours.',
+            personal: '🏠 Personal leave for family matters. Available with advance notice.',
+            other: '📝 Other reasons. Please specify in detail.'
+        };
+
+        // Update end date minimum when start date changes
+        startDateInput.addEventListener('change', function() {
+            endDateInput.setAttribute('min', this.value);
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = this.value;
+            }
+            validateForm();
+        });
+
+        // Leave type info display
+        leaveTypeSelect.addEventListener('change', function() {
+            const info = document.getElementById('leaveTypeInfo');
+            if (this.value && leaveTypeDescriptions[this.value]) {
+                info.textContent = leaveTypeDescriptions[this.value];
+                info.classList.add('show');
+            } else {
+                info.classList.remove('show');
+            }
+            validateForm();
+        });
+
+        // Character counter
+        reasonTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            charCounter.textContent = `${length} / 500`;
+            
+            if (length > 450) {
+                charCounter.classList.add('danger');
+                charCounter.classList.remove('warning');
+            } else if (length > 400) {
+                charCounter.classList.add('warning');
+                charCounter.classList.remove('danger');
+            } else {
+                charCounter.classList.remove('warning', 'danger');
+            }
+            validateForm();
+        });
+
+        // Form validation function
+        function validateForm() {
+            let isValid = true;
+
+            // Check start date
+            if (!startDateInput.value) {
+                startDateInput.classList.add('is-invalid');
+                document.getElementById('startDateError').textContent = 'Start date is required';
+                isValid = false;
+            } else if (new Date(startDateInput.value) < new Date(today)) {
+                startDateInput.classList.add('is-invalid');
+                document.getElementById('startDateError').textContent = 'Start date cannot be in the past';
+                isValid = false;
+            } else {
+                startDateInput.classList.remove('is-invalid');
+                startDateInput.classList.add('is-valid');
+            }
+
+            // Check end date
+            if (!endDateInput.value) {
+                endDateInput.classList.add('is-invalid');
+                document.getElementById('endDateError').textContent = 'End date is required';
+                isValid = false;
+            } else if (new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                endDateInput.classList.add('is-invalid');
+                document.getElementById('endDateError').textContent = 'End date cannot be before start date';
+                isValid = false;
+            } else {
+                endDateInput.classList.remove('is-invalid');
+                endDateInput.classList.add('is-valid');
+            }
+
+            // Check leave type
+            if (!leaveTypeSelect.value) {
+                leaveTypeSelect.classList.add('is-invalid');
+                document.getElementById('leaveTypeError').textContent = 'Leave type is required';
+                isValid = false;
+            } else {
+                leaveTypeSelect.classList.remove('is-invalid');
+                leaveTypeSelect.classList.add('is-valid');
+            }
+
+            // Check reason
+            if (!reasonTextarea.value.trim()) {
+                reasonTextarea.classList.add('is-invalid');
+                document.getElementById('reasonError').textContent = 'Please provide a reason';
+                isValid = false;
+            } else if (reasonTextarea.value.trim().length < 10) {
+                reasonTextarea.classList.add('is-invalid');
+                document.getElementById('reasonError').textContent = 'Reason should be at least 10 characters';
+                isValid = false;
+            } else {
+                reasonTextarea.classList.remove('is-invalid');
+                reasonTextarea.classList.add('is-valid');
+            }
+
+            return isValid;
+        }
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return false;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Submitting...</span>';
+
+            // Calculate days
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+            // Log submission
+            console.log('Leave Request:', {
+                startDate: startDateInput.value,
+                endDate: endDateInput.value,
+                days: days,
+                leaveType: leaveTypeSelect.value,
+                reason: reasonTextarea.value
+            });
+
+            // Submit form after a delay
+            setTimeout(() => {
+                form.submit();
+            }, 800);
+        });
+
+        // Real-time validation
+        [startDateInput, endDateInput, leaveTypeSelect, reasonTextarea].forEach(field => {
+            field.addEventListener('blur', validateForm);
+        });
+    });
+</script>
 {% endblock %}

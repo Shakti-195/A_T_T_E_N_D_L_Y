@@ -1,155 +1,1121 @@
 {% extends "shared/base.html" %}
 {% block title %}System Setup{% endblock %}
 
-{% block content %}
-<div class="container mt-4 fade-in">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <h2 class="fw-bold mb-4"><i class="fas fa-cogs me-2 text-primary"></i>System Setup</h2>
+{% block head_extra %}
+<style>
+    /* ==================== SETTINGS/CONTROL PANEL THEME ==================== */
+    :root {
+        --setup-primary: #f59e0b;
+        --setup-secondary: #3b82f6;
+        --setup-success: #10b981;
+        --setup-danger: #ef4444;
+        --setup-purple: #8b5cf6;
+        --setup-bg: #0a0a0a;
+        --setup-surface: #1a1a1a;
+        --setup-border: #2a2a2a;
+        --grid-line: rgba(139, 92, 246, 0.1);
+    }
 
-            <div class="card mb-4 shadow-sm border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>Your Institution ID</h5>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        background: var(--setup-bg);
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* ==================== ANIMATED GRID BACKGROUND ==================== */
+    .setup-container {
+        position: relative;
+        min-height: 100vh;
+    }
+
+    .setup-container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(var(--grid-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: grid-flow 20s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    @keyframes grid-flow {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(50px); }
+    }
+
+    /* ==================== GLOWING ORBS ==================== */
+    .glow-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+        z-index: 0;
+        animation: float-orb 10s ease-in-out infinite;
+    }
+
+    .glow-orb-1 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent);
+        top: 10%;
+        right: 10%;
+        animation-delay: 0s;
+    }
+
+    .glow-orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent);
+        bottom: 15%;
+        left: 10%;
+        animation-delay: 3s;
+    }
+
+    .glow-orb-3 {
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent);
+        top: 50%;
+        left: 50%;
+        animation-delay: 6s;
+    }
+
+    @keyframes float-orb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+
+    /* ==================== HEADER BANNER ==================== */
+    .setup-header {
+        position: relative;
+        z-index: 2;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+        border-bottom: 2px solid var(--setup-border);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .setup-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, 
+            transparent,
+            var(--setup-primary) 20%,
+            var(--setup-secondary) 40%,
+            var(--setup-purple) 60%,
+            var(--setup-success) 80%,
+            transparent
+        );
+        background-size: 200% 100%;
+        animation: gradient-scan 3s linear infinite;
+    }
+
+    @keyframes gradient-scan {
+        0% { background-position: 200% center; }
+        100% { background-position: -200% center; }
+    }
+
+    .setup-title {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--setup-primary), var(--setup-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+    }
+
+    .setup-subtitle {
+        color: #9ca3af;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* ==================== STATS DASHBOARD ==================== */
+    .stats-dashboard {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 0 2rem;
+    }
+
+    .stat-box {
+        background: rgba(26, 26, 26, 0.8);
+        border: 2px solid var(--setup-border);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .stat-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.6s;
+    }
+
+    .stat-box:hover::before {
+        left: 100%;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-10px);
+        border-color: var(--stat-color);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px var(--stat-color);
+    }
+
+    .stat-box.stat-orange { --stat-color: var(--setup-primary); }
+    .stat-box.stat-green { --stat-color: var(--setup-success); }
+    .stat-box.stat-blue { --stat-color: var(--setup-secondary); }
+    .stat-box.stat-purple { --stat-color: var(--setup-purple); }
+
+    .stat-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        position: relative;
+    }
+
+    .stat-orange .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));
+        color: var(--setup-primary);
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+
+    .stat-green .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+        color: var(--setup-success);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .stat-blue .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05));
+        color: var(--setup-secondary);
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .stat-purple .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.05));
+        color: var(--setup-purple);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: white;
+        margin-bottom: 0.25rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* ==================== PANEL SECTIONS ==================== */
+    .setup-content {
+        position: relative;
+        z-index: 2;
+        padding: 0 2rem 2rem;
+    }
+
+    .control-panel {
+        background: rgba(26, 26, 26, 0.8);
+        border: 2px solid var(--setup-border);
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(20px);
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(139, 92, 246, 0.1));
+        border-bottom: 2px solid var(--setup-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .panel-title i {
+        color: var(--setup-primary);
+        font-size: 1.3rem;
+    }
+
+    .panel-body {
+        padding: 2rem;
+    }
+
+    /* ==================== CODE DISPLAY ==================== */
+    .code-showcase {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(139, 92, 246, 0.05));
+        border: 2px solid var(--setup-primary);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .code-showcase::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(from 0deg, transparent, var(--setup-primary), transparent 30%);
+        animation: rotate-border 4s linear infinite;
+    }
+
+    @keyframes rotate-border {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .code-showcase-inner {
+        position: relative;
+        z-index: 1;
+        background: var(--setup-surface);
+        padding: 2rem;
+        border-radius: 0.75rem;
+    }
+
+    .institution-code {
+        font-family: 'Courier New', monospace;
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: var(--setup-primary);
+        letter-spacing: 0.5rem;
+        text-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+        margin: 1.5rem 0;
+    }
+
+    .code-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, var(--setup-primary), #ea580c);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-control:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+        color: white;
+    }
+
+    .btn-control-secondary {
+        background: linear-gradient(135deg, var(--setup-secondary), #1d4ed8);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-control-secondary:hover {
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+    }
+
+    /* ==================== TABS ==================== */
+    .control-tabs {
+        display: flex;
+        gap: 0.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.5rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        background: transparent;
+        border: 2px solid transparent;
+        border-radius: 0.75rem;
+        color: #9ca3af;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--setup-primary), var(--setup-purple));
+        border-color: var(--setup-primary);
+        color: white;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+    }
+
+    /* ==================== DATA TABLE ==================== */
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .data-table thead th {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--setup-primary);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        border-bottom: 2px solid var(--setup-primary);
+    }
+
+    .data-table tbody tr {
+        background: rgba(26, 26, 26, 0.6);
+        transition: all 0.3s;
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(245, 158, 11, 0.1);
+        transform: scale(1.01);
+    }
+
+    .data-table tbody td {
+        padding: 1rem;
+        border-top: 1px solid var(--setup-border);
+        border-bottom: 1px solid var(--setup-border);
+        color: white;
+    }
+
+    .data-table tbody tr td:first-child {
+        border-left: 1px solid var(--setup-border);
+        border-top-left-radius: 0.75rem;
+        border-bottom-left-radius: 0.75rem;
+    }
+
+    .data-table tbody tr td:last-child {
+        border-right: 1px solid var(--setup-border);
+        border-top-right-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .form-control-panel {
+        background: rgba(0, 0, 0, 0.4);
+        border: 2px solid var(--setup-border);
+        border-radius: 0.75rem;
+        padding: 0.875rem 1rem;
+        color: white;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .form-control-panel:focus {
+        outline: none;
+        border-color: var(--setup-primary);
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    /* ==================== MINI STAT BOXES ==================== */
+    .stat-box-mini {
+        padding: 1.25rem;
+        border-radius: 1rem;
+        transition: all 0.3s;
+    }
+
+    .stat-box-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-mini-value {
+        font-size: 2rem;
+        font-weight: 900;
+        font-family: 'Courier New', monospace;
+        line-height: 1;
+    }
+
+    .stat-mini-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+
+    /* ==================== ACTION BUTTONS ==================== */
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 0.5rem;
+        border: 2px solid;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .btn-action-primary {
+        background: rgba(245, 158, 11, 0.2);
+        border-color: var(--setup-primary);
+        color: var(--setup-primary);
+    }
+
+    .btn-action-primary:hover {
+        background: var(--setup-primary);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action-danger {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--setup-danger);
+        color: var(--setup-danger);
+    }
+
+    .btn-action-danger:hover {
+        background: var(--setup-danger);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action-info {
+        background: rgba(59, 130, 246, 0.2);
+        border-color: var(--setup-secondary);
+        color: var(--setup-secondary);
+    }
+
+    .btn-action-info:hover {
+        background: var(--setup-secondary);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    /* ==================== ACCORDION ==================== */
+    .accordion-panel {
+        background: rgba(26, 26, 26, 0.6);
+        border: 2px solid var(--setup-border);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .accordion-panel:hover {
+        border-color: var(--setup-primary);
+    }
+
+    .accordion-header-btn {
+        width: 100%;
+        padding: 1.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: none;
+        color: white;
+        text-align: left;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+
+    .accordion-header-btn:hover {
+        background: rgba(245, 158, 11, 0.1);
+    }
+
+    .badge-panel {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .badge-success-panel {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1));
+        color: var(--setup-success);
+        border: 1px solid var(--setup-success);
+    }
+
+    .badge-warning-panel {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(245, 158, 11, 0.1));
+        color: var(--setup-primary);
+        border: 1px solid var(--setup-primary);
+    }
+
+    /* ==================== ASSIGNMENT CARD ==================== */
+    .assignment-card {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.05));
+        border: 2px solid var(--setup-success);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+
+    .assignment-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .teacher-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--setup-success), var(--setup-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 1200px) {
+        .data-table {
+            font-size: 0.85rem;
+        }
+        
+        .btn-action {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .setup-title { font-size: 2rem; }
+        .stats-dashboard { grid-template-columns: repeat(2, 1fr); }
+        .institution-code { font-size: 2rem; letter-spacing: 0.3rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="setup-container">
+    <!-- Animated Background Elements -->
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    <div class="glow-orb glow-orb-3"></div>
+
+    <!-- Header -->
+    <div class="setup-header">
+        <div class="container-fluid">
+            <h1 class="setup-title"><i class="fas fa-sliders-h me-3"></i>CONTROL CENTER</h1>
+            <p class="setup-subtitle">System Configuration & Management Dashboard</p>
+        </div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="container-fluid">
+        <div class="stats-dashboard">
+            <div class="stat-box stat-orange">
+                <div class="stat-icon-wrapper">
+                    <i class="fas fa-user-slash"></i>
                 </div>
-                <div class="card-body text-center">
-                    <p class="lead">Share this ID with teachers and students so they can join your institution.</p>
-                    <div class="bg-light p-3 rounded d-inline-block">
-                        <h3 class="fw-bold text-primary mb-0" id="inst-code">{{ g.user.institution.institution_code }}</h3>
+                <div class="stat-value">{{ unassigned_students|length }}</div>
+                <div class="stat-label">Unassigned Students</div>
+            </div>
+            <div class="stat-box stat-green">
+                <div class="stat-icon-wrapper">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-value">{{ teachers|length }}</div>
+                <div class="stat-label">Active Teachers</div>
+            </div>
+            <div class="stat-box stat-blue">
+                <div class="stat-icon-wrapper">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <div class="stat-value">{{ classes_batches|length }}</div>
+                <div class="stat-label">Classes/Batches</div>
+            </div>
+            <div class="stat-box stat-purple">
+                <div class="stat-icon-wrapper">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="stat-value">{{ subjects|length }}</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="setup-content">
+        <div class="container-fluid">
+            
+            <!-- Institution Code Panel -->
+            <div class="control-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <i class="fas fa-key"></i>
+                        Institution Access Code
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <p class="text-secondary mb-4">Share this unique identifier with teachers and students to join your institution</p>
+                    <div class="code-showcase">
+                        <div class="code-showcase-inner">
+                            <div class="institution-code" id="inst-code">{{ g.user.institution.institution_code }}</div>
+                            <div class="code-actions">
+                                <button class="btn-control" onclick="copyCode()">
+                                    <i class="fas fa-copy"></i>Copy Code
+                                </button>
+                                <button class="btn-control btn-control-secondary" onclick="shareCode()">
+                                    <i class="fas fa-share-nodes"></i>Share
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn btn-outline-primary ms-2" onclick="copyCode()">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="card-title fw-bold mb-0"><i class="fas fa-user-cog me-2"></i>User Management</h5>
+            <!-- User Management Panel -->
+            <div class="control-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <i class="fas fa-users-cog"></i>
+                        User Management
+                    </h3>
+                    {% if unassigned_students %}
+                    <span class="badge-panel badge-warning-panel">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ unassigned_students|length }} Pending
+                    </span>
+                    {% else %}
+                    <span class="badge-panel badge-success-panel">
+                        <i class="fas fa-check-circle me-1"></i>All Assigned
+                    </span>
+                    {% endif %}
                 </div>
-                <div class="card-body p-4">
-                    <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students-panel" type="button" role="tab">Student Assignments</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers-panel" type="button" role="tab">Teacher Assignments</button>
-                        </li>
-                    </ul>
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade show active p-3" id="students-panel" role="tabpanel">
-                            <h6 class="mt-2">Unassigned Students</h6>
-                            <p class="text-muted small">Students who have registered but are not yet in a class.</p>
-                            <ul class="list-group">
-                                {% for student in unassigned_students %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <strong>{{ student.name }}</strong> (ID: {{ student.student_id }})
-                                    </span>
-                                    <form method="POST" action="{{ url_for('admin.assign_student_to_class', student_id=student.id) }}" class="d-flex w-50">
-                                        <select name="class_batch_id" class="form-select form-select-sm me-2" required>
-                                            <option value="">Select a class...</option>
+                <div class="panel-body">
+                    <!-- Tabs -->
+                    <div class="control-tabs">
+                        <button class="tab-btn active" data-bs-target="#students-panel">
+                            <i class="fas fa-user-graduate"></i>
+                            Students
+                        </button>
+                        <button class="tab-btn" data-bs-target="#teachers-panel">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Teachers
+                        </button>
+                    </div>
+
+                    <div class="tab-content">
+                        <!-- STUDENTS TAB -->
+                        <div class="tab-pane fade show active" id="students-panel">
+                            <!-- Student Statistics Bar -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="stat-box-mini" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05)); border: 2px solid var(--setup-success);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <div class="stat-mini-value" style="color: var(--setup-success);">{{ assigned_students|length }}</div>
+                                                <div class="stat-mini-label">Assigned Students</div>
+                                            </div>
+                                            <i class="fas fa-check-circle" style="font-size: 2rem; color: var(--setup-success); opacity: 0.3;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-box-mini" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05)); border: 2px solid var(--setup-primary);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <div class="stat-mini-value" style="color: var(--setup-primary);">{{ unassigned_students|length }}</div>
+                                                <div class="stat-mini-label">Unassigned Students</div>
+                                            </div>
+                                            <i class="fas fa-user-slash" style="font-size: 2rem; color: var(--setup-primary); opacity: 0.3;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-box-mini" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05)); border: 2px solid var(--setup-secondary);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <div class="stat-mini-value" style="color: var(--setup-secondary);">{{ all_students|length }}</div>
+                                                <div class="stat-mini-label">Total Students</div>
+                                            </div>
+                                            <i class="fas fa-users" style="font-size: 2rem; color: var(--setup-secondary); opacity: 0.3;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Search and Filter Bar -->
+                            <div class="mb-4 p-3" style="background: rgba(0, 0, 0, 0.3); border-radius: 1rem; border: 2px solid var(--setup-border);">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-md-5">
+                                        <input type="text" id="studentSearch" class="form-control-panel" placeholder="🔍 Search by name or ID..." onkeyup="filterStudents()">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select id="classFilter" class="form-control-panel" onchange="filterStudents()">
+                                            <option value="">All Classes</option>
+                                            <option value="unassigned">Unassigned Only</option>
                                             {% for cb in classes_batches %}
-                                            <option value="{{ cb.id }}">{{ cb.name }}</option>
+                                            <option value="{{ cb.name }}">{{ cb.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <button type="submit" class="btn btn-sm btn-success">Assign</button>
-                                    </form>
-                                </li>
-                                {% else %}
-                                <li class="list-group-item text-muted">No unassigned students found.</li>
-                                {% endfor %}
-                            </ul>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn-control w-100" onclick="resetFilters()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Students Table -->
+                            <div class="table-responsive">
+                                <table class="data-table" id="studentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">#</th>
+                                            <th width="20%">Student Name</th>
+                                            <th width="15%">Student ID</th>
+                                            <th width="15%">Current Class</th>
+                                            <th width="20%">Assign/Change Class</th>
+                                            <th width="15%">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if all_students %}
+                                            {% for student in all_students %}
+                                            <tr class="student-row" data-student-name="{{ student.name|lower }}" data-student-id="{{ student.student_id|lower }}" data-class="{{ student.class_batch.name if student.class_batch else 'unassigned' }}">
+                                                <td>{{ loop.index }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div style="width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, var(--setup-primary), var(--setup-purple)); display: flex; align-items: center; justify-content: center; font-weight: 900; color: white;">
+                                                            {{ student.name[0]|upper }}
+                                                        </div>
+                                                        <strong>{{ student.name }}</strong>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <code style="background: rgba(245,158,11,0.2); padding: 0.25rem 0.75rem; border-radius: 0.5rem; color: var(--setup-primary); font-weight: 700;">
+                                                        {{ student.student_id }}
+                                                    </code>
+                                                </td>
+                                                <td>
+                                                    {% if student.class_batch %}
+                                                        <span class="badge-panel badge-success-panel">
+                                                            <i class="fas fa-users me-1"></i>{{ student.class_batch.name }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge-panel badge-warning-panel">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>Unassigned
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <form method="POST" action="{{ url_for('admin.assign_student_to_class', student_id=student.id) }}" class="assign-form-inline">
+                                                        <select name="class_batch_id" class="form-control-panel" style="padding: 0.5rem; font-size: 0.85rem;">
+                                                            <option value="">-- Select class --</option>
+                                                            {% for cb in classes_batches %}
+                                                            <option value="{{ cb.id }}" {% if student.class_batch and student.class_batch.id == cb.id %}selected{% endif %}>
+                                                                {{ cb.name }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </form>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <!-- Assign/Update Button -->
+                                                        <button type="button" class="btn-action btn-action-primary" onclick="this.closest('tr').querySelector('.assign-form-inline').submit()" title="{% if student.class_batch %}Update Class{% else %}Assign to Class{% endif %}">
+                                                            <i class="fas {% if student.class_batch %}fa-sync-alt{% else %}fa-user-plus{% endif %}"></i>
+                                                        </button>
+                                                        
+                                                        <!-- Unassign Button (only if assigned) -->
+                                                        {% if student.class_batch %}
+                                                        <form method="POST" action="{{ url_for('admin.unassign_student', student_id=student.id) }}" style="display: inline;">
+                                                            <button type="submit" class="btn-action btn-action-danger" onclick="return confirm('Unassign {{ student.name }} from {{ student.class_batch.name }}?')" title="Unassign from class">
+                                                                <i class="fas fa-user-minus"></i>
+                                                            </button>
+                                                        </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="6" class="text-center py-5">
+                                                    <i class="fas fa-users-slash" style="font-size: 4rem; color: #6b7280;"></i>
+                                                    <h4 class="fw-bold mt-3" style="color: white;">No Students Found</h4>
+                                                    <p class="text-secondary">No students have registered yet.</p>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Bulk Actions Section -->
+                            {% if unassigned_students %}
+                            <div class="mt-4 p-3" style="background: rgba(239, 68, 68, 0.1); border-radius: 1rem; border: 2px solid var(--setup-danger);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold" style="color: var(--setup-danger); margin: 0;">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            {{ unassigned_students|length }} Student{{ 's' if unassigned_students|length > 1 }} Pending Assignment
+                                        </h6>
+                                        <p style="color: #9ca3af; font-size: 0.9rem; margin: 0.25rem 0 0 0;">
+                                            These students need to be assigned to a class to access class-specific features.
+                                        </p>
+                                    </div>
+                                    <button class="btn-control" onclick="scrollToUnassigned()">
+                                        <i class="fas fa-arrow-down me-2"></i>View Unassigned
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="tab-pane fade p-3" id="teachers-panel" role="tabpanel">
-                             <h6 class="mt-2">Assign Teachers to Classes</h6>
-                             <ul class="list-group">
-                                 {% for cb in classes_batches %}
-                                 <li class="list-group-item">
-                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                         <h6 class="mb-0">{{ cb.name }}</h6>
-                                         <form method="POST" action="{{ url_for('admin.assign_teacher_to_class', class_id=cb.id) }}" class="d-flex w-50">
-                                             <select name="teacher_id" class="form-select form-select-sm me-2" required>
-                                                 <option value="">Select a teacher to add...</option>
-                                                 {% for teacher in teachers %}
-                                                 <option value="{{ teacher.id }}">{{ teacher.username }}</option>
-                                                 {% endfor %}
-                                             </select>
-                                             <button type="submit" class="btn btn-sm btn-primary">Add Teacher</button>
-                                         </form>
-                                     </div>
-                                     <div class="ps-2">
-                                         <small class="text-muted">Assigned Teachers:</small>
-                                         {% if cb.teachers %}
-                                         <ul class="list-unstyled d-flex flex-wrap gap-2 mt-1">
-                                             {% for teacher in cb.teachers %}
-                                             <li class="d-flex align-items-center bg-light border rounded px-2 py-1">
-                                                 <span>{{ teacher.username }}</span>
-                                                 <form method="POST" action="{{ url_for('admin.unassign_teacher_from_class', class_id=cb.id, teacher_id=teacher.id) }}" class="ms-2">
-                                                     <button type="submit" class="btn btn-sm btn-outline-danger p-0 px-1" style="line-height: 1;">&times;</button>
-                                                 </form>
-                                             </li>
-                                             {% endfor %}
-                                         </ul>
-                                         {% else %}
-                                         <p class="small text-muted fst-italic mt-1">No teachers assigned yet.</p>
-                                         {% endif %}
-                                     </div>
-                                 </li>
-                                 {% endfor %}
-                             </ul>
+
+                        <!-- TEACHERS TAB -->
+                        <div class="tab-pane fade" id="teachers-panel">
+                            {% if classes_batches %}
+                            <div class="accordion" id="teacherAccordion">
+                                {% for cb in classes_batches %}
+                                <div class="accordion-panel">
+                                    <button class="accordion-header-btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ cb.id }}">
+                                        <span>
+                                            <i class="fas fa-layer-group me-2" style="color: var(--setup-primary);"></i>
+                                            {{ cb.name }}
+                                        </span>
+                                        <span class="badge-panel badge-success-panel">
+                                            {{ cb.teacher_assignments|length }} Assignment{{ 's' if cb.teacher_assignments|length != 1 }}
+                                        </span>
+                                    </button>
+                                    
+                                    <div id="collapse-{{ cb.id }}" class="accordion-collapse collapse" data-bs-parent="#teacherAccordion">
+                                        <div class="p-4">
+                                            <!-- Add Teacher-Subject Form -->
+                                            <div class="mb-4 p-3" style="background: rgba(59, 130, 246, 0.1); border-radius: 1rem; border: 2px solid var(--setup-secondary);">
+                                                <h6 class="text-secondary mb-3 fw-bold">
+                                                    <i class="fas fa-plus-circle me-2"></i>Assign Teacher to Subject
+                                                </h6>
+                                                <form method="POST" action="{{ url_for('admin.assign_teacher_subject', class_id=cb.id) }}" class="row g-3">
+                                                    <div class="col-md-5">
+                                                        <label class="form-label small" style="color: #9ca3af;">Select Teacher</label>
+                                                        <select name="teacher_id" class="form-control-panel" required>
+                                                            <option value="">-- Select teacher --</option>
+                                                            {% for teacher in teachers %}
+                                                            <option value="{{ teacher.id }}">{{ teacher.username }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="form-label small" style="color: #9ca3af;">Select Subject</label>
+                                                        <select name="subject_id" class="form-control-panel" required>
+                                                            <option value="">-- Select subject --</option>
+                                                            {% for subject in subjects %}
+                                                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2 d-flex align-items-end">
+                                                        <button type="submit" class="btn-control w-100">
+                                                            <i class="fas fa-plus"></i>Assign
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <!-- Assigned Teachers -->
+                                            <h6 class="text-secondary mb-3 fw-bold">
+                                                <i class="fas fa-list-check me-2"></i>Current Assignments
+                                            </h6>
+                                            {% if cb.teacher_assignments %}
+                                            <div class="row g-3">
+                                                {% for assignment in cb.teacher_assignments %}
+                                                <div class="col-md-6">
+                                                    <div class="assignment-card">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <div class="teacher-avatar">{{ assignment.teacher.username[0]|upper }}</div>
+                                                            <div>
+                                                                <div class="fw-bold" style="color: white;">{{ assignment.teacher.username }}</div>
+                                                                <div class="small" style="color: var(--setup-success);">
+                                                                    <i class="fas fa-book me-1"></i>{{ assignment.subject.name }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <form method="POST" action="{{ url_for('admin.unassign_teacher_subject', assignment_id=assignment.id) }}">
+                                                            <button type="submit" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.2); border: 2px solid var(--setup-danger); color: var(--setup-danger); padding: 0.5rem 0.75rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s;" onclick="return confirm('Remove this assignment?')">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% else %}
+                                            <div class="text-center py-4" style="background: rgba(59, 130, 246, 0.05); border-radius: 0.75rem; border: 2px dashed var(--setup-secondary); color: #9ca3af;">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                No assignments yet. Add a teacher-subject pair above.
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-folder-open" style="font-size: 4rem; color: #6b7280;"></i>
+                                <h4 class="fw-bold mt-3" style="color: white;">No Classes Created</h4>
+                                <p class="text-secondary">Create classes below to assign teachers</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-body p-4">
-                            <h5 class="card-title fw-bold mb-3"><i class="fas fa-users-cog me-2"></i>Manage {% if institution and institution.type == 'school' %}Classes{% else %}Batches{% endif %}</h5>
-                            <form method="POST" action="{{ url_for('admin.setup') }}" class="mb-3">
+            <!-- Classes & Subjects Row -->
+            <div class="row g-4">
+                <!-- Manage Classes -->
+                <div class="col-lg-6">
+                    <div class="control-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <i class="fas fa-layer-group"></i>
+                                Manage Classes
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <form method="POST" action="{{ url_for('admin.setup') }}" class="mb-4">
                                 <div class="input-group">
-                                    <input type="text" name="class_batch_name" class="form-control" placeholder="New class/batch name" required>
-                                    <button class="btn btn-primary" type="submit">Add</button>
+                                    <input type="text" name="class_batch_name" class="form-control-panel" placeholder="e.g., Class 11-A" required>
+                                    <button class="btn-control ms-2" type="submit">
+                                        <i class="fas fa-plus me-2"></i>Add
+                                    </button>
                                 </div>
                             </form>
-                            <ul class="list-group">
+                            
+                            {% if classes_batches %}
+                            <div class="list-group">
                                 {% for cb in classes_batches %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ cb.name }}
+                                <div class="d-flex justify-content-between align-items-center p-3 mb-2" style="background: rgba(26, 26, 26, 0.8); border-radius: 0.75rem; border: 2px solid var(--setup-border);">
+                                    <span style="color: white;"><i class="fas fa-users me-2" style="color: var(--setup-primary);"></i><strong>{{ cb.name }}</strong></span>
                                     <form method="POST" action="{{ url_for('admin.delete_class_batch', class_id=cb.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure? Deleting this cannot be undone.')">&times;</button>
+                                        <button type="submit" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.2); border: 2px solid var(--setup-danger); color: var(--setup-danger); padding: 0.5rem 0.75rem; border-radius: 0.5rem;" onclick="return confirm('Delete {{ cb.name }}?')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </form>
-                                </li>
-                                {% else %}
-                                <li class="list-group-item text-muted">No classes or batches created yet.</li>
+                                </div>
                                 {% endfor %}
-                            </ul>
+                            </div>
+                            {% else %}
+                            <p class="text-secondary text-center">No classes created yet</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-body p-4">
-                            <h5 class="card-title fw-bold mb-3"><i class="fas fa-book me-2"></i>Manage Subjects</h5>
-                            <form method="POST" action="{{ url_for('admin.setup') }}" class="mb-3">
+
+                <!-- Manage Subjects -->
+                <div class="col-lg-6">
+                    <div class="control-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <i class="fas fa-book-reader"></i>
+                                Manage Subjects
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <form method="POST" action="{{ url_for('admin.setup') }}" class="mb-4">
                                 <div class="input-group">
-                                    <input type="text" name="subject_name" class="form-control" placeholder="New subject name" required>
-                                    <button class="btn btn-primary" type="submit">Add</button>
+                                    <input type="text" name="subject_name" class="form-control-panel" placeholder="e.g., Mathematics" required>
+                                    <button class="btn-control ms-2" type="submit">
+                                        <i class="fas fa-plus me-2"></i>Add
+                                    </button>
                                 </div>
                             </form>
-                             <ul class="list-group">
+                            
+                            {% if subjects %}
+                            <div class="list-group">
                                 {% for subject in subjects %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ subject.name }}
+                                <div class="d-flex justify-content-between align-items-center p-3 mb-2" style="background: rgba(26, 26, 26, 0.8); border-radius: 0.75rem; border: 2px solid var(--setup-border);">
+                                    <span style="color: white;"><i class="fas fa-book me-2" style="color: var(--setup-purple);"></i><strong>{{ subject.name }}</strong></span>
                                     <form method="POST" action="{{ url_for('admin.delete_subject', subject_id=subject.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure? Deleting this cannot be undone.')">&times;</button>
+                                        <button type="submit" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.2); border: 2px solid var(--setup-danger); color: var(--setup-danger); padding: 0.5rem 0.75rem; border-radius: 0.5rem;" onclick="return confirm('Delete {{ subject.name }}?')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </form>
-                                </li>
-                                {% else %}
-                                <li class="list-group-item text-muted">No subjects created yet.</li>
+                                </div>
                                 {% endfor %}
-                            </ul>
+                            </div>
+                            {% else %}
+                            <p class="text-secondary text-center">No subjects configured yet</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -165,11 +1131,108 @@
 function copyCode() {
     const code = document.getElementById('inst-code').innerText;
     navigator.clipboard.writeText(code).then(() => {
-        alert('Institution ID copied to clipboard!');
+        alert('✅ Institution ID copied to clipboard!');
     }, (err) => {
-        alert('Failed to copy ID.');
+        alert('❌ Failed to copy ID.');
     });
+}
+
+function shareCode() {
+    const code = document.getElementById('inst-code').innerText;
+    const shareText = `Join our institution using this code: ${code}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Institution Access Code',
+            text: shareText
+        }).catch(err => console.log('Share failed:', err));
+    } else {
+        copyCode();
+    }
+}
+
+// Tab functionality - FIXED VERSION
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get the target panel
+            const targetId = this.getAttribute('data-bs-target');
+            
+            // Remove active from all buttons
+            tabButtons.forEach(b => b.classList.remove('active'));
+            
+            // Add active to clicked button
+            this.classList.add('active');
+            
+            // Hide all panels
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+            
+            // Show target panel
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+        });
+    });
+});
+
+// Student Search and Filter
+function filterStudents() {
+    const searchInput = document.getElementById('studentSearch').value.toLowerCase();
+    const classFilter = document.getElementById('classFilter').value.toLowerCase();
+    const rows = document.querySelectorAll('.student-row');
+    
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const studentName = row.getAttribute('data-student-name');
+        const studentId = row.getAttribute('data-student-id');
+        const studentClass = row.getAttribute('data-class');
+        
+        const matchesSearch = studentName.includes(searchInput) || studentId.includes(searchInput);
+        const matchesClass = !classFilter || studentClass === classFilter;
+        
+        if (matchesSearch && matchesClass) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Update row numbers
+    let index = 1;
+    rows.forEach(row => {
+        if (row.style.display !== 'none') {
+            row.cells[0].textContent = index++;
+        }
+    });
+}
+
+function resetFilters() {
+    document.getElementById('studentSearch').value = '';
+    document.getElementById('classFilter').value = '';
+    filterStudents();
+}
+
+function scrollToUnassigned() {
+    document.getElementById('classFilter').value = 'unassigned';
+    filterStudents();
+    
+    const firstUnassigned = document.querySelector('.student-row[data-class="unassigned"]');
+    if (firstUnassigned) {
+        firstUnassigned.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstUnassigned.style.background = 'rgba(245, 158, 11, 0.2)';
+        setTimeout(() => {
+            firstUnassigned.style.background = '';
+        }, 2000);
+    }
 }
 </script>
 {% endblock %}
-

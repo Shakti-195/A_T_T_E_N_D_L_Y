@@ -1,0 +1,287 @@
+{% extends "shared/base.html" %}
+{% block title %}Mark Attendance{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* Custom styles for the radio button toggle group */
+    .btn-check:checked+.btn-outline-success {
+        background-color: #198754;
+        color: white;
+    }
+    .btn-check:checked+.btn-outline-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    .btn-check:checked+.btn-outline-info {
+        background-color: #0dcaf0;
+        color: white;
+    }
+    .border-dashed {
+        border: 2px dashed var(--border-color) !important;
+    }
+    
+    .alert-info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+    }
+    
+    .teacher-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 2px solid #e9ecef;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <!-- Header -->
+            <div class="teacher-header">
+                <h2 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>Mark Attendance
+                </h2>
+                <p class="text-white-50 mb-0 mt-2">Mark attendance for your assigned classes and subjects</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Check if teacher has any assignments -->
+            {% if not classes %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h4 class="text-dark">No Classes Assigned</h4>
+                    <p class="text-muted">You are not assigned to teach any classes yet. Please contact your administrator.</p>
+                </div>
+            </div>
+            {% else %}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Form 1: For selecting class, subject, date and loading students (uses GET) -->
+                    <form method="GET" action="{{ url_for('teacher.mark_attendance') }}" class="form-section">
+                        <h5 class="mb-3"><i class="fas fa-filter me-2 text-primary"></i>Select Class & Subject</h5>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="class_batch_id" class="form-label fw-medium">Select Your Class</label>
+                                <select class="form-select" id="class_batch_id" name="class_batch_id" required onchange="updateSubjects()">
+                                    <option value="">-- Choose a class --</option>
+                                    {% for class_batch in classes %}
+                                        <option value="{{ class_batch.id }}" {% if class_batch.id|string == selected_class_id|string %}selected{% endif %}>
+                                            {{ class_batch.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="subject_id" class="form-label fw-medium">Select Subject</label>
+                                <select class="form-select" id="subject_id" name="subject_id" required>
+                                    <option value="">-- Choose a subject --</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}" {% if subject.id|string == selected_subject_id|string %}selected{% endif %}>
+                                        {{ subject.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="date" class="form-label fw-medium">Date</label>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ selected_date }}" required>
+                            </div>
+
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-users me-1"></i>Load
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if students %}
+                    <!-- Form 2: For submitting attendance data (uses POST) -->
+                    <form method="POST" action="{{ url_for('teacher.mark_attendance') }}">
+                        <input type="hidden" name="class_batch_id" value="{{ selected_class_id }}">
+                        <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
+                        <input type="hidden" name="date" value="{{ selected_date }}">
+
+                        {% set subject_name = subjects|selectattr('id', 'equalto', selected_subject_id|int)|map(attribute='name')|first %}
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2 text-success"></i>Student List for {{ subject_name or 'Selected Subject' }}
+                            </h5>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('present')">
+                                    ✅ Mark All Present
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('absent')">
+                                    ❌ Mark All Absent
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="5%">#</th>
+                                        <th width="30%">Student Name</th>
+                                        <th width="20%">Student ID</th>
+                                        <th class="text-center" width="45%">Attendance Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr>
+                                        <td><strong>{{ loop.index }}</strong></td>
+                                        <td class="fw-medium">
+                                            <i class="fas fa-user-circle me-2 text-primary"></i>{{ student.name }}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ student.student_id }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <input type="radio" class="btn-check" name="status_{{ student.id }}" id="present_{{ student.id }}" value="present" autocomplete="off" 
+                                                    {% if attendance_data.get(student.id) == 'present' %}checked{% endif %}>
+                                                <label class="btn btn-outline-success" for="present_{{ student.id }}">
+                                                    <i class="fas fa-check me-1"></i>Present
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="status_{{ student.id }}" id="absent_{{ student.id }}" value="absent" autocomplete="off"
+                                                    {% if attendance_data.get(student.id) == 'absent' or not attendance_data.get(student.id) %}checked{% endif %}>
+                                                <label class="btn btn-outline-danger" for="absent_{{ student.id }}">
+                                                    <i class="fas fa-times me-1"></i>Absent
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="status_{{ student.id }}" id="leave_{{ student.id }}" value="leave" autocomplete="off"
+                                                    {% if attendance_data.get(student.id) == 'leave' %}checked{% endif %}>
+                                                <label class="btn btn-outline-info" for="leave_{{ student.id }}">
+                                                    <i class="fas fa-file-alt me-1"></i>Leave
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Attendance
+                            </button>
+                        </div>
+                    </form>
+
+                    {% else %}
+                    <div class="text-center p-5 text-muted border-dashed rounded-3">
+                        <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
+                        <h5>Select Class, Subject & Date</h5>
+                        <p>Please make a selection from all fields above and click "Load" to begin.</p>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal (Optional - for future enhancement) -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrModalLabel">Generate QR Code for Attendance</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" id="qrModalBody">
+        <div id="qr-image-container">
+            <!-- QR image will be injected here -->
+        </div>
+        <div id="qr-spinner" class="spinner-border" role="status" style="display: none;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3">This QR code is valid for 2 minutes. Students can scan it to mark their attendance.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block body_extra %}
+<script>
+// Store class-subject mapping from Python
+const classSubjectMap = {
+    {% for class_id, subjects_list in class_subjects.items() %}
+    '{{ class_id }}': [
+        {% for subject in subjects_list %}
+        { id: '{{ subject.id }}', name: '{{ subject.name }}' }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]{% if not loop.last %},{% endif %}
+    {% endfor %}
+};
+
+// Update subjects dropdown based on selected class
+function updateSubjects() {
+    const classSelect = document.getElementById('class_batch_id');
+    const subjectSelect = document.getElementById('subject_id');
+    const selectedClassId = classSelect.value;
+
+    // Clear current options
+    subjectSelect.innerHTML = '<option value="">-- Choose a subject --</option>';
+
+    // Add subjects for selected class
+    if (selectedClassId && classSubjectMap[selectedClassId]) {
+        classSubjectMap[selectedClassId].forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = subject.name;
+            subjectSelect.appendChild(option);
+        });
+    }
+}
+
+// Mark all students with a given status
+function markAll(status) {
+    const radioButtons = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
+    radioButtons.forEach(radio => {
+        radio.checked = true;
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateSubjects();
+});
+</script>
+{% endblock %}
