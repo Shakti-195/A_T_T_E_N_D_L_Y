@@ -58,11 +58,11 @@ def create_app():
     #     'connect_args': {'timeout': 15}
     # }
     
-    # # --- Secret Key Configuration ---
-    # app.config['SECRET_KEY'] = os.environ.get(
-    #     'SECRET_KEY', 
-    #     'a-very-secret-and-long-random-key-for-production'
-    # )
+    # --- Secret Key Configuration ---
+    app.config['SECRET_KEY'] = os.environ.get(
+        'SECRET_KEY', 
+        'f70d6785ce63b40a5b3044f7f95dc48bba41ed0a1f2c140e540d01e3550f6aeb'
+    )
 
     # --- Database Configuration ---
     database_url = os.environ.get('DATABASE_URL')
