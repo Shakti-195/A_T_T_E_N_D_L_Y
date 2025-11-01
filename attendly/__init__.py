@@ -47,22 +47,40 @@ def create_app():
     load_dotenv()
 
     # --- Database Configuration ---
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'DATABASE_URL', 
-        f"sqlite:///{os.path.join(project_root, 'attendance.db')}"
-    )
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    #     'DATABASE_URL', 
+    #     f"sqlite:///{os.path.join(project_root, 'attendance.db')}"
+    # )
+    # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    #     'pool_pre_ping': True,
+    #     'pool_recycle': 3600,
+    #     'connect_args': {'timeout': 15}
+    # }
+    
+    # # --- Secret Key Configuration ---
+    # app.config['SECRET_KEY'] = os.environ.get(
+    #     'SECRET_KEY', 
+    #     'a-very-secret-and-long-random-key-for-production'
+    # )
+
+    # --- Database Configuration ---
+    database_url = os.environ.get('DATABASE_URL')
+
+    # ✅ Render adds "postgres://" instead of "postgresql://"
+    # SQLAlchemy needs it corrected
+    if database_url and database_url.startswith("postgres://"):
+     database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url or f"sqlite:///{os.path.join(project_root, 'attendance.db')}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
         'pool_recycle': 3600,
-        'connect_args': {'timeout': 15}
+     # NOTE: 'connect_args' should not be used for PostgreSQL
+        **({'connect_args': {'timeout': 15}} if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI'] else {})
     }
-    
-    # --- Secret Key Configuration ---
-    app.config['SECRET_KEY'] = os.environ.get(
-        'SECRET_KEY', 
-        'a-very-secret-and-long-random-key-for-production'
-    )
+
     
     # --- Session Configuration ---
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
