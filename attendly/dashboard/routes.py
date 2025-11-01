@@ -38,7 +38,11 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @dashboard_bp.route('/')
 def index():
     """Redirect to dashboard or login"""
-    return redirect(url_for('dashboard.dashboard') if g.user else url_for('auth.login'))
+    # return redirect(url_for('dashboard.dashboard') if g.user else url_for('auth.login'))
+    from flask import g
+
+    return redirect(url_for('dashboard.dashboard') if getattr(g, 'user', None) else url_for('auth.login'))
+
 
 
 # ====================================================================
