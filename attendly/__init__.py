@@ -577,5 +577,18 @@ def create_app():
     logger.info(f"Scheduler Running: {scheduler.running}")
     logger.info("=" * 70)
 
+    # --- Load Logged-in User Before Each Request ---
+    @app.before_request
+    def load_logged_in_user():
+        """Load user from session before each request."""
+        from .models import User
+        user_id = session.get('user_id')
+
+        if user_id is None:
+            g.user = None
+        else:
+            g.user = db.session.get(User, int(user_id))
+
+
     return app
 
