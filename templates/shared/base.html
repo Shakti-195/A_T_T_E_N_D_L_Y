@@ -943,7 +943,13 @@
                 padding: 1rem;
                 padding-top: 4rem;
             }
-            .flash-messages { right: 0.75rem; top: 0.75rem; max-width: calc(100vw - 1.5rem); }
+            .flash-messages {
+                left: 0.75rem;
+                right: 0.75rem;
+                top: 0.75rem;
+                max-width: none;
+                transform: none;
+            }
             .appearance-panel { width: 100%; }
             .page-header h1 { font-size: 1.25rem; }
         }
@@ -1458,9 +1464,9 @@
             }
         });
 
-        // Close alerts after 1 seconds
+        // Close alerts after 3 seconds
         document.querySelectorAll('.alert').forEach(alert => {
-            setTimeout(() => { try { new bootstrap.Alert(alert).close(); } catch(e) {} }, 1000);
+            setTimeout(() => { try { new bootstrap.Alert(alert).close(); } catch(e) {} }, 3000);
         });
 
         // Handle resize — clean up mobile state

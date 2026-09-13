@@ -545,6 +545,7 @@
                 left: 1rem;
                 max-width: none;
                 align-items: center;
+                transform: none;
             }
             .flash-messages .alert {
                 width: 100%;
@@ -613,7 +614,7 @@
                 setTimeout(() => {
                     const bsAlert = new bootstrap.Alert(alertElement);
                     bsAlert.close();
-                }, 1000);
+                }, 3000);
             });
 
             // Password Visibility Toggle
