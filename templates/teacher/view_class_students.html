@@ -27,7 +27,7 @@
         align-items: center;
         margin-bottom: 3rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
         flex-wrap: wrap;
         gap: 2rem;
     }
@@ -51,7 +51,7 @@
 
     .students-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -59,7 +59,7 @@
 
     /* === BACK BUTTON === */
     .back-btn {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         border: none;
         color: white;
         padding: 0.75rem 1.5rem;
@@ -84,7 +84,7 @@
     /* === CLASS INFO === */
     .class-info-card {
         background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
-        border: 2px solid var(--primary);
+        border: 2px solid var(--primary-color);
         border-radius: 1.5rem;
         padding: 2rem;
         margin-bottom: 3rem;
@@ -116,7 +116,7 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        color: var(--primary);
+        color: var(--primary-color);
     }
 
     .info-content h3 {
@@ -161,7 +161,7 @@
     }
 
     .search-input:focus {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         outline: none;
     }
@@ -176,6 +176,8 @@
         border: 2px solid var(--border-color);
         border-radius: 1.5rem;
         overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
     }
 
@@ -190,7 +192,7 @@
     }
 
     .students-table thead {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     }
 
     .students-table th {
@@ -269,12 +271,12 @@
         border-radius: 1rem;
         height: 12px;
         overflow: hidden;
-        border: 1px solid var(--primary);
+        border: 1px solid var(--primary-color);
     }
 
     .attendance-progress {
         height: 100%;
-        background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
         border-radius: 1rem;
         transition: width 0.5s ease;
     }
@@ -297,12 +299,12 @@
     }
 
     .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
     }
 
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -440,7 +442,7 @@
     }
 
     body[data-theme="dark"] .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
     }
 </style>
 {% endblock %}
@@ -454,7 +456,7 @@
                 <i class="fas fa-users"></i>
                 Class Students
             </h1>
-            <p>👥 View all students in {{ class_batch.name }}</p>
+            <p> View all students in {{ class_batch.name }}</p>
         </div>
         <a href="{{ url_for('teacher.teacher_classes') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
@@ -471,7 +473,7 @@
                     <i class="fas fa-book"></i>
                 </div>
                 <div class="info-content">
-                    <h3>📚 Class Name</h3>
+                    <h3><i class="fas fa-book"></i> Class Name</h3>
                     <p>{{ class_batch.name }}</p>
                 </div>
             </div>
@@ -482,7 +484,7 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="info-content">
-                    <h3>👥 Total Students</h3>
+                    <h3><i class="fas fa-users"></i> Total Students</h3>
                     <p>{{ students|length }}</p>
                 </div>
             </div>
@@ -493,7 +495,7 @@
                     <i class="fas fa-chart-pie"></i>
                 </div>
                 <div class="info-content">
-                    <h3>📊 Avg Attendance</h3>
+                    <h3><i class="fas fa-chart-bar"></i> Avg Attendance</h3>
                     <p>
                         {% if students|length > 0 %}
                             {% set total_pct = (student_stats.values() | map(attribute='percentage') | sum) / student_stats|length %}
@@ -509,21 +511,22 @@
 
     <!-- ===== SEARCH BAR ===== -->
     <div class="search-bar">
-        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search students by name...">
+        <input type="text" class="search-input" id="searchInput" placeholder="<i class="fas fa-search"></i> Search students by name...">
     </div>
 
     <!-- ===== STUDENTS TABLE ===== -->
     {% if students %}
     <div class="table-wrapper">
-        <table class="students-table">
+        <div class="table-responsive">
+<table class="students-table">
             <thead>
                 <tr>
-                    <th>👤 Student Name</th>
-                    <th>🆔 Student ID</th>
-                    <th>✅ Present</th>
-                    <th>📊 Total Days</th>
-                    <th>📈 Attendance %</th>
-                    <th>📌 Status</th>
+                    <th><i class="fas fa-user"></i> Student Name</th>
+                    <th><i class="fas fa-id-badge"></i> Student ID</th>
+                    <th><i class="fas fa-check-circle text-success"></i> Present</th>
+                    <th><i class="fas fa-chart-bar"></i> Total Days</th>
+                    <th><i class="fas fa-chart-line text-success"></i> Attendance %</th>
+                    <th><i class="fas fa-thumbtack"></i> Status</th>
                 </tr>
             </thead>
             <tbody id="studentsTableBody">
@@ -536,7 +539,7 @@
 
                     <!-- Student ID -->
                     <td>
-                        <span style="background: rgba(220, 38, 38, 0.1); padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: var(--primary); font-weight: 700;">
+                        <span style="background: rgba(220, 38, 38, 0.1); padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: var(--primary-color); font-weight: 700;">
                             {{ student.student_id if student.student_id else 'N/A' }}
                         </span>
                     </td>
@@ -589,13 +592,14 @@
                 {% endfor %}
             </tbody>
         </table>
+</div>
     </div>
 
     <!-- ===== EMPTY STATE (NO STUDENTS) ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">👥</div>
-        <h2 class="empty-title">No Students in This Class! 📚</h2>
+        <div class="empty-icon"><i class="fas fa-users"></i></div>
+        <h2 class="empty-title">No Students in This Class!</h2>
         <p class="empty-text">This class currently has no students assigned to it.<br>Please add students to this class from the admin panel.</p>
     </div>
     {% endif %}

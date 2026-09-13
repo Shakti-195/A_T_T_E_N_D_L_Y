@@ -3,12 +3,7 @@
 
 {% block head_extra %}
 <style>
-    :root {
-        --primary: #dc2626;
-        --primary-dark: #b91c1c;
-    }
-
-    * {
+* {
         transition: all 0.3s ease;
     }
 
@@ -25,7 +20,7 @@
         align-items: center;
         margin-bottom: 3rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
         flex-wrap: wrap;
         gap: 2rem;
     }
@@ -49,7 +44,7 @@
 
     .classes-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -79,7 +74,7 @@
 
     .stat-card:hover {
         transform: translateY(-8px);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
     }
 
@@ -96,7 +91,7 @@
     .stat-number {
         font-size: 3.5rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
         line-height: 1;
         margin-bottom: 0.5rem;
     }
@@ -135,7 +130,7 @@
 
     .class-card:hover {
         transform: translateY(-12px) scale(1.02);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 16px 40px rgba(220, 38, 38, 0.3);
     }
 
@@ -144,7 +139,7 @@
     }
 
     .class-header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         padding: 2rem;
         color: white;
         position: relative;
@@ -208,7 +203,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 0.9rem;
     }
 
@@ -235,47 +230,15 @@
         margin-top: auto;
     }
 
-    .action-btn {
-        flex: 1;
-        padding: 0.75rem 1rem;
-        border: none;
-        border-radius: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
+    
 
-    .action-btn-primary {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-    }
+    
 
-    .action-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(220, 38, 38, 0.5);
-        text-decoration: none;
-        color: white;
-    }
+    
 
-    .action-btn-secondary {
-        background: rgba(220, 38, 38, 0.1);
-        color: var(--primary);
-        border: 2px solid var(--primary);
-    }
+    
 
-    .action-btn-secondary:hover {
-        background: rgba(220, 38, 38, 0.2);
-        text-decoration: none;
-    }
+    
 
     /* === EMPTY STATE === */
     .empty-state {
@@ -288,12 +251,12 @@
     }
 
     .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
     }
 
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -348,10 +311,7 @@
             margin-bottom: 0.75rem;
         }
 
-        .action-btn {
-            font-size: 0.85rem;
-            padding: 0.6rem 0.8rem;
-        }
+        
     }
 
     @media (max-width: 480px) {
@@ -376,9 +336,7 @@
             flex-direction: column;
         }
 
-        .action-btn {
-            width: 100%;
-        }
+        
 
         .stat-number {
             font-size: 2rem;
@@ -403,7 +361,7 @@
     }
 
     body[data-theme="dark"] .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
     }
 </style>
 {% endblock %}
@@ -417,7 +375,7 @@
                 <i class="fas fa-chalkboard-user"></i>
                 My Classes
             </h1>
-            <p>📚 Manage and teach your assigned classes</p>
+            <p> Manage and teach your assigned classes</p>
         </div>
     </div>
 
@@ -426,23 +384,23 @@
     <div class="stats-grid">
         <!-- Total Classes Card -->
         <div class="stat-card">
-            <span class="stat-icon">📚</span>
+            <span class="stat-icon"><i class="fas fa-book"></i></span>
             <div class="stat-number">{{ classes|length }}</div>
-            <div class="stat-label">📖 Classes</div>
+            <div class="stat-label"><i class="fas fa-book-open"></i> Classes</div>
         </div>
 
         <!-- Total Students Card -->
         <div class="stat-card">
-            <span class="stat-icon">👥</span>
+            <span class="stat-icon"><i class="fas fa-users"></i></span>
             <div class="stat-number">{{ total_students }}</div>
-            <div class="stat-label">👤 Students</div>
+            <div class="stat-label"><i class="fas fa-user"></i> Students</div>
         </div>
 
         <!-- Total Subjects Card -->
         <div class="stat-card">
-            <span class="stat-icon">📝</span>
+            <span class="stat-icon"><i class="fas fa-pen"></i></span>
             <div class="stat-number">{{ total_subjects }}</div>
-            <div class="stat-label">📕 Subjects</div>
+            <div class="stat-label"><i class="fas fa-book"></i> Subjects</div>
         </div>
     </div>
 
@@ -453,7 +411,7 @@
             <!-- Class Header -->
             <div class="class-header">
                 <h3 class="class-name">{{ class_batch.name }}</h3>
-                <span class="class-badge">🏫 Class Batch</span>
+                <span class="class-badge"><i class="fas fa-school"></i> Class Batch</span>
             </div>
 
             <!-- Class Body -->
@@ -463,7 +421,7 @@
                     <div class="info-item">
                         <i class="fas fa-users"></i>
                         <div>
-                            <div class="info-label">👥 Students</div>
+                            <div class="info-label"><i class="fas fa-users"></i> Students</div>
                             <div class="info-value">{{ class_batch.students|length if class_batch.students else 0 }}</div>
                         </div>
                     </div>
@@ -472,7 +430,7 @@
                     <div class="info-item">
                         <i class="fas fa-book"></i>
                         <div>
-                            <div class="info-label">📚 Subjects</div>
+                            <div class="info-label"><i class="fas fa-book"></i> Subjects</div>
                             <div class="info-value">{{ class_batch.teacher_assignments|length if class_batch.teacher_assignments else 0 }}</div>
                         </div>
                     </div>
@@ -481,7 +439,7 @@
                     <div class="info-item">
                         <i class="fas fa-chalkboard-user"></i>
                         <div>
-                            <div class="info-label">👨‍🏫 Teachers</div>
+                            <div class="info-label"><i class="fas fa-school"></i> Teachers</div>
                             <div class="info-value">{{ class_batch.teachers|length if class_batch.teachers else 0 }}</div>
                         </div>
                     </div>
@@ -490,7 +448,7 @@
                     <div class="info-item">
                         <i class="fas fa-percent"></i>
                         <div>
-                            <div class="info-label">📊 Avg Attendance</div>
+                            <div class="info-label"><i class="fas fa-chart-bar"></i> Avg Attendance</div>
                             <div class="info-value">{{ class_attendance.get(class_batch.id, 0)|round(1)|int }}%</div>
                         </div>
                     </div>
@@ -498,11 +456,11 @@
 
                 <!-- Actions -->
                 <div class="class-actions">
-                    <a href="{{ url_for('teacher.mark_attendance', class_id=class_batch.id) }}" class="action-btn action-btn-primary">
+                    <a href="{{ url_for('teacher.mark_attendance', class_id=class_batch.id) }}" class="btn-base btn-primary">
                         <i class="fas fa-check-circle"></i>
                         <span>Mark Attendance</span>
                     </a>
-                    <a href="{{ url_for('teacher.view_class_students', class_id=class_batch.id) }}" class="action-btn action-btn-secondary">
+                    <a href="{{ url_for('teacher.view_class_students', class_id=class_batch.id) }}" class="btn-base btn-secondary">
                         <i class="fas fa-eye"></i>
                         <span>View Students</span>
                     </a>
@@ -515,8 +473,8 @@
     <!-- ===== EMPTY STATE ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📚</div>
-        <h2 class="empty-title">No Classes Assigned! 📖</h2>
+        <div class="empty-icon"><i class="fas fa-book"></i></div>
+        <h2 class="empty-title">No Classes Assigned!</h2>
         <p class="empty-text">You haven't been assigned to any classes yet.<br>Please contact the administration to get assigned to classes.</p>
     </div>
     {% endif %}
@@ -524,39 +482,5 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    // Theme switching support
-    document.addEventListener('DOMContentLoaded', function() {
-        const themeButtons = document.querySelectorAll('.theme-btn');
-        const body = document.body;
-        
-        const applyTheme = (theme) => {
-            body.setAttribute('data-theme', theme);
-            themeButtons.forEach(btn => {
-                if (btn.dataset.theme === theme) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            localStorage.setItem('attendance_theme', theme);
-        };
 
-        themeButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const theme = button.dataset.theme;
-                applyTheme(theme);
-            });
-        });
-
-        const savedTheme = localStorage.getItem('attendance_theme');
-        if (savedTheme && ['light', 'dark', 'sepia'].includes(savedTheme)) {
-            applyTheme(savedTheme);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            applyTheme(prefersDark ? 'dark' : 'light');
-        }
-    });
-</script>
 {% endblock %}

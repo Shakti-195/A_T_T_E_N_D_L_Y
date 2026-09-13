@@ -3,148 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Attendance System{% endblock %}</title>
+    <title>{% block title %}Attendly — Smart Attendance System{% endblock %}</title>
     
     <!-- Bootstrap & Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Font: Inter for a modern look (consistent with base.html) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        /* === ALIGNED WITH DESIGN SYSTEM === */
         :root {
-            --theme-primary: #481111; /* Primary Blue */
-            --theme-primary-hover: #051b33;
-            --theme-dark: #212529; /* Dark background color */
-            --text-color-dark: #343a40; /* Dark text for light backgrounds */
+            /* --- Core Palette (Light) --- */
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --hover-bg: #f1f5f9;
+            
+            /* Semantic Tokens */
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-rgb: 79, 70, 229;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #f1f5f9;
+            --secondary-hover: #e2e8f0;
+            --secondary-foreground: #0f172a;
+            
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --success-foreground: #ffffff;
+            
+            --warning-color: #f59e0b;
+            --warning-hover: #d97706;
+            --warning-foreground: #ffffff;
+            
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-foreground: #ffffff;
+            
+            --info-color: #3b82f6;
+            --info-hover: #2563eb;
+            --info-foreground: #ffffff;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+
+            /* --- Sidebar --- */
+            --sidebar-bg: #111318;
+            --sidebar-border: #23262f;
+            --sidebar-text: #a1a7b4;
+            --sidebar-text-hover: #ffffff;
+            --sidebar-active-bg: rgba(79, 70, 229, 0.15);
+            --sidebar-active-text: #818cf8;
+            --sidebar-section: #6c727f;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 72px;
         }
+
+        /* --- Dark Theme --- */
+        body[data-theme="dark"] {
+            --bg-color: #0f1117;
+            --card-bg: #1a1d24;
+            --text-color: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #2e3340;
+            --hover-bg: #232732;
+            
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #2e3340;
+            --secondary-hover: #3b4252;
+            --secondary-foreground: #e2e8f0;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        /* --- Sepia Theme --- */
+        body[data-theme="sepia"] {
+            --bg-color: #fdf6e3;
+            --card-bg: #fffbf0;
+            --text-color: #5c4b37;
+            --text-muted: #8a7a67;
+            --border-color: #e6dccb;
+            --hover-bg: #f2e9d8;
+            
+            --primary-color: #9d5b40;
+            --primary-hover: #834b34;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #e6dccb;
+            --secondary-hover: #d5c8b3;
+            --secondary-foreground: #5c4b37;
+            
+            --success-color: #637a4e;
+            --success-hover: #50633f;
+            --danger-color: #c95c50;
+            --danger-hover: #b0493e;
+            --warning-color: #c48c40;
+            --warning-hover: #ad7831;
+        }
+
+        /* --- Oceanic Theme --- */
+        body[data-theme="oceanic"] {
+            --bg-color: #0b1628;
+            --card-bg: #12203a;
+            --text-color: #c8daf0;
+            --text-muted: #6889b0;
+            --border-color: #1e3454;
+            --hover-bg: #172a48;
+            
+            --primary-color: #0ea5e9;
+            --primary-hover: #0284c7;
+            --primary-rgb: 14, 165, 233;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #1e3454;
+            --secondary-hover: #294773;
+            --secondary-foreground: #c8daf0;
+        }
+
+        /* --- Sunset Theme --- */
+        body[data-theme="sunset"] {
+            --bg-color: #1c0f0a;
+            --card-bg: #2a1810;
+            --text-color: #e8c9b8;
+            --text-muted: #9c7560;
+            --border-color: #3d2417;
+            --hover-bg: #33201a;
+            
+            --primary-color: #f97316;
+            --primary-hover: #ea580c;
+            --primary-rgb: 249, 115, 22;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #3d2417;
+            --secondary-hover: #543321;
+            --secondary-foreground: #e8c9b8;
+        }
+
+        /* --- Forest Theme --- */
+        body[data-theme="forest"] {
+            --bg-color: #0a1a10;
+            --card-bg: #13291c;
+            --text-color: #b8d8c4;
+            --text-muted: #5e8a6e;
+            --border-color: #1e3d2a;
+            --hover-bg: #1a3324;
+            
+            --primary-color: #10b981;
+            --primary-hover: #059669;
+            --primary-rgb: 16, 185, 129;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #1e3d2a;
+            --secondary-hover: #285239;
+            --secondary-foreground: #b8d8c4;
+        }
+
+        /* --- Cyberpunk Theme --- */
+        body[data-theme="cyberpunk"] {
+            --bg-color: #080a1a;
+            --card-bg: #10132a;
+            --text-color: #c8d0e8;
+            --text-muted: #5a6290;
+            --border-color: #1c2040;
+            --hover-bg: #161a35;
+            
+            --primary-color: #06b6d4;
+            --primary-hover: #0891b2;
+            --primary-rgb: 6, 182, 212;
+            --primary-foreground: #000000;
+            
+            --secondary-color: #1c2040;
+            --secondary-hover: #292f5c;
+            --secondary-foreground: #c8d0e8;
+            
+            --success-color: #a3e635;
+            --danger-color: #f43f5e;
+            --warning-color: #fcd34d;
+        }
+
+        /* --- Lavender Theme --- */
+        body[data-theme="lavender"] {
+            --bg-color: #140e28;
+            --card-bg: #1e1540;
+            --text-color: #cec0e8;
+            --text-muted: #7a6a9e;
+            --border-color: #2d2055;
+            --hover-bg: #251c4a;
+            
+            --primary-color: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --primary-rgb: 167, 139, 250;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #2d2055;
+            --secondary-hover: #3d2c73;
+            --secondary-foreground: #cec0e8;
+        }
+
+        /* --- Midnight Theme --- */
+        body[data-theme="midnight"] {
+            --bg-color: #0c0e16;
+            --card-bg: #141722;
+            --text-color: #c4c9d8;
+            --text-muted: #6b7394;
+            --border-color: #222738;
+            --hover-bg: #1a1e2e;
+            
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-rgb: 99, 102, 241;
+            --primary-foreground: #ffffff;
+            
+            --secondary-color: #222738;
+            --secondary-hover: #2d334d;
+            --secondary-foreground: #c4c9d8;
+        }
+
+        /* --- Role-based sidebar accent --- */
+        body.role-student {
+            --sidebar-active-bg: rgba(59, 130, 246, 0.15);
+            --sidebar-active-text: #60a5fa;
+        }
+        body.role-teacher {
+            --sidebar-active-bg: rgba(139, 92, 246, 0.15);
+            --sidebar-active-text: #a78bfa;
+        }
+        body.role-admin {
+            --sidebar-active-bg: rgba(239, 68, 68, 0.15);
+            --sidebar-active-text: #f87171;
+        }
+
         body, html {
             height: 100%;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f2f5; /* Light background for auth pages */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* Modern Split Layout for Auth */
+        .auth-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Left Side: Branding / Hero (Hidden on Mobile) */
+        .auth-hero {
+            flex: 1;
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            color: var(--text-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 992px) {
+            .auth-hero { display: flex; }
+        }
+
+        .auth-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="2" fill="rgba(255,255,255,0.05)"/></svg>') repeat;
+            opacity: 0.5;
+        }
+
+        .auth-hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 480px;
+        }
+
+        .auth-hero-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            background: var(--card-bg);
+            padding: 4px;
+        }
+
+        .auth-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Right Side: Form Container */
         .auth-container {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-            background: linear-gradient(135deg, var(--theme-dark) 0%, var(--theme-primary) 100%); /* Consistent gradient */
+            padding: 2rem 1.5rem;
+            background-color: var(--bg-color);
         }
+
+        /* If mobile, we want a subtle gradient background since hero is hidden */
+        @media (max-width: 991px) {
+            .auth-container {
+                background: var(--bg-color);
+            }
+        }
+
         .auth-card {
             width: 100%;
-            max-width: 500px;
-            padding: 2.5rem;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            background-color: #e5dbdb;
-            animation: fadeIn 0.5s ease-in-out;
+            max-width: 440px;
+            padding: 3rem 2.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .auth-card .text-center i {
-            color: var(--theme-primary);
-            transition: transform 0.3s ease-in-out;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .auth-card .text-center i:hover {
-            transform: scale(1.1);
-        }
+
+        /* Auth Form Elements */
         .auth-card h2 {
-            color: var(--text-color-dark);
-            font-weight: 700;
-            margin-top: 1rem;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
         }
+
         .auth-card p.text-muted {
             font-size: 0.95rem;
+            margin-bottom: 2rem;
+            color: var(--text-muted) !important;
         }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
         .form-floating .form-control {
-            border-radius: 8px;
-            border: 1px solid #ced4da;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .form-floating .form-control:focus {
-            border-color: var(--theme-primary);
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
-        }
-        .form-floating > label {
-            padding-left: 0.75rem;
-            color: #6c757d;
-        }
-        .form-select {
-            border-radius: 8px;
-            border: 1px solid #054e9b;
-        }
-        .btn-primary.btn-lg {
-            background-color: var(--theme-primary);
-            border-color: var(--theme-primary);
-            border-radius: 8px;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .btn-primary.btn-lg:hover {
-            background-color: var(--theme-primary-hover);
-            border-color: var(--theme-primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .text-center.mt-4 small a {
-            color: var(--theme-primary);
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            padding-left: 1rem;
             font-weight: 500;
+            transition: all 0.2s ease;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .form-floating .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .form-floating > label {
+            padding-left: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-select {
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            padding: 1rem;
+            font-weight: 500;
+            height: 58px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .btn-primary.btn-lg {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.875rem 1.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.25);
+        }
+
+        .btn-primary.btn-lg:hover, .btn-primary.btn-lg:focus {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.35);
+        }
+
+        .btn-primary.btn-lg:active {
+            transform: translateY(0);
+        }
+
+        /* Links */
+        .auth-links {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: center;
+        }
+
+        .auth-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .auth-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .text-center.mt-4 small {
+            font-size: 0.9rem;
+        }
+
+        .text-center.mt-4 small a {
+            color: var(--primary-color);
+            font-weight: 600;
             text-decoration: none;
         }
+
         .text-center.mt-4 small a:hover {
             text-decoration: underline;
         }
+
+        /* Flash Messages */
         .flash-messages {
             position: fixed;
-            top: 1rem; /* Adjusted for auth pages, no fixed header */
-            right: 1rem;
-            z-index: 1050;
-            width: 350px;
-        }
-        .alert {
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 0.75rem;
-            animation: fadeInRight 0.5s ease-out;
-        }
-        @keyframes fadeInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .alert-dismissible .btn-close {
-            padding: 0.75rem 0.75rem;
+            top: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        /* Links for Forgot Password/Username */
-        .auth-links {
-            margin-top: 1.5rem;
-            text-align: center;
-        }
-        .auth-links a {
-            display: block; /* Each link on its own line */
-            color: #6c757d; /* Muted color */
-            text-decoration: none;
+        .alert {
+            border-radius: 10px;
+            border: 1px solid transparent;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
             font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            transition: color 0.2s ease;
+            animation: slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
         }
-        .auth-links a:hover {
-            color: var(--theme-primary);
-            text-decoration: underline;
+
+        .alert-success { background: rgba(16,185,129,0.12); border-color: var(--success-color, #10b981); color: var(--success-color, #059669); }
+        .alert-danger, .alert-error { background: rgba(239,68,68,0.12); border-color: var(--danger-color, #ef4444); color: var(--danger-color, #dc2626); }
+        .alert-warning { background: rgba(245,158,11,0.12); border-color: var(--warning-color, #f59e0b); color: var(--warning-color, #d97706); }
+        .alert-info { background: rgba(59,130,246,0.12); border-color: var(--info-color, #3b82f6); color: var(--info-color, #2563eb); }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Password Toggle */
+        .password-toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 10;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .password-toggle-btn:hover {
+            color: var(--primary-color);
+        }
+        .password-toggle-btn:focus {
+            outline: none;
+            color: var(--primary-color);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 2rem 1.5rem;
+                border: none;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            }
+            .auth-card h2 { font-size: 1.5rem; }
+            .btn-primary.btn-lg { padding: 0.75rem 1.25rem; }
+            .flash-messages {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+                align-items: center;
+            }
+            .flash-messages .alert {
+                width: 100%;
+            }
         }
     </style>
     {% block head_extra %}{% endblock %}
 </head>
-<body>
+<body data-theme="light">
+
+    <script>
+        // Apply theme early to prevent flash
+        const savedTheme = localStorage.getItem('attendance_theme') || 'light';
+        if (savedTheme !== 'light') {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+
     <!-- Flash Messages Container -->
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
+                {% set category = 'danger' if category == 'error' else category %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -153,19 +579,75 @@
         {% endwith %}
     </div>
 
-    <!-- Main Content Block for Login/Register pages -->
-    {% block content %}{% endblock %}
+    <!-- Main Layout -->
+    <div class="auth-layout">
+        <!-- Hero Section (Desktop Only) -->
+        <div class="auth-hero">
+            <div class="auth-hero-content">
+                <img src="{{ url_for('static', filename='uploads/logo2.png') }}" alt="Attendly Logo" class="auth-hero-logo">
+                <h1>Attendly</h1>
+                <p>The smart, intuitive, and seamless attendance management platform for modern institutions.</p>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="auth-container">
+            <div class="w-100 d-flex flex-column align-items-center">
+                <!-- Mobile Logo (Hidden on Desktop) -->
+                <div class="d-lg-none mb-4 text-center" style="animation: fadeIn 0.5s ease;">
+                    <img src="{{ url_for('static', filename='uploads/logo2.png') }}" alt="Attendly Logo" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow-sm); margin-bottom: 0.75rem; background: var(--card-bg); padding: 2px;">
+                    <h2 style="font-weight: 800; font-size: 1.5rem; color: var(--text-color); margin: 0; letter-spacing: -0.02em;">Attendly</h2>
+                </div>
+                
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
     
-    <!-- Bootstrap JS and Popper.js -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Optionally close flash messages after a few seconds
+            // Flash Messages Auto-dismiss
             document.querySelectorAll('.alert').forEach(alertElement => {
                 setTimeout(() => {
                     const bsAlert = new bootstrap.Alert(alertElement);
                     bsAlert.close();
-                }, 5000); // Close after 5 seconds
+                }, 1000);
+            });
+
+            // Password Visibility Toggle
+            document.querySelectorAll('.password-toggle-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                        this.setAttribute('aria-label', 'Hide password');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                        this.setAttribute('aria-label', 'Show password');
+                    }
+                });
+            });
+
+            // Loading States for forms
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if(this.checkValidity()) {
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            const originalText = submitBtn.innerHTML;
+                            submitBtn.dataset.original = originalText;
+                            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Processing...';
+                        }
+                    }
+                });
             });
         });
     </script>

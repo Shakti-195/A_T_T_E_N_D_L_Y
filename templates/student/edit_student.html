@@ -10,7 +10,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4 p-md-5">
                     <div class="d-flex align-items-center mb-4">
-                        <a href="{{ url_for('student.list_students') }}" class="btn btn-light me-3" title="Back to Students">
+                        <a href="{{ url_for('student.list_students') }}" class="btn btn-light me-3" title="Back to Students" aria-label="Back to Students">
                             <i class="fas fa-arrow-left"></i>
                         </a>
                         <h2 class="card-title fw-bold mb-0">
@@ -47,8 +47,8 @@
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{{ url_for('student.list_students') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
+                            <a href="{{ url_for('student.list_students') }}" class="btn-base btn-secondary">Cancel</a>
+                            <button type="submit" class="btn-base btn-primary">
                                 <i class="fas fa-save me-1"></i> Save Changes
                             </button>
                         </div>

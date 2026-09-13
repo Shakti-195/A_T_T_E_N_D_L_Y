@@ -3,12 +3,7 @@
 
 {% block head_extra %}
 <style>
-    :root {
-        --primary: #dc2626;
-        --primary-dark: #b91c1c;
-        --success: #10b981;
-    }
-
+    /* Rely on global theme tokens */
     * {
         transition: all 0.3s ease;
     }
@@ -26,7 +21,7 @@
         align-items: center;
         margin-bottom: 3rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
         flex-wrap: wrap;
         gap: 2rem;
     }
@@ -50,7 +45,7 @@
 
     .reports-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -58,16 +53,12 @@
 
     /* === FILTER BAR === */
     .filter-bar {
-        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
-        padding: 2rem;
-        border: 2px solid var(--border-color);
-        border-radius: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    body[data-theme="dark"] .filter-bar {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        background: var(--card-bg);
+        padding: 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        margin-bottom: 3rem;
+        box-shadow: var(--shadow-md);
     }
 
     .filter-group {
@@ -88,28 +79,11 @@
         font-size: 1rem;
     }
 
-    .filter-group input:focus,
-    .filter-group select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    .filter-field input:focus,
+    .filter-field select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
         outline: none;
-    }
-
-    .filter-btn {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        border: none;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-    }
-
-    .filter-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
     }
 
     /* === STATS === */
@@ -121,27 +95,18 @@
     }
 
     .stat-card {
-        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
-        border: 2px solid var(--border-color);
-        border-radius: 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
         padding: 2rem;
-        text-align: center;
         transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    body[data-theme="dark"] .stat-card {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: var(--shadow-sm);
     }
 
     .stat-card:hover {
-        transform: translateY(-8px);
-        border-color: var(--primary);
-        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
-    }
-
-    body[data-theme="dark"] .stat-card:hover {
-        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.5);
+        transform: translateY(-4px);
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
     }
 
     .stat-icon {
@@ -153,7 +118,7 @@
     .stat-number {
         font-size: 3.5rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
         line-height: 1;
         margin-bottom: 0.5rem;
     }
@@ -172,6 +137,8 @@
         border: 2px solid var(--border-color);
         border-radius: 1.5rem;
         overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
         margin-bottom: 2rem;
     }
@@ -187,7 +154,7 @@
     }
 
     .reports-table thead {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     }
 
     .reports-table th {
@@ -259,12 +226,12 @@
         border-radius: 1rem;
         height: 12px;
         overflow: hidden;
-        border: 1px solid var(--primary);
+        border: 1px solid var(--primary-color);
     }
 
     .progress-bar {
         height: 100%;
-        background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
         border-radius: 1rem;
         transition: width 1s ease;
     }
@@ -280,12 +247,12 @@
     }
 
     .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
     }
 
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -350,7 +317,7 @@
 
         .filter-group input,
         .filter-group select,
-        .filter-btn {
+        .filter-field {
             width: 100%;
         }
 
@@ -422,7 +389,7 @@
     }
 
     body[data-theme="dark"] .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
     }
 </style>
 {% endblock %}
@@ -436,25 +403,25 @@
                 <i class="fas fa-chart-bar"></i>
                 Reports Summary
             </h1>
-            <p>📊 View attendance and performance reports for your classes</p>
+            <p> View attendance and performance reports for your classes</p>
         </div>
     </div>
 
     <!-- ===== FILTER BAR ===== -->
     <div class="filter-bar">
         <form method="GET" class="filter-group">
-            <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;">📅 Start Date</label>
+            <div style="flex: 1; min-width: 150px;" class="filter-field">
+                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;"><i class="fas fa-calendar-alt"></i> Start Date</label>
                 <input type="date" name="start_date" value="{{ start_date or '' }}" style="width: 100%;">
             </div>
 
-            <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;">📆 End Date</label>
+            <div style="flex: 1; min-width: 150px;" class="filter-field">
+                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;"><i class="fas fa-calendar-alt"></i> End Date</label>
                 <input type="date" name="end_date" value="{{ end_date or '' }}" style="width: 100%;">
             </div>
 
-            <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;">🏫 Class</label>
+            <div style="flex: 1; min-width: 150px;" class="filter-field">
+                <label style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.5rem;"><i class="fas fa-school"></i> Class</label>
                 <select name="class_id" style="width: 100%;">
                     <option value="">All Classes</option>
                     {% for cls in classes %}
@@ -465,8 +432,9 @@
                 </select>
             </div>
 
-            <button type="submit" class="filter-btn" style="min-width: 120px;">
-                <i class="fas fa-search me-2"></i>Generate Report
+            <button type="submit" class="btn-base btn-primary" style="height: 100%;">
+                <i class="fas fa-search"></i>
+                <span>Generate Report</span>
             </button>
         </form>
     </div>
@@ -476,28 +444,28 @@
     <div class="stats-grid">
         <!-- Total Classes Card -->
         <div class="stat-card">
-            <span class="stat-icon">📚</span>
+            <span class="stat-icon"><i class="fas fa-book"></i></span>
             <div class="stat-number">{{ classes|length }}</div>
-            <div class="stat-label">📖 Classes</div>
+            <div class="stat-label"><i class="fas fa-book-open"></i> Classes</div>
         </div>
 
         <!-- Average Attendance Card -->
         <div class="stat-card">
-            <span class="stat-icon">📊</span>
+            <span class="stat-icon"><i class="fas fa-chart-bar"></i></span>
             <div class="stat-number">{{ summary.overall_attendance_percent|round(1)|int }}%</div>
-            <div class="stat-label">📈 Avg Attendance</div>
+            <div class="stat-label"><i class="fas fa-chart-line text-success"></i> Avg Attendance</div>
         </div>
 
         <!-- Present Card -->
         <div class="stat-card">
-            <span class="stat-icon">✅</span>
+            <span class="stat-icon"><i class="fas fa-check-circle text-success"></i></span>
             <div class="stat-number">{{ summary.total_present }}</div>
             <div class="stat-label">✓ Present</div>
         </div>
 
         <!-- Absent Card -->
         <div class="stat-card">
-            <span class="stat-icon">❌</span>
+            <span class="stat-icon"><i class="fas fa-times-circle text-danger"></i></span>
             <div class="stat-number">{{ summary.total_absent }}</div>
             <div class="stat-label">✗ Absent</div>
         </div>
@@ -505,16 +473,17 @@
 
     <!-- ===== REPORTS TABLE ===== -->
     <div class="table-wrapper">
-        <table class="reports-table">
+        <div class="table-responsive">
+<table class="reports-table">
             <thead>
                 <tr>
-                    <th>👤 Student Name</th>
-                    <th>📚 Class</th>
-                    <th>📅 Total Days</th>
-                    <th>✅ Present</th>
-                    <th>❌ Absent</th>
-                    <th>📊 Attendance %</th>
-                    <th>📈 Status</th>
+                    <th><i class="fas fa-user"></i> Student Name</th>
+                    <th><i class="fas fa-book"></i> Class</th>
+                    <th><i class="fas fa-calendar-alt"></i> Total Days</th>
+                    <th><i class="fas fa-check-circle text-success"></i> Present</th>
+                    <th><i class="fas fa-times-circle text-danger"></i> Absent</th>
+                    <th><i class="fas fa-chart-bar"></i> Attendance %</th>
+                    <th><i class="fas fa-chart-line text-success"></i> Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -527,7 +496,7 @@
 
                     <!-- Class -->
                     <td>
-                        <span style="background: rgba(220, 38, 38, 0.1); padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: var(--primary); font-weight: 700;">
+                        <span style="background: rgba(220, 38, 38, 0.1); padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: var(--primary-color); font-weight: 700;">
                             {{ record.class_name if record.class_name else 'N/A' }}
                         </span>
                     </td>
@@ -588,13 +557,14 @@
                 {% endfor %}
             </tbody>
         </table>
+</div>
     </div>
 
     <!-- ===== EMPTY STATE ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📊</div>
-        <h2 class="empty-title">No Report Data Available! 📈</h2>
+        <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+        <h2 class="empty-title">No Report Data Available!</h2>
         <p class="empty-text">Please select a date range and class above to generate your attendance report.</p>
     </div>
     {% endif %}
@@ -602,39 +572,5 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    // Theme switching support
-    document.addEventListener('DOMContentLoaded', function() {
-        const themeButtons = document.querySelectorAll('.theme-btn');
-        const body = document.body;
-        
-        const applyTheme = (theme) => {
-            body.setAttribute('data-theme', theme);
-            themeButtons.forEach(btn => {
-                if (btn.dataset.theme === theme) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            localStorage.setItem('attendance_theme', theme);
-        };
 
-        themeButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const theme = button.dataset.theme;
-                applyTheme(theme);
-            });
-        });
-
-        const savedTheme = localStorage.getItem('attendance_theme');
-        if (savedTheme && ['light', 'dark', 'sepia'].includes(savedTheme)) {
-            applyTheme(savedTheme);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            applyTheme(prefersDark ? 'dark' : 'light');
-        }
-    });
-</script>
 {% endblock %}

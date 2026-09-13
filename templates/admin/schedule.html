@@ -49,7 +49,7 @@
     }
 
     .header-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 3rem;
         animation: float 3s ease-in-out infinite;
     }
@@ -77,7 +77,7 @@
     }
 
     .schedule-card:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 20px 45px rgba(220, 38, 38, 0.15);
     }
 
@@ -104,7 +104,7 @@
     }
 
     .card-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 1.8rem;
     }
 
@@ -122,7 +122,7 @@
     }
 
     .form-label i {
-        color: var(--primary);
+        color: var(--primary-color);
     }
 
     .form-control, .form-select {
@@ -136,7 +136,7 @@
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
         outline: none;
     }
@@ -173,7 +173,7 @@
     /* === BUTTONS === */
     .btn-schedule {
         padding: 1rem 2.5rem;
-        background: linear-gradient(135deg, var(--primary), #ef4444);
+        background: linear-gradient(135deg, var(--primary-color), #ef4444);
         color: white;
         border: 2px solid var(--accent);
         border-radius: 0.75rem;
@@ -340,7 +340,7 @@
                 <div class="info-box">
                     <i class="fas fa-info-circle"></i>
                     <div class="info-box-text">
-                        <strong>📊 Automated Reports:</strong> Set up recurring reports to be sent to your email automatically.
+                        <strong><i class="fas fa-chart-bar"></i> Automated Reports:</strong> Set up recurring reports to be sent to your email automatically.
                     </div>
                 </div>
 
@@ -360,10 +360,10 @@
                                 </label>
                                 <select class="form-select" id="report_type" name="report_type" required>
                                     <option value="" selected disabled>Select report type...</option>
-                                    <option value="attendance">📊 Attendance Report</option>
-                                    <option value="summary">📈 Summary Report</option>
-                                    <option value="detailed">📄 Detailed Report</option>
-                                    <option value="analytics">📉 Analytics Report</option>
+                                    <option value="attendance"><i class="fas fa-chart-bar"></i> Attendance Report</option>
+                                    <option value="summary"><i class="fas fa-chart-line text-success"></i> Summary Report</option>
+                                    <option value="detailed"><i class="fas fa-file-alt"></i> Detailed Report</option>
+                                    <option value="analytics"><i class="fas fa-chart-line text-danger" style="transform: scaleY(-1);"></i> Analytics Report</option>
                                 </select>
                             </div>
 
@@ -374,10 +374,10 @@
                                 </label>
                                 <select class="form-select" id="frequency" name="frequency" required>
                                     <option value="" selected disabled>Select frequency...</option>
-                                    <option value="daily">📅 Daily</option>
-                                    <option value="weekly">📆 Weekly</option>
-                                    <option value="monthly">📋 Monthly</option>
-                                    <option value="quarterly">📊 Quarterly</option>
+                                    <option value="daily"><i class="fas fa-calendar-alt"></i> Daily</option>
+                                    <option value="weekly"><i class="fas fa-calendar-alt"></i> Weekly</option>
+                                    <option value="monthly"><i class="fas fa-clipboard-list"></i> Monthly</option>
+                                    <option value="quarterly"><i class="fas fa-chart-bar"></i> Quarterly</option>
                                 </select>
                             </div>
 
@@ -434,9 +434,9 @@
                                     <i class="fas fa-file-export"></i> Format
                                 </label>
                                 <select class="form-select" id="format" name="format" required>
-                                    <option value="pdf">📄 PDF</option>
-                                    <option value="excel">📊 Excel</option>
-                                    <option value="csv">📋 CSV</option>
+                                    <option value="pdf"><i class="fas fa-file-alt"></i> PDF</option>
+                                    <option value="excel"><i class="fas fa-chart-bar"></i> Excel</option>
+                                    <option value="csv"><i class="fas fa-clipboard-list"></i> CSV</option>
                                 </select>
                             </div>
                         </div>
@@ -474,7 +474,7 @@
                             <strong>Status:</strong> Active Schedule
                         </p>
                         <p style="margin: 0.5rem 0; color: var(--text-color); font-weight: 600;">
-                            <i class="fas fa-file-alt" style="color: var(--primary); margin-right: 0.5rem;"></i>
+                            <i class="fas fa-file-alt" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
                             <strong>Next Run:</strong> {{ job.next_run_time.strftime('%d %b %Y at %H:%M') if job.next_run_time else 'Not scheduled' }}
                         </p>
                     </div>
@@ -485,7 +485,7 @@
                                 <i class="fas fa-play"></i>
                                 <span>Run Now</span>
                             </button>
-                            <button type="submit" name="action" value="cancel" class="btn-schedule btn-cancel" onclick="return confirm('❌ Cancel this schedule?');">
+                            <button type="submit" name="action" value="cancel" class="btn-schedule btn-cancel" onclick="return confirm('<i class="fas fa-times-circle text-danger"></i> Cancel this schedule?');">
                                 <i class="fas fa-stop"></i>
                                 <span>Cancel Schedule</span>
                             </button>
@@ -525,18 +525,18 @@
 
             if (!reportType || !frequency || !time || !email || !format) {
                 e.preventDefault();
-                alert('⚠️ Please fill all required fields!');
+                alert('<i class="fas fa-exclamation-triangle text-warning"></i> Please fill all required fields!');
                 return false;
             }
 
             if (!email.includes('@')) {
                 e.preventDefault();
-                alert('⚠️ Please enter a valid email address!');
+                alert('<i class="fas fa-exclamation-triangle text-warning"></i> Please enter a valid email address!');
                 return false;
             }
         });
 
-        console.log('✅ Schedule page loaded');
+        console.log('<i class="fas fa-check-circle text-success"></i> Schedule page loaded');
     });
 </script>
 {% endblock %}

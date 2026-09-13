@@ -3,14 +3,7 @@
 
 {% block head_extra %}
 <style>
-    :root {
-        --primary: #dc2626;
-        --primary-dark: #b91c1c;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --info: #3b82f6;
-    }
-
+    /* Rely on global theme tokens */
     * {
         transition: all 0.3s ease;
     }
@@ -28,7 +21,7 @@
         align-items: center;
         margin-bottom: 3rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
         flex-wrap: wrap;
         gap: 2rem;
     }
@@ -45,7 +38,7 @@
 
     .reports-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -60,16 +53,12 @@
 
     /* === FILTER BAR === */
     .filter-bar {
-        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+        background: var(--card-bg);
         padding: 2.5rem;
-        border: 2px solid var(--border-color);
-        border-radius: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
         margin-bottom: 3rem;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    body[data-theme="dark"] .filter-bar {
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        box-shadow: var(--shadow-md);
     }
 
     .filter-group {
@@ -106,32 +95,9 @@
 
     .filter-field input:focus,
     .filter-field select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
         outline: none;
-    }
-
-    .filter-btn {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        border: none;
-        color: white;
-        padding: 0.875rem 2rem;
-        border-radius: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        width: 100%;
-    }
-
-    .filter-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
     }
 
     /* === TAB NAVIGATION === */
@@ -163,8 +129,8 @@
     }
 
     .report-tab.active {
-        color: var(--primary);
-        border-bottom-color: var(--primary);
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
     }
 
     /* === STATS GRID === */
@@ -176,27 +142,21 @@
     }
 
     .stat-card {
-        background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
-        border: 2px solid var(--border-color);
-        border-radius: 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
         padding: 2rem;
         transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    body[data-theme="dark"] .stat-card {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: var(--shadow-sm);
     }
 
     .stat-card:hover {
-        transform: translateY(-8px);
-        border-color: var(--primary);
-        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
+        transform: translateY(-4px);
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
     }
 
-    body[data-theme="dark"] .stat-card:hover {
-        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.5);
-    }
+
 
     .stat-icon {
         width: 70px;
@@ -212,7 +172,7 @@
     .stat-number {
         font-size: 3.5rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
         line-height: 1;
         margin-bottom: 0.5rem;
     }
@@ -281,7 +241,7 @@
     }
 
     .reports-table thead {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     }
 
     .reports-table th {
@@ -365,12 +325,12 @@
         border-radius: 1rem;
         height: 14px;
         overflow: hidden;
-        border: 1px solid var(--primary);
+        border: 1px solid var(--primary-color);
     }
 
     .progress-bar {
         height: 100%;
-        background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
         border-radius: 1rem;
         transition: width 0.5s ease;
     }
@@ -408,7 +368,7 @@
     }
 
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
         display: inline-block;
     }
@@ -519,7 +479,7 @@
                 <i class="fas fa-chart-bar"></i>
                 Attendance Reports
             </h1>
-            <p>📊 Comprehensive attendance analytics for students and teachers</p>
+            <p> Comprehensive attendance analytics for students and teachers</p>
         </div>
     </div>
 
@@ -527,17 +487,17 @@
     <div class="filter-bar">
         <form method="GET" class="filter-group">
             <div class="filter-field">
-                <label for="start_date">📅 Start Date</label>
+                <label for="start_date"><i class="fas fa-calendar-alt"></i> Start Date</label>
                 <input type="date" id="start_date" name="start_date" value="{{ start_date or '' }}">
             </div>
 
             <div class="filter-field">
-                <label for="end_date">📆 End Date</label>
+                <label for="end_date"><i class="fas fa-calendar-alt"></i> End Date</label>
                 <input type="date" id="end_date" name="end_date" value="{{ end_date or '' }}">
             </div>
 
             <div class="filter-field">
-                <label for="class_id">🏫 Class</label>
+                <label for="class_id"><i class="fas fa-school"></i> Class</label>
                 <select id="class_id" name="class_id">
                     <option value="">All Classes</option>
                     {% for cls in classes %}
@@ -549,7 +509,7 @@
             </div>
 
             <div class="filter-field">
-                <label for="role_filter">👤 Role</label>
+                <label for="role_filter"><i class="fas fa-user"></i> Role</label>
                 <select id="role_filter" name="role_filter">
                     <option value="">All Users</option>
                     <option value="student">Students</option>
@@ -557,7 +517,7 @@
                 </select>
             </div>
 
-            <button type="submit" class="filter-btn">
+            <button type="submit" class="btn-base btn-primary" style="height: 100%;">
                 <i class="fas fa-search"></i>
                 <span>Generate Report</span>
             </button>
@@ -569,11 +529,11 @@
     <div class="stats-grid">
         <!-- Overall Attendance -->
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(220, 38, 38, 0.15); color: var(--primary);">
+            <div class="stat-icon" style="background: rgba(220, 38, 38, 0.15); color: var(--primary-color);">
                 <i class="fas fa-chart-pie"></i>
             </div>
             <div class="stat-number">{{ summary.overall_attendance_percent|round(1) }}%</div>
-            <div class="stat-label">📊 Overall Attendance</div>
+            <div class="stat-label"><i class="fas fa-chart-bar"></i> Overall Attendance</div>
         </div>
 
         <!-- Total Present -->
@@ -582,7 +542,7 @@
                 <i class="fas fa-user-check"></i>
             </div>
             <div class="stat-number">{{ summary.total_present }}</div>
-            <div class="stat-label">✅ Total Present</div>
+            <div class="stat-label"><i class="fas fa-check-circle text-success"></i> Total Present</div>
         </div>
 
         <!-- Total Absent -->
@@ -591,7 +551,7 @@
                 <i class="fas fa-user-times"></i>
             </div>
             <div class="stat-number">{{ summary.total_absent }}</div>
-            <div class="stat-label">❌ Total Absent</div>
+            <div class="stat-label"><i class="fas fa-times-circle text-danger"></i> Total Absent</div>
         </div>
 
         <!-- Total Records -->
@@ -600,7 +560,7 @@
                 <i class="fas fa-list-ol"></i>
             </div>
             <div class="stat-number">{{ summary.total_records }}</div>
-            <div class="stat-label">📋 Total Records</div>
+            <div class="stat-label"><i class="fas fa-clipboard-list"></i> Total Records</div>
         </div>
 
         <!-- Classes -->
@@ -609,7 +569,7 @@
                 <i class="fas fa-book"></i>
             </div>
             <div class="stat-number">{{ classes|length }}</div>
-            <div class="stat-label">🏫 Classes</div>
+            <div class="stat-label"><i class="fas fa-school"></i> Classes</div>
         </div>
 
         <!-- Users -->
@@ -618,7 +578,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-number">{{ total_users }}</div>
-            <div class="stat-label">👥 Users</div>
+            <div class="stat-label"><i class="fas fa-users"></i> Users</div>
         </div>
     </div>
 
@@ -627,7 +587,7 @@
         <!-- Attendance Distribution -->
         <div class="chart-card">
             <h3 class="chart-title">
-                <i class="fas fa-doughnut-chart" style="color: var(--primary);"></i>
+                <i class="fas fa-doughnut-chart" style="color: var(--primary-color);"></i>
                 Attendance Distribution
             </h3>
             <div class="chart-container">
@@ -655,16 +615,17 @@
         </h3>
 
         <div class="table-wrapper">
-            <table class="reports-table">
+            <div class="table-responsive">
+<table class="reports-table">
                 <thead>
                     <tr>
-                        <th>👤 Student Name</th>
-                        <th>🏫 Class</th>
-                        <th>📅 Total Days</th>
-                        <th>✅ Present</th>
-                        <th>❌ Absent</th>
-                        <th>📊 Attendance %</th>
-                        <th>📈 Status</th>
+                        <th><i class="fas fa-user"></i> Student Name</th>
+                        <th><i class="fas fa-school"></i> Class</th>
+                        <th><i class="fas fa-calendar-alt"></i> Total Days</th>
+                        <th><i class="fas fa-check-circle text-success"></i> Present</th>
+                        <th><i class="fas fa-times-circle text-danger"></i> Absent</th>
+                        <th><i class="fas fa-chart-bar"></i> Attendance %</th>
+                        <th><i class="fas fa-chart-line text-success"></i> Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -719,6 +680,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+</div>
         </div>
     </div>
 
@@ -730,15 +692,16 @@
         </h3>
 
         <div class="table-wrapper">
-            <table class="reports-table">
+            <div class="table-responsive">
+<table class="reports-table">
                 <thead>
                     <tr>
-                        <th>👨‍🏫 Teacher Name</th>
-                        <th>📚 Assigned Classes</th>
-                        <th>📕 Subjects</th>
-                        <th>👥 Total Students</th>
-                        <th>✅ Classes Taken</th>
-                        <th>📈 Attendance Rate</th>
+                        <th><i class="fas fa-school"></i> Teacher Name</th>
+                        <th><i class="fas fa-book"></i> Assigned Classes</th>
+                        <th><i class="fas fa-book"></i> Subjects</th>
+                        <th><i class="fas fa-users"></i> Total Students</th>
+                        <th><i class="fas fa-check-circle text-success"></i> Classes Taken</th>
+                        <th><i class="fas fa-chart-line text-success"></i> Attendance Rate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -779,14 +742,15 @@
                     {% endfor %}
                 </tbody>
             </table>
+</div>
         </div>
     </div>
 
     <!-- ===== EMPTY STATE ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📊</div>
-        <h2 class="empty-title">No Report Data Available! 📈</h2>
+        <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+        <h2 class="empty-title">No Report Data Available!</h2>
         <p class="empty-text">Please select a date range and apply filters to generate your attendance report.</p>
     </div>
     {% endif %}

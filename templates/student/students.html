@@ -53,7 +53,7 @@
     }
 
     .header-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 2.8rem;
         animation: float 3s ease-in-out infinite;
     }
@@ -91,7 +91,7 @@
     }
 
     .btn-add {
-        background: linear-gradient(135deg, var(--primary), var(--danger));
+        background: linear-gradient(135deg, var(--primary-color), var(--danger));
         color: white;
     }
 
@@ -155,7 +155,7 @@
 
     .stat-card:hover {
         transform: translateY(-5px);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 8px 25px rgba(220, 38, 38, 0.2);
     }
 
@@ -257,7 +257,7 @@
     }
 
     .filter-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 1.3rem;
     }
 
@@ -293,7 +293,7 @@
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         outline: none;
     }
@@ -305,7 +305,7 @@
 
     .btn-search {
         padding: 0.85rem 2rem;
-        background: linear-gradient(135deg, var(--primary), var(--danger));
+        background: linear-gradient(135deg, var(--primary-color), var(--danger));
         color: white;
         border: none;
         border-radius: 10px;
@@ -348,7 +348,7 @@
     }
 
     .student-table thead {
-        background: linear-gradient(135deg, var(--primary), var(--danger));
+        background: linear-gradient(135deg, var(--primary-color), var(--danger));
     }
 
     .student-table thead th {
@@ -509,7 +509,7 @@
     }
 
     .empty-icon {
-        font-size: 4rem;
+        font-size: 3rem;
         margin-bottom: 1rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -572,16 +572,16 @@
     }
 
     .page-link:hover:not(.disabled) {
-        background: var(--primary);
+        background: var(--primary-color);
         color: white;
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         transform: translateY(-2px);
     }
 
     .page-item.active .page-link {
-        background: linear-gradient(135deg, var(--primary), var(--danger));
+        background: linear-gradient(135deg, var(--primary-color), var(--danger));
         color: white;
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
     }
 
@@ -710,17 +710,17 @@
     {% if all_classes or total_students %}
     <div class="stats-section">
         <div class="stat-card">
-            <div class="stat-icon">👥</div>
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
             <div class="stat-value">{{ total_students | default(0) }}</div>
             <div class="stat-label">Total Students</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">📚</div>
+            <div class="stat-icon"><i class="fas fa-book"></i></div>
             <div class="stat-value">{{ all_classes | length | default(0) }}</div>
             <div class="stat-label">Total Classes</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">✅</div>
+            <div class="stat-icon"><i class="fas fa-check-circle text-success"></i></div>
             <div class="stat-value">{{ linked_accounts | default(0) }}</div>
             <div class="stat-label">Linked Accounts</div>
         </div>
@@ -735,7 +735,7 @@
         </div>
         <form method="GET" class="filter-form">
             <div class="form-group">
-                <label for="query" class="form-label">🔍 Search</label>
+                <label for="query" class="form-label"><i class="fas fa-search"></i> Search</label>
                 <input 
                     type="text" 
                     class="form-control" 
@@ -746,7 +746,7 @@
                 >
             </div>
             <div class="form-group">
-                <label for="class_id" class="form-label">📚 Class</label>
+                <label for="class_id" class="form-label"><i class="fas fa-book"></i> Class</label>
                 <select name="class_id" class="form-select">
                     <option value="">All Classes</option>
                     {% for class_batch in all_classes %}
@@ -765,15 +765,16 @@
     <!-- TABLE SECTION -->
     <div class="table-section">
         <div class="table-wrapper">
-            <table class="student-table">
+            <div class="table-responsive">
+<table class="student-table">
                 <thead>
                     <tr>
                         <th width="5%">#</th>
-                        <th width="25%">👤 Name</th>
-                        <th width="20%">🆔 Student ID</th>
-                        <th width="20%">📚 Class</th>
-                        <th width="15%">📧 Email</th>
-                        <th width="15%">⚙️ Actions</th>
+                        <th width="25%"><i class="fas fa-user"></i> Name</th>
+                        <th width="20%"><i class="fas fa-id-badge"></i> Student ID</th>
+                        <th width="20%"><i class="fas fa-book"></i> Class</th>
+                        <th width="15%"><i class="fas fa-envelope"></i> Email</th>
+                        <th width="15%"><i class="fas fa-cog"></i> Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -797,24 +798,24 @@
                                     
                                         href="{{ url_for('student.student_profile_view', student_id=student.id) }}"
                                         class="btn-view" 
-                                        title="View Profile"
+                                        title="View Profile" aria-label="View Profile"
                                     >
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a 
                                         href="{{ url_for('student.edit_student', student_id=student.id) }}" 
                                         class="btn-edit" 
-                                        title="Edit"
+                                        title="Edit" aria-label="Edit"
                                     >
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-pen"></i>
                                     </a>
                                     <form 
                                         method="POST" 
                                         action="{{ url_for('student.delete_student', student_id=student.id) }}" 
                                         style="display:inline;"
-                                        onsubmit="return confirm('⚠️ Delete this student?');"
+                                        onsubmit="return confirm('<i class="fas fa-exclamation-triangle text-warning"></i> Delete this student?');"
                                     >
-                                        <button type="submit" class="btn-delete" title="Delete">
+                                        <button type="submit" class="btn-delete" title="Delete" aria-label="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -826,7 +827,7 @@
                     <tr>
                         <td colspan="6">
                             <div class="empty-state">
-                                <div class="empty-icon">📭</div>
+                                <div class="empty-icon"><i class="fas fa-envelope-open-text"></i></div>
                                 <h5 class="empty-title">No Students Found</h5>
                                 <p class="empty-text">Try adjusting your filters or add a new student.</p>
                                 <a href="{{ url_for('student.add_student') }}" class="btn-add" style="display: inline-block;">
@@ -838,6 +839,7 @@
                     {% endif %}
                 </tbody>
             </table>
+</div>
         </div>
 
         <!-- PAGINATION -->
@@ -853,7 +855,7 @@
                         <a 
                             class="page-link" 
                             href="{{ url_for('student.list_students', page=students.prev_num, query=query, class_id=selected_class_id) }}"
-                            title="Previous"
+                            title="Previous" aria-label="Previous"
                         >
                             <i class="fas fa-chevron-left"></i>
                         </a>
@@ -878,7 +880,7 @@
                         <a 
                             class="page-link" 
                             href="{{ url_for('student.list_students', page=students.next_num, query=query, class_id=selected_class_id) }}"
-                            title="Next"
+                            title="Next" aria-label="Next"
                         >
                             <i class="fas fa-chevron-right"></i>
                         </a>

@@ -57,7 +57,7 @@
     }
 
     .header-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 3rem;
         animation: float 3s ease-in-out infinite;
     }
@@ -93,7 +93,7 @@
 
     .stat-card:hover {
         transform: translateY(-5px);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 12px 32px rgba(220, 38, 38, 0.15);
     }
 
@@ -199,7 +199,7 @@
     }
 
     .chart-card:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 12px 32px rgba(220, 38, 38, 0.15);
     }
 
@@ -221,7 +221,7 @@
     }
 
     .chart-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 1.5rem;
     }
 
@@ -251,7 +251,7 @@
     }
 
     .engagement-card:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 12px 32px rgba(220, 38, 38, 0.15);
     }
 
@@ -276,7 +276,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary), #ef4444);
+        background: linear-gradient(135deg, var(--primary-color), #ef4444);
         color: white;
         display: flex;
         align-items: center;
@@ -304,7 +304,7 @@
     .engagement-score {
         font-size: 1.5rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
     }
 
     /* === RESPONSIVE === */
@@ -351,7 +351,7 @@
                 <i class="fas fa-chart-line"></i>
                 Analytics & Insights
             </h1>
-            <p class="header-subtitle">📊 Comprehensive attendance analytics and performance metrics</p>
+            <p class="header-subtitle"> Comprehensive attendance analytics and performance metrics</p>
         </div>
 
         <!-- STATS GRID -->
@@ -415,7 +415,7 @@
                             Attendance Heatmap
                         </div>
                         <span style="font-size: 0.85rem; color: var(--text-muted);">
-                            📊 By Day & Hour
+                            <i class="fas fa-chart-bar"></i> By Day & Hour
                         </span>
                     </div>
                     <div class="chart-body">
@@ -433,7 +433,7 @@
                             Attendance Trend
                         </div>
                         <span style="font-size: 0.85rem; color: var(--text-muted);">
-                            📈 Last 30 Days
+                            <i class="fas fa-chart-line text-success"></i> Last 30 Days
                         </span>
                     </div>
                     <div class="chart-body">
@@ -451,7 +451,7 @@
                             Class Comparison
                         </div>
                         <span style="font-size: 0.85rem; color: var(--text-muted);">
-                            📊 Real-time Class Data
+                            <i class="fas fa-chart-bar"></i> Real-time Class Data
                         </span>
                     </div>
                     <div class="chart-body">

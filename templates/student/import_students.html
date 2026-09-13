@@ -24,7 +24,7 @@
     .import-header {
         margin-bottom: 3rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
     }
 
     .import-header h1 {
@@ -39,7 +39,7 @@
 
     .import-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -74,7 +74,7 @@
     }
 
     .upload-header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         padding: 2rem;
         color: white;
     }
@@ -104,20 +104,20 @@
     }
 
     .drag-drop-zone:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: rgba(220, 38, 38, 0.05);
         transform: scale(1.02);
     }
 
     .drag-drop-zone.dragover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: rgba(220, 38, 38, 0.1);
         transform: scale(1.03);
     }
 
     .drag-drop-icon {
         font-size: 3.5rem;
-        color: var(--primary);
+        color: var(--primary-color);
         margin-bottom: 1rem;
         display: block;
         animation: bounce 2s infinite;
@@ -145,35 +145,14 @@
         display: none;
     }
 
-    .browse-btn {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        border: none;
-        color: white;
-        padding: 1rem 2.5rem;
-        border-radius: 0.75rem;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
+    
 
-    .browse-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
-        text-decoration: none;
-        color: white;
-    }
+    
 
     /* === FILE INFO === */
     .file-info {
         background: rgba(220, 38, 38, 0.1);
-        border: 2px solid var(--primary);
+        border: 2px solid var(--primary-color);
         border-radius: 1rem;
         padding: 1.5rem;
         margin-top: 2rem;
@@ -204,7 +183,7 @@
 
     .file-icon {
         font-size: 2.5rem;
-        color: var(--primary);
+        color: var(--primary-color);
     }
 
     .file-name {
@@ -218,21 +197,9 @@
         color: var(--text-muted);
     }
 
-    .remove-file-btn {
-        background: #ef4444;
-        border: none;
-        color: white;
-        padding: 0.6rem 1.2rem;
-        border-radius: 0.6rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
+    
 
-    .remove-file-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
+    
 
     /* === UPLOAD BUTTON === */
     .upload-btn-container {
@@ -241,51 +208,18 @@
         margin-top: 2rem;
     }
 
-    .upload-btn {
-        flex: 1;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border: none;
-        color: white;
-        padding: 1.25rem;
-        border-radius: 0.75rem;
-        font-weight: 700;
-        font-size: 1.05rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
+    
 
     .upload-btn:hover:not(:disabled) {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
     }
 
-    .upload-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+    
 
-    .cancel-btn {
-        background: #6b7280;
-        border: none;
-        color: white;
-        padding: 1.25rem;
-        border-radius: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
+    
 
-    .cancel-btn:hover {
-        background: #4b5563;
-        transform: translateY(-2px);
-    }
+    
 
     /* === INSTRUCTIONS CARD === */
     .instructions-card {
@@ -426,9 +360,7 @@
         }
 
         .upload-btn,
-        .cancel-btn {
-            width: 100%;
-        }
+        
     }
 
     @media (max-width: 480px) {
@@ -444,10 +376,7 @@
             padding: 0.75rem;
         }
 
-        .browse-btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.9rem;
-        }
+        
     }
 
     /* === THEME SUPPORT === */
@@ -465,7 +394,7 @@
             <i class="fas fa-file-import"></i>
             Import Students
         </h1>
-        <p>📤 Bulk upload new students using a CSV file. Fast, easy, and efficient!</p>
+        <p> Bulk upload new students using a CSV file. Fast, easy, and efficient!</p>
     </div>
 
     <!-- ===== MAIN CONTENT ===== -->
@@ -484,7 +413,7 @@
                     <i class="fas fa-file-csv drag-drop-icon"></i>
                     <div class="drag-drop-title">Drag & Drop Your CSV File Here</div>
                     <div class="drag-drop-text">or click the button below to browse</div>
-                    <button type="button" class="browse-btn" id="browseBtn">
+                    <button type="button" class="btn-base btn-secondary" id="browseBtn">
                         <i class="fas fa-folder-open"></i>
                         <span>Browse Files</span>
                     </button>
@@ -501,7 +430,7 @@
                                 <div class="file-size" id="fileSize">Size: 0 KB</div>
                             </div>
                         </div>
-                        <button type="button" class="remove-file-btn" id="removeFileBtn">
+                        <button type="button" class="btn-base btn-destructive" id="removeFileBtn">
                             <i class="fas fa-times"></i> Remove
                         </button>
                     </div>
@@ -511,11 +440,11 @@
                 <form method="POST" enctype="multipart/form-data" id="uploadForm">
                     <input type="file" id="csvFileHidden" name="student_csv" accept=".csv" style="display: none;" />
                     <div class="upload-btn-container">
-                        <button type="submit" class="upload-btn" id="uploadBtn" disabled>
+                        <button type="submit" class="btn-base btn-primary" id="uploadBtn" disabled>
                             <i class="fas fa-upload"></i>
                             <span>Upload & Import</span>
                         </button>
-                        <button type="button" class="cancel-btn" id="cancelBtn">
+                        <button type="button" class="btn-base btn-secondary" id="cancelBtn">
                             <i class="fas fa-times"></i> Clear
                         </button>
                     </div>
@@ -538,7 +467,7 @@
                 <div class="columns-list">
                     <!-- Column 1: Name -->
                     <div class="column-item">
-                        <div class="column-icon">1️⃣</div>
+                        <div class="column-icon"><i class="fas fa-1"></i></div>
                         <div class="column-details">
                             <h4>Name</h4>
                             <p>Student's full name (e.g., "John Doe")</p>
@@ -547,7 +476,7 @@
 
                     <!-- Column 2: Student ID -->
                     <div class="column-item">
-                        <div class="column-icon">2️⃣</div>
+                        <div class="column-icon"><i class="fas fa-2"></i></div>
                         <div class="column-details">
                             <h4>Student ID</h4>
                             <p>Unique identifier (e.g., "STU001")</p>
@@ -556,7 +485,7 @@
 
                     <!-- Column 3: Email -->
                     <div class="column-item">
-                        <div class="column-icon">3️⃣</div>
+                        <div class="column-icon"><i class="fas fa-3"></i></div>
                         <div class="column-details">
                             <h4>Email</h4>
                             <p>Student's email address</p>
@@ -565,7 +494,7 @@
 
                     <!-- Column 4: Class Batch ID -->
                     <div class="column-item">
-                        <div class="column-icon">4️⃣</div>
+                        <div class="column-icon"><i class="fas fa-4"></i></div>
                         <div class="column-details">
                             <h4>Class Batch ID</h4>
                             <p>ID of the class they belong to</p>
@@ -586,7 +515,7 @@ Mike Johnson,STU003,mike@example.com,2
 
                 <!-- Tips -->
                 <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem;">
-                    <h4 style="font-size: 0.9rem; font-weight: 700; color: #10b981; margin: 0 0 0.5rem 0;">💡 Tips:</h4>
+                    <h4 style="font-size: 0.9rem; font-weight: 700; color: #10b981; margin: 0 0 0.5rem 0;"><i class="fas fa-lightbulb text-warning"></i> Tips:</h4>
                     <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
                         <li>Max 1000 students per upload</li>
                         <li>Email must be unique</li>
@@ -649,7 +578,7 @@ Mike Johnson,STU003,mike@example.com,2
                 csvFileHidden.files = files;
                 displayFileInfo(file);
             } else {
-                alert('❌ Please drop a CSV file!');
+                alert('<i class="fas fa-times-circle text-danger"></i> Please drop a CSV file!');
             }
         }
     });
@@ -683,7 +612,7 @@ Mike Johnson,STU003,mike@example.com,2
     uploadForm.addEventListener('submit', (e) => {
         if (!csvFileHidden.files || csvFileHidden.files.length === 0) {
             e.preventDefault();
-            alert('❌ Please select a CSV file!');
+            alert('<i class="fas fa-times-circle text-danger"></i> Please select a CSV file!');
         }
     });
 

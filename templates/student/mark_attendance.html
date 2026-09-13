@@ -44,7 +44,7 @@
     }
 
     .header-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 2.5rem;
         animation: float 3s ease-in-out infinite;
     }
@@ -110,7 +110,7 @@
     }
 
     .filter-title i {
-        color: var(--primary);
+        color: var(--primary-color);
     }
 
     .filter-form {
@@ -145,7 +145,7 @@
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         outline: none;
     }
@@ -166,7 +166,7 @@
 
     .btn-filter {
         padding: 0.75rem 2rem;
-        background: linear-gradient(135deg, var(--primary), #ef4444);
+        background: linear-gradient(135deg, var(--primary-color), #ef4444);
         color: white;
         border: none;
         border-radius: 0.75rem;
@@ -212,7 +212,7 @@
 
     .stat-card:hover {
         transform: translateY(-5px);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
     }
 
@@ -251,7 +251,7 @@
     .stat-value {
         font-size: 2rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
         position: relative;
         z-index: 1;
     }
@@ -296,7 +296,7 @@
     }
 
     .attendance-table thead {
-        background: linear-gradient(135deg, var(--primary), #ef4444);
+        background: linear-gradient(135deg, var(--primary-color), #ef4444);
     }
 
     .attendance-table thead th {
@@ -385,7 +385,7 @@
     }
 
     .empty-icon {
-        font-size: 4rem;
+        font-size: 3rem;
         margin-bottom: 1rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -540,7 +540,7 @@
     <div class="info-alert">
         <i class="fas fa-info-circle"></i>
         <div>
-            <strong>📊 View Your Attendance:</strong> Below you can see your attendance records for all subjects. Use the filters to find specific records based on subject or date.
+            <strong><i class="fas fa-chart-bar"></i> View Your Attendance:</strong> Below you can see your attendance records for all subjects. Use the filters to find specific records based on subject or date.
         </div>
     </div>
 
@@ -552,7 +552,7 @@
         </div>
         <form method="GET" action="{{ url_for('student.mark_attendance') }}" class="filter-form">
             <div class="form-group">
-                <label for="subject_id" class="form-label">📚 Subject</label>
+                <label for="subject_id" class="form-label"><i class="fas fa-book"></i> Subject</label>
                 <select class="form-select" id="subject_id" name="subject_id">
                     <option value="">All Subjects</option>
                     {% for subject in subjects %}
@@ -564,7 +564,7 @@
             </div>
 
             <div class="form-group">
-                <label for="from_date" class="form-label">📅 From Date</label>
+                <label for="from_date" class="form-label"><i class="fas fa-calendar-alt"></i> From Date</label>
                 <input 
                     type="date" 
                     class="form-control" 
@@ -586,25 +586,25 @@
     {% if attendance_records %}
     <div class="stats-grid">
         <div class="stat-card present">
-            <div class="stat-icon">✅</div>
+            <div class="stat-icon"><i class="fas fa-check-circle text-success"></i></div>
             <div class="stat-label">Present</div>
             <div class="stat-value">{{ total_present }}</div>
         </div>
 
         <div class="stat-card absent">
-            <div class="stat-icon">❌</div>
+            <div class="stat-icon"><i class="fas fa-times-circle text-danger"></i></div>
             <div class="stat-label">Absent</div>
             <div class="stat-value">{{ total_absent }}</div>
         </div>
 
         <div class="stat-card leave">
-            <div class="stat-icon">📅</div>
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
             <div class="stat-label">Leave</div>
             <div class="stat-value">{{ total_leave }}</div>
         </div>
 
         <div class="stat-card percentage">
-            <div class="stat-icon">📊</div>
+            <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
             <div class="stat-label">Percentage</div>
             <div class="stat-value">{{ attendance_percentage }}%</div>
         </div>
@@ -615,14 +615,15 @@
     <div class="table-section">
         <div class="table-wrapper">
             {% if attendance_records %}
-            <table class="attendance-table">
+            <div class="table-responsive">
+<table class="attendance-table">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>📅 Date</th>
-                        <th>📚 Subject</th>
+                        <th><i class="fas fa-calendar-alt"></i> Date</th>
+                        <th><i class="fas fa-book"></i> Subject</th>
                         <th>✓ Status</th>
-                        <th>👤 Marked By</th>
+                        <th><i class="fas fa-user"></i> Marked By</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -637,7 +638,7 @@
                             {% elif record.status == 'absent' %}
                                 <span class="status-badge status-absent">✗ Absent</span>
                             {% elif record.status == 'leave' %}
-                                <span class="status-badge status-leave">📄 Leave</span>
+                                <span class="status-badge status-leave"><i class="fas fa-file-alt"></i> Leave</span>
                             {% else %}
                                 <span class="status-badge" style="background: linear-gradient(135deg, #6366f1, #818cf8); color: white;">{{ record.status|capitalize }}</span>
                             {% endif %}
@@ -647,12 +648,13 @@
                     {% endfor %}
                 </tbody>
             </table>
+</div>
             <div class="record-counter">
                 Showing {{ attendance_records|length }} record{{ 's' if attendance_records|length != 1 else '' }}
             </div>
             {% else %}
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
+                <div class="empty-icon"><i class="fas fa-envelope-open-text"></i></div>
                 <h5 class="empty-title">No Attendance Records Found</h5>
                 <p class="empty-text">Your attendance records will appear here once your teachers mark your attendance. Check back later!</p>
             </div>
@@ -684,13 +686,13 @@
                 const today = new Date();
                 
                 if (selectedDate > today) {
-                    alert('⚠️ Future dates are not allowed!');
+                    alert('<i class="fas fa-exclamation-triangle text-warning"></i> Future dates are not allowed!');
                     this.value = '';
                 }
             });
         }
 
-        console.log('✅ My Attendance page loaded');
+        console.log('<i class="fas fa-check-circle text-success"></i> My Attendance page loaded');
     });
 </script>
 {% endblock %}

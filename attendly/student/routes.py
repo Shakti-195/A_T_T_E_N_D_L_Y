@@ -18,7 +18,8 @@ from sqlalchemy.orm import joinedload
 import qrcode
 from fpdf import FPDF
 
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -765,12 +766,14 @@ def export_csv():
         output = StringIO()
         writer = csv.writer(output)
         
-        writer.writerow(['Student Name', 'Student ID', 'Class', 'Subject', 'Date', 'Status', 'Marked At'])
+        writer.writerow(['Student Name', 'Roll / Student ID', 'Batch', 'Semester', 'Class', 'Subject', 'Date', 'Status', 'Marked At'])
         
         for record in records:
             writer.writerow([
                 record.student.name or 'N/A',
                 record.student.student_id or 'N/A',
+                record.student.batch or 'N/A',
+                record.student.semester or 'N/A',
                 record.student.class_batch.name if record.student.class_batch else 'N/A',
                 record.subject.name if record.subject else 'N/A',
                 record.date.strftime('%Y-%m-%d'),
@@ -811,7 +814,7 @@ def export_excel():
         ws = wb.active
         ws.title = "Attendance"
         
-        headers = ['Student Name', 'Student ID', 'Class', 'Subject', 'Date', 'Status', 'Recorded At']
+        headers = ['Student Name', 'Roll / Student ID', 'Batch', 'Semester', 'Class', 'Subject', 'Date', 'Status', 'Recorded At']
         ws.append(headers)
         
         header_fill = PatternFill(start_color='4472C4', end_color='4472C4', fill_type='solid')
@@ -836,6 +839,8 @@ def export_excel():
             ws.append([
                 record.student.name or 'N/A',
                 record.student.student_id or 'N/A',
+                record.student.batch or 'N/A',
+                record.student.semester or 'N/A',
                 record.student.class_batch.name if record.student.class_batch else 'N/A',
                 record.subject.name if record.subject else 'N/A',
                 record.date.strftime('%Y-%m-%d'),
@@ -851,13 +856,15 @@ def export_excel():
                 cell.border = border
                 cell.font = data_font
         
-        ws.column_dimensions['A'].width = 20
-        ws.column_dimensions['B'].width = 15
+        ws.column_dimensions['A'].width = 22
+        ws.column_dimensions['B'].width = 18
         ws.column_dimensions['C'].width = 15
-        ws.column_dimensions['D'].width = 15
-        ws.column_dimensions['E'].width = 12
-        ws.column_dimensions['F'].width = 12
-        ws.column_dimensions['G'].width = 20
+        ws.column_dimensions['D'].width = 10
+        ws.column_dimensions['E'].width = 18
+        ws.column_dimensions['F'].width = 18
+        ws.column_dimensions['G'].width = 12
+        ws.column_dimensions['H'].width = 12
+        ws.column_dimensions['I'].width = 22
         
         ws.freeze_panes = 'A2'
         
@@ -892,7 +899,7 @@ def export_pdf():
         ).order_by(Attendance.date.desc()).limit(100).all()
         
         pdf_buffer = BytesIO()
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=A4)
+        doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
         elements = []
         
         styles = getSampleStyleSheet()
@@ -901,19 +908,21 @@ def export_pdf():
         elements.append(title)
         elements.append(Spacer(1, 0.3))
         
-        table_data = [['Student Name', 'Student ID', 'Class', 'Subject', 'Date', 'Status']]
+        table_data = [['Student Name', 'Roll / Student ID', 'Batch', 'Semester', 'Class', 'Subject', 'Date', 'Status']]
         
         for record in records:
             table_data.append([
                 record.student.name or 'N/A',
                 record.student.student_id or 'N/A',
+                record.student.batch or 'N/A',
+                str(record.student.semester) if record.student.semester else 'N/A',
                 record.student.class_batch.name if record.student.class_batch else 'N/A',
                 record.subject.name if record.subject else 'N/A',
                 record.date.strftime('%Y-%m-%d'),
                 record.status.capitalize()
             ])
         
-        table = Table(table_data, colWidths=[1.5, 1.2, 1.5, 1.5, 1.2, 1])
+        table = Table(table_data, colWidths=[2.2*inch, 1.5*inch, 1.2*inch, 0.9*inch, 1.5*inch, 1.5*inch, 1.0*inch, 1.0*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),

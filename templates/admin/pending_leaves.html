@@ -27,7 +27,7 @@
         align-items: center;
         margin-bottom: 3rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
         flex-wrap: wrap;
         gap: 2rem;
     }
@@ -51,7 +51,7 @@
 
     .schedule-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -81,7 +81,7 @@
 
     .stat-box:hover {
         transform: translateY(-8px);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
     }
 
@@ -90,9 +90,9 @@
     }
 
     .stat-number {
-        font-size: 4rem;
+        font-size: 3rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
         line-height: 1;
         margin-bottom: 0.5rem;
     }
@@ -145,13 +145,13 @@
 
     .filter-group input:focus,
     .filter-group select:focus {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         outline: none;
     }
 
     .filter-btn {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         border: none;
         color: white;
         padding: 0.75rem 1.5rem;
@@ -187,7 +187,7 @@
     }
 
     .leaves-table thead {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     }
 
     .leaves-table th {
@@ -301,12 +301,12 @@
     }
 
     .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
     }
 
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -483,7 +483,7 @@
     }
 
     body[data-theme="dark"] .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
     }
 </style>
 {% endblock %}
@@ -497,7 +497,7 @@
                 <i class="fas fa-calendar-check"></i>
                 Pending Leaves
             </h1>
-            <p>📋 Manage and approve student leave requests</p>
+            <p> Manage and approve student leave requests</p>
         </div>
     </div>
 
@@ -506,43 +506,43 @@
     <div class="stats-grid">
         <!-- Pending Card -->
         <div class="stat-box">
-            <span class="stat-icon">⏳</span>
+            <span class="stat-icon"><i class="fas fa-hourglass-half text-warning"></i></span>
             <div class="stat-number">{{ total_pending }}</div>
-            <div class="stat-label">⌛ Pending</div>
+            <div class="stat-label"><i class="fas fa-clock"></i> Pending</div>
         </div>
 
         <!-- Approved Card -->
         <div class="stat-box">
-            <span class="stat-icon">✅</span>
+            <span class="stat-icon"><i class="fas fa-check-circle text-success"></i></span>
             <div class="stat-number">{{ total_approved }}</div>
-            <div class="stat-label">✓ Approved</div>
+            <div class="stat-label"><i class="fas fa-check"></i> Approved</div>
         </div>
 
         <!-- Denied Card -->
         <div class="stat-box">
-            <span class="stat-icon">❌</span>
+            <span class="stat-icon"><i class="fas fa-times-circle text-danger"></i></span>
             <div class="stat-number">{{ total_denied }}</div>
-            <div class="stat-label">✗ Denied</div>
+            <div class="stat-label"><i class="fas fa-times"></i> Denied</div>
         </div>
 
         <!-- Total Card -->
         <div class="stat-box">
-            <span class="stat-icon">📊</span>
+            <span class="stat-icon"><i class="fas fa-chart-bar"></i></span>
             <div class="stat-number">{{ total_pending + total_approved + total_denied }}</div>
-            <div class="stat-label">📈 Total</div>
+            <div class="stat-label"><i class="fas fa-chart-line text-success"></i> Total</div>
         </div>
     </div>
 
     <!-- ===== FILTER BAR ===== -->
     <div class="filter-bar">
         <form method="GET" class="filter-group">
-            <input type="text" name="search" placeholder="🔍 Search by student name..." value="{{ search_query or '' }}" style="flex: 1; min-width: 250px;">
+            <input type="text" name="search" placeholder="<i class="fas fa-search"></i> Search by student name..." value="{{ search_query or '' }}" style="flex: 1; min-width: 250px;">
             
             <select name="status" style="min-width: 150px;">
-                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Pending</option>
-                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>✅ Approved</option>
-                <option value="denied" {% if status_filter == 'denied' %}selected{% endif %}>❌ Denied</option>
-                <option value="" {% if status_filter == '' %}selected{% endif %}>📋 All Status</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="denied" {% if status_filter == 'denied' %}selected{% endif %}>Denied</option>
+                <option value="" {% if status_filter == '' %}selected{% endif %}>All Status</option>
             </select>
 
             <button type="submit" class="filter-btn">
@@ -553,16 +553,17 @@
 
     <!-- ===== LEAVES TABLE ===== -->
     <div class="table-wrapper">
-        <table class="leaves-table">
+        <div class="table-responsive">
+<table class="leaves-table">
             <thead>
                 <tr>
-                    <th>👤 Student Name</th>
-                    <th>📅 Start Date</th>
-                    <th>📆 End Date</th>
-                    <th>📝 Reason</th>
-                    <th>⏱️ Days</th>
-                    <th>📌 Status</th>
-                    <th>🎯 Action</th>
+                    <th><i class="fas fa-user"></i> Student Name</th>
+                    <th><i class="fas fa-calendar-alt"></i> Start Date</th>
+                    <th><i class="fas fa-calendar-alt"></i> End Date</th>
+                    <th><i class="fas fa-pen"></i> Reason</th>
+                    <th><i class="fas fa-clock"></i> Days</th>
+                    <th><i class="fas fa-thumbtack"></i> Status</th>
+                    <th><i class="fas fa-bolt"></i> Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -595,8 +596,8 @@
 
                     <!-- Days -->
                     <td>
-                        <strong style="color: var(--primary); font-size: 1.1rem;">
-                            {{ (leave.end_date - leave.start_date).days + 1 }} 📅
+                        <strong style="color: var(--primary-color); font-size: 1.1rem;">
+                            {{ (leave.end_date - leave.start_date).days + 1 }} <i class="fas fa-calendar-alt"></i>
                         </strong>
                     </td>
 
@@ -629,13 +630,14 @@
                 {% endfor %}
             </tbody>
         </table>
+</div>
     </div>
 
     <!-- ===== EMPTY STATE ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">✨</div>
-        <h2 class="empty-title">No Pending Leaves! 🎉</h2>
+        <div class="empty-icon"><i class="fas fa-sparkles text-warning"></i></div>
+        <h2 class="empty-title">No Pending Leaves!</h2>
         <p class="empty-text">All leave requests have been processed. Everything is up to date!</p>
         <div style="margin-top: 2rem;">
             <span class="success-badge">
@@ -649,49 +651,5 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    // Theme switching support
-    document.addEventListener('DOMContentLoaded', function() {
-        const themeButtons = document.querySelectorAll('.theme-btn');
-        const body = document.body;
-        
-        const applyTheme = (theme) => {
-            body.setAttribute('data-theme', theme);
-            themeButtons.forEach(btn => {
-                if (btn.dataset.theme === theme) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            localStorage.setItem('attendance_theme', theme);
-        };
 
-        themeButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const theme = button.dataset.theme;
-                applyTheme(theme);
-            });
-        });
-
-        const savedTheme = localStorage.getItem('attendance_theme');
-        if (savedTheme && ['light', 'dark', 'sepia'].includes(savedTheme)) {
-            applyTheme(savedTheme);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            applyTheme(prefersDark ? 'dark' : 'light');
-        }
-
-        // Prevent form submission for confirmation
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const action = this.querySelector('button').textContent.trim().split('\n')[0];
-                if (!confirm(`Are you sure you want to ${action.toLowerCase()} this leave request?`)) {
-                    e.preventDefault();
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

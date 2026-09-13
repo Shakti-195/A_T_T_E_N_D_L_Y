@@ -30,7 +30,7 @@
         flex-wrap: wrap;
         gap: 2rem;
         padding-bottom: 2rem;
-        border-bottom: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary-color);
     }
 
     .leaves-header-content h1 {
@@ -52,7 +52,7 @@
 
     .leaves-header i {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -60,7 +60,7 @@
 
     /* === APPLY BUTTON === */
     .apply-btn {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         border: none;
         color: white;
         padding: 1.25rem 2.5rem;
@@ -117,7 +117,7 @@
     .stat-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 35px rgba(220, 38, 38, 0.3);
-        border-color: var(--primary);
+        border-color: var(--primary-color);
     }
 
     body[data-theme="dark"] .stat-card:hover {
@@ -146,9 +146,9 @@
     }
 
     .stat-value {
-        font-size: 4rem;
+        font-size: 3rem;
         font-weight: 900;
-        color: var(--primary);
+        color: var(--primary-color);
         line-height: 1;
     }
 
@@ -172,7 +172,7 @@
     }
 
     .leaves-table thead {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     }
 
     .leaves-table th {
@@ -267,12 +267,12 @@
     }
 
     .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
     }
 
     .empty-icon {
-        font-size: 5rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -419,7 +419,7 @@
     }
 
     body[data-theme="dark"] .empty-state:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
     }
 </style>
 {% endblock %}
@@ -433,7 +433,7 @@
                 <i class="fas fa-calendar-check"></i>
                 My Leaves
             </h1>
-            <p>📋 Track and manage your leave requests</p>
+            <p> Track and manage your leave requests</p>
         </div>
         <a href="{{ url_for('student.apply_leave') }}" class="apply-btn">
             <i class="fas fa-plus-circle"></i>
@@ -453,29 +453,31 @@
 
         <!-- Approved Leaves Card -->
         <div class="stat-card">
-            <div class="stat-icon">✅</div>
+            <div class="stat-icon"><i class="fas fa-check-circle text-success"></i></div>
             <div class="stat-label">✓ Approved</div>
             <div class="stat-value">{{ approved_count }}</div>
         </div>
 
         <!-- Total Leaves Card -->
         <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-label">📋 Total</div>
+            <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="stat-label"><i class="fas fa-clipboard-list"></i> Total</div>
             <div class="stat-value">{{ leaves|length }}</div>
         </div>
     </div>
 
     <!-- ===== LEAVES TABLE ===== -->
     <div class="leaves-table-wrapper">
-        <table class="leaves-table">
+        <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <div class="table-responsive">
+<table class="leaves-table">
             <thead>
                 <tr>
-                    <th>📅 Start Date</th>
-                    <th>📆 End Date</th>
-                    <th>📝 Reason</th>
+                    <th><i class="fas fa-calendar-alt"></i> Start Date</th>
+                    <th><i class="fas fa-calendar-alt"></i> End Date</th>
+                    <th><i class="fas fa-pen"></i> Reason</th>
                     <th>⏱️ Duration</th>
-                    <th>📌 Status</th>
+                    <th><i class="fas fa-thumbtack"></i> Status</th>
                     <th>⏰ Applied On</th>
                 </tr>
             </thead>
@@ -543,13 +545,15 @@
                 {% endfor %}
             </tbody>
         </table>
+</div>
+        </div>
     </div>
 
     <!-- ===== EMPTY STATE ===== -->
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <h2 class="empty-title">No Leave Requests Yet! 🎉</h2>
+        <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
+        <h2 class="empty-title">No Leave Requests Yet!</h2>
         <p class="empty-text">You haven't applied for any leave requests yet.<br>Let's get started by creating your first leave request!</p>
         <a href="{{ url_for('student.apply_leave') }}" class="apply-btn">
             <i class="fas fa-plus-circle"></i>
@@ -561,39 +565,5 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    // Theme switching support
-    document.addEventListener('DOMContentLoaded', function() {
-        const themeButtons = document.querySelectorAll('.theme-btn');
-        const body = document.body;
-        
-        const applyTheme = (theme) => {
-            body.setAttribute('data-theme', theme);
-            themeButtons.forEach(btn => {
-                if (btn.dataset.theme === theme) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            localStorage.setItem('attendance_theme', theme);
-        };
 
-        themeButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const theme = button.dataset.theme;
-                applyTheme(theme);
-            });
-        });
-
-        const savedTheme = localStorage.getItem('attendance_theme');
-        if (savedTheme && ['light', 'dark', 'sepia'].includes(savedTheme)) {
-            applyTheme(savedTheme);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            applyTheme(prefersDark ? 'dark' : 'light');
-        }
-    });
-</script>
 {% endblock %}

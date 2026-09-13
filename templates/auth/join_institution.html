@@ -1,21 +1,17 @@
 {% extends "shared/base.html" %}
-{% block title %}Join Institution{% endblock %}
+{% block title %}Join Institution — Attendly{% endblock %}
 
 {% block head_extra %}
 <style>
-    .wizard-card {
-        background-color: var(--card-bg);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow);
-        border-radius: 1rem;
-        overflow: hidden;
-    }
+    /* Wizard Steps Styling */
     .progress-bar-container {
         display: flex;
         justify-content: space-between;
-        padding: 1.5rem 2rem;
-        background-color: var(--bg-color);
+        padding: 1.5rem;
+        background-color: var(--card-bg);
         border-bottom: 1px solid var(--border-color);
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
     .step {
         display: flex;
@@ -24,38 +20,69 @@
         color: var(--text-muted);
         font-weight: 500;
         transition: all 0.3s ease;
+        opacity: 0.7;
     }
     .step .step-icon {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background-color: var(--border-color);
+        background-color: var(--hover-bg);
         color: var(--text-muted);
         display: flex;
         align-items: center;
         justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
         transition: all 0.3s ease;
+        flex-shrink: 0;
     }
     .step.active {
         color: var(--primary-color);
         font-weight: 700;
+        opacity: 1;
     }
     .step.active .step-icon {
-        background-color: var(--primary-color);
-        color: white;
+        background-color: rgba(var(--primary-rgb), 0.15);
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+    .step.completed {
+        opacity: 1;
     }
     .step.completed .step-icon {
-        background-color: #198754;
+        background-color: var(--success-color);
         color: white;
+        border: none;
     }
 
     .wizard-step-content {
         display: none;
-        padding: 2.5rem;
-        animation: fadeIn 0.5s ease-in-out;
+        padding: 3rem 2.5rem;
+        animation: fadeIn 0.4s ease-out;
     }
     .wizard-step-content.active {
         display: block;
+    }
+
+    .list-group-item-action {
+        border-color: var(--border-color);
+        background: var(--bg-color);
+        color: var(--text-color);
+        transition: all 0.2s;
+        margin-bottom: 0.5rem;
+        border-radius: var(--radius-sm) !important;
+        padding: 1rem 1.25rem;
+    }
+    .list-group-item-action:hover {
+        background: var(--hover-bg);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: .2em;
     }
 
     @keyframes fadeIn {
@@ -63,98 +90,112 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    .list-group-item-action {
-        transition: background-color 0.2s, color 0.2s;
+    @media (max-width: 768px) {
+        .progress-bar-container { padding: 1rem; }
+        .step span { font-size: 0.85rem; }
+        .wizard-step-content { padding: 1.5rem; }
     }
-    .spinner-border-sm {
-        width: 1rem;
-        height: 1rem;
-        border-width: .2em;
+    @media (max-width: 480px) {
+        .step span { display: none; } /* Hide text on very small screens, show only numbers */
+        .wizard-step-content { padding: 1.25rem 1rem; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="wizard-card">
+<div class="page-header">
+    <div>
+        <h1>Join Institution</h1>
+        <p class="text-muted mt-1 mb-0">Link your account to your school or college.</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card-modern overflow-hidden">
+            
+            <!-- UI for Teachers (Simple) -->
+            {% if g.user.role == 'teacher' %}
+            <div class="wizard-step-content active text-center py-5">
+                <div class="mb-4" style="width: 72px; height: 72px; border-radius: 50%; background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto;">
+                    <i class="fas fa-school"></i>
+                </div>
+                <h3 class="fw-bold mb-2">Join Your Institution</h3>
+                <p class="text-muted mb-4 px-md-4">As a teacher, you just need to enter the unique ID provided by your institution's administrator to get started.</p>
                 
-                <!-- UI for Teachers (Simple) -->
-                {% if g.user.role == 'teacher' %}
-                <div class="card-body wizard-step-content active p-5">
-                    <h2 class="fw-bold mb-3"><i class="fas fa-school me-2 text-primary"></i>Join Your Institution</h2>
-                    <p class="text-muted mb-4">As a teacher, you just need to enter the unique ID provided by your institution's administrator to get started.</p>
-                    <form method="POST" action="{{ url_for('auth.join_institution') }}">
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="institution_code" name="institution_code" placeholder="e.g., AB12CD" required>
-                            <label for="institution_code">Institution ID</label>
-                        </div>
-                        <div class="d-grid">
-                            <button class="btn btn-primary btn-lg" type="submit">Join Institution</button>
-                        </div>
-                    </form>
-                </div>
-                {% endif %}
-                
-                <!-- UI for Students (Wizard) -->
-                {% if g.user.role == 'student' %}
-                <div class="progress-bar-container">
-                    <div class="step active" id="step-1">
-                        <div class="step-icon">1</div>
-                        <span>Institution ID</span>
+                <form method="POST" action="{{ url_for('auth.join_institution') }}" class="px-md-5">
+                    <div class="form-floating mb-4">
+                        <input type="text" class="form-control" id="institution_code" name="institution_code" placeholder="e.g., AB12CD" required>
+                        <label for="institution_code">Institution ID</label>
                     </div>
-                    <div class="step" id="step-2">
-                        <div class="step-icon">2</div>
-                        <span>Select Class</span>
+                    <div class="d-grid">
+                        <button class="btn-base btn-primary py-3" type="submit" style="font-weight: 600;">Join Institution</button>
                     </div>
-                    <div class="step" id="step-3">
-                        <div class="step-icon">3</div>
-                        <span>Find Your Name</span>
-                    </div>
-                </div>
-
-                <div class="card-body">
-                    <!-- Step 1: Enter Institution ID -->
-                    <div class="wizard-step-content active" id="content-step-1">
-                        <h4 class="mb-3 fw-bold"><i class="fas fa-school me-2 text-primary"></i>Enter Institution ID</h4>
-                        <p class="text-muted">Please enter the unique ID provided by your institution.</p>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="institution_code_student" placeholder="e.g., AB12CD">
-                            <button class="btn btn-primary" type="button" id="find-batches-btn">
-                                <span id="find-btn-text">Find</span>
-                                <span id="find-btn-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Select Batch/Class -->
-                    <div class="wizard-step-content" id="content-step-2">
-                         <h4 class="mb-3 fw-bold"><i class="fas fa-users me-2 text-primary"></i>Select Your Class</h4>
-                        <p class="text-muted">Now, choose your class or batch from the list below.</p>
-                        <select class="form-select" id="batch_id">
-                            <option>Loading classes...</option>
-                        </select>
-                    </div>
-
-                    <!-- Step 3: Select Student -->
-                    <div class="wizard-step-content" id="content-step-3">
-                        <h4 class="mb-3 fw-bold"><i class="fas fa-user-check me-2 text-primary"></i>Confirm Your Identity</h4>
-                        <p class="text-muted">Find and click your name to link your account. This is a one-time action.</p>
-                        <div id="student-list" class="list-group" style="max-height: 250px; overflow-y: auto;">
-                            <!-- Student list will be populated here -->
-                        </div>
-                    </div>
-
-                    <form method="POST" id="join-form-student" action="{{ url_for('auth.join_institution') }}">
-                        <input type="hidden" id="student_record_id" name="student_record_id">
-                    </form>
-                    
-                    <div id="error-message" class="alert alert-danger mx-4 mt-3" style="display: none;"></div>
-                </div>
-                {% endif %}
-
+                </form>
             </div>
+            {% endif %}
+            
+            <!-- UI for Students (Wizard) -->
+            {% if g.user.role == 'student' %}
+            <div class="progress-bar-container">
+                <div class="step active" id="step-1">
+                    <div class="step-icon">1</div>
+                    <span>Institution ID</span>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-icon">2</div>
+                    <span>Select Class</span>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-icon">3</div>
+                    <span>Find Your Name</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Enter Institution ID -->
+            <div class="wizard-step-content active" id="content-step-1">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Enter Institution ID</h3>
+                    <p class="text-muted">Please enter the unique ID provided by your institution.</p>
+                </div>
+                <div class="input-group input-group-lg shadow-sm" style="border-radius: var(--radius-sm); overflow: hidden;">
+                    <input type="text" class="form-control" id="institution_code_student" placeholder="e.g., AB12CD" style="border: 1px solid var(--border-color); font-size: 1rem;">
+                    <button class="btn-base btn-primary px-4" type="button" id="find-batches-btn">
+                        <span id="find-btn-text">Find Class</span>
+                        <span id="find-btn-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Batch/Class -->
+            <div class="wizard-step-content" id="content-step-2">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Select Your Class</h3>
+                    <p class="text-muted">Now, choose your class or batch from the list below.</p>
+                </div>
+                <select class="form-select form-select-lg" id="batch_id" style="font-size: 1rem; padding: 1rem;">
+                    <option>Loading classes...</option>
+                </select>
+            </div>
+
+            <!-- Step 3: Select Student -->
+            <div class="wizard-step-content" id="content-step-3">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Confirm Your Identity</h3>
+                    <p class="text-muted">Find and click your name to link your account. This is a one-time action.</p>
+                </div>
+                <div id="student-list" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                    <!-- Student list will be populated here -->
+                </div>
+            </div>
+
+            <form method="POST" id="join-form-student" action="{{ url_for('auth.join_institution') }}">
+                <input type="hidden" id="student_record_id" name="student_record_id">
+            </form>
+            
+            <div id="error-message" class="alert alert-danger mx-4 mb-4 mt-0" style="display: none;"></div>
+            {% endif %}
+
         </div>
     </div>
 </div>
@@ -163,7 +204,7 @@
 {% block body_extra %}
 <script>
 // This script only runs if the user is a student
-{% if g.user.role == 'student' %}
+{% if g.user and g.user.role == 'student' %}
 document.addEventListener('DOMContentLoaded', function () {
     const steps = {
         1: { indicator: document.getElementById('step-1'), content: document.getElementById('content-step-1') },
@@ -192,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         for (let i = 1; i < stepNumber; i++) {
             steps[i].indicator.classList.add('completed');
+            steps[i].indicator.querySelector('.step-icon').innerHTML = '<i class="fas fa-check"></i>';
         }
         steps[stepNumber].indicator.classList.add('active');
         steps[stepNumber].content.classList.add('active');
@@ -241,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        studentListDiv.innerHTML = '<div class="d-flex justify-content-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        studentListDiv.innerHTML = '<div class="d-flex justify-content-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
         setActiveStep(3);
 
         const studentsUrlPrototype = "{{ url_for('auth.get_students_in_batch', batch_id=0) }}";
@@ -252,13 +294,19 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(students => {
                 studentListDiv.innerHTML = '';
                 if (students.length === 0) {
-                    studentListDiv.innerHTML = '<p class="text-muted text-center p-4">No unclaimed student records found in this class. Please contact your administrator.</p>';
+                    studentListDiv.innerHTML = '<div class="empty-state"><i class="fas fa-users-slash empty-state-icon"></i><div class="empty-state-title">No Students Found</div><div class="empty-state-text">No unclaimed student records found in this class. Please contact your administrator.</div></div>';
                 } else {
                     students.forEach(student => {
                         const studentLink = document.createElement('a');
                         studentLink.href = '#';
-                        studentLink.className = 'list-group-item list-group-item-action';
-                        studentLink.innerHTML = `<strong>${student.name}</strong> <small class="text-muted">(ID: ${student.student_id})</small>`;
+                        studentLink.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        studentLink.innerHTML = `
+                            <div>
+                                <h6 class="mb-0 fw-bold">${student.name}</h6>
+                                <small class="text-muted">ID: ${student.student_id}</small>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        `;
                         studentLink.dataset.id = student.id;
                         studentListDiv.appendChild(studentLink);
                     });
@@ -272,11 +320,11 @@ document.addEventListener('DOMContentLoaded', function () {
         
         if (target) {
             const studentRecordId = target.dataset.id;
-            const studentName = target.querySelector('strong').textContent;
+            const studentName = target.querySelector('h6').textContent;
             hiddenStudentRecordIdInput.value = studentRecordId;
             
-            this.querySelectorAll('.list-group-item-action').forEach(item => item.classList.remove('active'));
-            target.classList.add('active');
+            this.querySelectorAll('.list-group-item-action').forEach(item => item.style.borderColor = 'var(--border-color)');
+            target.style.borderColor = 'var(--primary-color)';
 
             if (confirm(`Are you sure you want to link your account to the academic record for "${studentName}"? This action cannot be undone.`)) {
                 joinForm.submit();
@@ -287,4 +335,3 @@ document.addEventListener('DOMContentLoaded', function () {
 {% endif %}
 </script>
 {% endblock %}
-

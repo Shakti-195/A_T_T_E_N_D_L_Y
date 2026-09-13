@@ -67,7 +67,7 @@
     }
 
     .header-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 3rem;
         animation: float 3s ease-in-out infinite;
     }
@@ -96,7 +96,7 @@
     }
 
     .search-card:hover {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 20px 45px rgba(220, 38, 38, 0.15);
     }
 
@@ -121,7 +121,7 @@
     }
 
     .search-title i {
-        color: var(--primary);
+        color: var(--primary-color);
         font-size: 1.5rem;
     }
 
@@ -139,7 +139,7 @@
     }
 
     .form-label i {
-        color: var(--primary);
+        color: var(--primary-color);
     }
 
     .form-control {
@@ -154,7 +154,7 @@
     }
 
     .form-control:focus {
-        border-color: var(--primary);
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
         outline: none;
     }
@@ -169,7 +169,7 @@
 
     .btn-search {
         padding: 1rem 2.5rem;
-        background: linear-gradient(135deg, var(--primary), #ef4444);
+        background: linear-gradient(135deg, var(--primary-color), #ef4444);
         color: white;
         border: 2px solid var(--accent);
         border-radius: 0.75rem;
@@ -220,7 +220,7 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary), var(--accent));
     }
 
     /* === STUDENT INFO BANNER === */
@@ -409,7 +409,7 @@
     }
 
     .empty-icon {
-        font-size: 4rem;
+        font-size: 3rem;
         margin-bottom: 1rem;
         display: inline-block;
         animation: float 3s ease-in-out infinite;
@@ -515,7 +515,7 @@
                         <i class="fas fa-search"></i>
                         Check Attendance Records
                     </h1>
-                    <p class="header-subtitle">🔍 Enter your Student ID to view your attendance history</p>
+                    <p class="header-subtitle"> Enter your Student ID to view your attendance history</p>
                 </div>
 
                 <!-- SEARCH CARD -->
@@ -568,13 +568,14 @@
                     <!-- TABLE -->
                     <div class="table-wrapper">
                         {% if attendance_records.items %}
-                        <table class="attendance-table">
+                        <div class="table-responsive">
+<table class="attendance-table">
                             <thead>
                                 <tr>
-                                    <th>📅 Date</th>
-                                    <th>📚 Subject</th>
+                                    <th><i class="fas fa-calendar-alt"></i> Date</th>
+                                    <th><i class="fas fa-book"></i> Subject</th>
                                     <th>✓ Status</th>
-                                    <th>👤 Marked By</th>
+                                    <th><i class="fas fa-user"></i> Marked By</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -594,14 +595,14 @@
                                         {% elif record.status == 'absent' %}
                                             <span class="status-badge status-absent">✗ Absent</span>
                                         {% elif record.status == 'leave' %}
-                                            <span class="status-badge status-leave">📄 Leave</span>
+                                            <span class="status-badge status-leave"><i class="fas fa-file-alt"></i> Leave</span>
                                         {% else %}
                                             <span class="status-badge status-other">{{ record.status|capitalize }}</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if record.marked_by == 'qr' %}
-                                            <span class="marked-badge marked-qr">📱 QR Scan</span>
+                                            <span class="marked-badge marked-qr"><i class="fas fa-mobile-alt"></i> QR Scan</span>
                                         {% else %}
                                             <span class="marked-badge marked-manual">✍️ Manual</span>
                                         {% endif %}
@@ -610,9 +611,10 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+</div>
                         {% else %}
                         <div class="empty-state">
-                            <div class="empty-icon">📭</div>
+                            <div class="empty-icon"><i class="fas fa-envelope-open-text"></i></div>
                             <h5 class="empty-title">No Records Found</h5>
                             <p class="empty-text">No attendance records found for this student.</p>
                         </div>
@@ -641,7 +643,7 @@
             this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
         });
 
-        console.log('✅ Check Attendance page loaded');
+        console.log('<i class="fas fa-check-circle text-success"></i> Check Attendance page loaded');
     });
 </script>
 {% endblock %}

@@ -1,31 +1,35 @@
-<!-- {% extends "shared/base_auth.html" %}
-
-{% block title %}Verify Your Account{% endblock %}
+{% extends "shared/base_auth.html" %}
+{% block title %}Verification Sent — Attendly{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="text-center mb-4">
-            <i class="fas fa-paper-plane fa-3x"></i>
-            <h2 class="fw-bold mt-3">Check Your Email</h2>
-            <p class="text-muted">We've sent a verification code to<br><strong class="text-dark">{{ email }}</strong></p>
-        </div>
+<div class="auth-card text-center">
+    <div style="width: 80px; height: 80px; border-radius: 50%; background: #f0fdf4; color: #166534; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem;">
+        <i class="fas fa-paper-plane"></i>
+    </div>
+    
+    <h2 class="mb-3">Verification Sent!</h2>
+    
+    <p class="text-muted mb-4">
+        We've sent a verification email to<br>
+        <strong class="text-dark">{{ email }}</strong>
+    </p>
+    
+    <p class="text-muted small mb-4">
+        Please check your inbox (and spam folder) for the email. Click the link inside or use the 6-digit code to activate your account.
+    </p>
+    
+    <div class="d-grid gap-3">
+        <a href="{{ url_for('auth.verify_email_otp') }}?email={{ email }}" class="btn-base btn-primary btn-lg">
+            Enter Verification Code
+        </a>
         
-        <div class="d-grid mt-4">
-            <a href="{{ url_for('auth.verify_email_otp', email=email) }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-keyboard me-2"></i>Enter Verification Code
-            </a>
-        </div>
-        
-        <div class="auth-links">
-             <a href="{{ url_for('auth.resend_verification_otp', email=email) }}">Didn't receive the code? Resend</a>
-        </div>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg" style="border-radius: 10px; font-weight: 500;">
+            Return to Login
+        </a>
+    </div>
 
-        <div class="text-center mt-4">
-            <small class="text-muted">
-                Already verified? <a href="{{ url_for('auth.login') }}">Login here</a>
-            </small>
-        </div>
+    <div class="text-center mt-4">
+        <small class="text-muted">Didn't receive the email? <a href="{{ url_for('auth.resend_verification_otp') }}?email={{ email }}">Resend it</a></small>
     </div>
 </div>
-{% endblock %} -->
+{% endblock %}
