@@ -1,0 +1,88 @@
+{# templates/profile/search_profiles.html #}
+<div class="section-card">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h3 class="section-title mb-0">
+            <i class="fa-solid fa-magnifying-glass text-primary"></i> Discover Profiles
+        </h3>
+        <span class="badge badge-neutral ml-auto">
+            <i class="fa-solid fa-users"></i> {{ quick_searches | length + 1 }} Active
+        </span>
+    </div>
+    
+    <p class="text-muted mb-4">Search and connect with the Attendly community</p>
+
+    <!-- Search Form -->
+    <div class="p-4 rounded-3 mb-5" style="background: var(--hover-bg); border: 1px solid var(--border-color);">
+        <h5 class="font-weight-bold mb-2" style="font-size: 1.1rem; color: var(--text-color);">Search by Attendly ID</h5>
+        <p class="text-muted mb-4" style="font-size: 0.875rem;">Enter the unique Attendly ID to view the user's profile instantly</p>
+
+        <form method="POST" action="{{ url_for('profile.search_profile') }}" id="profileSearchForm" class="d-flex gap-3">
+            <div class="flex-grow-1 position-relative">
+                <span class="position-absolute top-50 translate-middle-y text-muted" style="left: 15px;">
+                    <i class="fa-solid fa-id-badge"></i>
+                </span>
+                <input 
+                    type="text" 
+                    id="search_id_input" 
+                    name="search_id"
+                    placeholder="e.g., ATD000002"
+                    class="form-control" 
+                    autocomplete="off"
+                    maxlength="20"
+                    required
+                    style="padding-left: 40px; background: var(--bg-color); border-color: var(--border-color); color: var(--text-color);"
+                >
+            </div>
+            <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                <i class="fa-solid fa-search"></i> Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Quick Access Section -->
+    <h5 class="font-weight-bold mb-3 d-flex align-items-center gap-2" style="font-size: 1rem; color: var(--text-color);">
+        <i class="fa-solid fa-bolt text-warning"></i> Quick Access: Other Users
+    </h5>
+
+    {% if quick_searches and quick_searches|length > 0 %}
+        <div class="info-grid">
+            {% for search_user in quick_searches %}
+            <div class="info-card" style="cursor: pointer;" onclick="document.getElementById('search_id_input').value='{{ search_user.attendlyId }}'; document.getElementById('profileSearchForm').submit();">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: var(--bg-color); border: 1px solid var(--border-color);">
+                        <i class="fa-solid fa-user text-muted"></i>
+                    </div>
+                    <div>
+                        <p class="info-card-value mb-0" style="font-size: 1rem; font-weight: 600;">{{ search_user.name }}</p>
+                        <p class="info-card-label mb-0" style="text-transform: none;">{{ search_user.attendlyId }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state text-center py-4 mb-4" style="background: var(--hover-bg); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <p class="text-muted mb-0">No other user profiles found to display for Quick Access.</p>
+        </div>
+    {% endif %}
+
+    <!-- Tips Section -->
+    <div class="row mt-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <div class="p-3 h-100 rounded-3" style="background: var(--hover-bg); border: 1px solid var(--border-color);">
+                <h6 class="font-weight-bold mb-3 d-flex align-items-center gap-2" style="color: var(--text-color);"><i class="fa-solid fa-lightbulb text-warning"></i> Search Tips</h6>
+                <ul class="text-muted pl-3 mb-0" style="font-size: 0.8125rem;">
+                    <li class="mb-2">Case-insensitive search (ATD000002 = atd000002)</li>
+                    <li class="mb-2">Instant redirect to profile page</li>
+                    <li>Only exact Attendly ID matches are supported</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-3 h-100 rounded-3" style="background: var(--hover-bg); border: 1px solid var(--border-color);">
+                <h6 class="font-weight-bold mb-3 d-flex align-items-center gap-2" style="color: var(--text-color);"><i class="fa-solid fa-shield-halved text-success"></i> Privacy & Security</h6>
+                <p class="text-muted mb-0" style="font-size: 0.8125rem; line-height: 1.5;">Only authorized public profile information is displayed when viewing other users. All sensitive data is strictly protected by role-based permissions.</p>
+            </div>
+        </div>
+    </div>
+</div>

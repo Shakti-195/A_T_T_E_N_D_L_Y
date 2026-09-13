@@ -184,8 +184,13 @@
                     <h3 class="fw-bold">Confirm Your Identity</h3>
                     <p class="text-muted">Find and click your name to link your account. This is a one-time action.</p>
                 </div>
-                <div id="student-list" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                <div id="student-list" class="list-group list-group-flush mb-3" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
                     <!-- Student list will be populated here -->
+                </div>
+                <div id="confirm-join-container" style="display: none;" class="d-grid mt-3">
+                    <button class="btn-base btn-primary py-3" type="button" id="confirm-join-btn" style="font-weight: 600;">
+                        Confirm &amp; Join Institution
+                    </button>
                 </div>
             </div>
 
@@ -314,23 +319,38 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
+    const confirmJoinContainer = document.getElementById('confirm-join-container');
+    const confirmJoinBtn = document.getElementById('confirm-join-btn');
+
     studentListDiv.addEventListener('click', function (e) {
         e.preventDefault();
         const target = e.target.closest('.list-group-item-action');
         
         if (target) {
             const studentRecordId = target.dataset.id;
-            const studentName = target.querySelector('h6').textContent;
             hiddenStudentRecordIdInput.value = studentRecordId;
             
-            this.querySelectorAll('.list-group-item-action').forEach(item => item.style.borderColor = 'var(--border-color)');
+            this.querySelectorAll('.list-group-item-action').forEach(item => {
+                item.style.borderColor = 'var(--border-color)';
+                item.style.backgroundColor = 'var(--bg-color)';
+            });
             target.style.borderColor = 'var(--primary-color)';
+            target.style.backgroundColor = 'rgba(var(--primary-rgb), 0.05)';
 
-            if (confirm(`Are you sure you want to link your account to the academic record for "${studentName}"? This action cannot be undone.`)) {
-                joinForm.submit();
-            }
+            confirmJoinContainer.style.display = 'block';
+            confirmJoinContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     });
+
+    if (confirmJoinBtn) {
+        confirmJoinBtn.addEventListener('click', function() {
+            if (!hiddenStudentRecordIdInput.value) return;
+            
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Joining...';
+            joinForm.submit();
+        });
+    }
 });
 {% endif %}
 </script>

@@ -674,18 +674,7 @@
 {% block content %}
 <div class="students-container">
     <!-- ALERTS -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="alert-container">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}">
-                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
-                <span>{{ message }}</span>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    {% endwith %}
+    
 
     <!-- HEADER -->
     <div class="students-header">

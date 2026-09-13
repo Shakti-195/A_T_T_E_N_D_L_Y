@@ -21,424 +21,126 @@
     "Other"
 ] %}
 
-<style>
-    .danger-zone-card {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 2px solid rgba(239, 68, 68, 0.3);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(239, 68, 68, 0.2);
-    }
 
-    .danger-zone-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 30% 20%, rgba(239, 68, 68, 0.15) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: 0;
-    }
+<div class="section-card" style="border: 1px solid var(--danger-color);">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h3 class="section-title text-danger mb-0" style="color: var(--danger-color) !important;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
+        </h3>
+    </div>
+    
+    <p class="text-muted mb-4">Irreversible actions require careful consideration.</p>
 
-    .danger-zone-card > * {
-        position: relative;
-        z-index: 1;
-    }
+    <!-- Warning Alert -->
+    <div class="alert d-flex gap-3 align-items-start border-0 mb-4" style="background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-md); padding: 1.25rem;">
+        <i class="fa-solid fa-circle-exclamation text-danger fs-5 mt-1"></i>
+        <div>
+            <h5 class="text-danger font-weight-bold mb-1" style="color: var(--danger-color) !important;">Critical Warning</h5>
+            <p class="text-danger mb-0" style="font-size: 0.9375rem; color: var(--danger-color) !important;">Account deletion is <strong>permanent and cannot be reversed</strong>. Please ensure you have backed up any important data before proceeding.</p>
+        </div>
+    </div>
 
-    .danger-zone-header {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
-        background-size: 200% 200%;
-        animation: dangerGradientFlow 10s ease infinite;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .danger-zone-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
-        animation: rotateGlow 20s linear infinite;
-    }
-
-    @keyframes dangerGradientFlow {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-
-    .danger-warning-alert {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
-        border: 2px solid rgba(239, 68, 68, 0.3);
-        border-left-width: 5px;
-        transition: all 0.3s ease;
-    }
-
-    .danger-warning-alert:hover {
-        border-color: rgba(239, 68, 68, 0.5);
-        box-shadow: 0 12px 30px rgba(239, 68, 68, 0.25);
-        transform: translateY(-2px);
-    }
-
-    .consequence-item {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(148, 163, 184, 0.1);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .consequence-item::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, var(--item-glow), transparent);
-        transition: left 0.6s ease;
-    }
-
-    .consequence-item:hover {
-        background: rgba(15, 23, 42, 0.8);
-        border-color: rgba(239, 68, 68, 0.3);
-        transform: translateX(8px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .consequence-item:hover::before {
-        left: 100%;
-    }
-
-    .delete-action-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(148, 163, 184, 0.1);
-        transition: all 0.3s ease;
-    }
-
-    .delete-action-card:hover {
-        border-color: rgba(239, 68, 68, 0.3);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .btn-delete-account {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
-    }
-
-    .btn-delete-account::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-        transition: left 0.6s ease;
-    }
-
-    .btn-delete-account:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(239, 68, 68, 0.5);
-    }
-
-    .btn-delete-account:hover::before {
-        left: 100%;
-    }
-
-    .btn-delete-account:active {
-        transform: translateY(-1px);
-    }
-
-    /* Modal Styles */
-    .modal-danger .modal-content {
-        background: linear-gradient(135deg, rgba(24, 24, 37, 0.98) 0%, rgba(17, 17, 27, 0.98) 100%);
-        border: 2px solid rgba(239, 68, 68, 0.3);
-        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6), 0 0 60px rgba(239, 68, 68, 0.2);
-    }
-
-    .modal-danger .modal-header {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
-        border-bottom: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .modal-progress-bar {
-        height: 6px;
-        background: rgba(39, 39, 42, 0.8);
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .modal-progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
-        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
-    }
-
-    .reason-option {
-        background: rgba(30, 30, 46, 0.6);
-        border: 2px solid rgba(63, 63, 70, 0.5);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-    }
-
-    .reason-option:hover {
-        border-color: rgba(99, 102, 241, 0.4);
-        background: rgba(99, 102, 241, 0.1);
-        transform: translateX(4px);
-    }
-
-    .reason-option.selected {
-        border-color: rgba(99, 102, 241, 0.6);
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.1));
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
-    }
-
-    .custom-checkbox {
-        width: 22px;
-        height: 22px;
-        border: 2px solid rgba(99, 102, 241, 0.5);
-        border-radius: 6px;
-        background: rgba(17, 17, 27, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-    .reason-option.selected .custom-checkbox {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-        border-color: #6366f1;
-    }
-
-    .checkbox-icon {
-        display: none;
-    }
-
-    .reason-option.selected .checkbox-icon {
-        display: block;
-    }
-
-    .countdown-box {
-        background: rgba(30, 30, 46, 0.8);
-        border: 2px solid rgba(59, 130, 246, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .countdown-number {
-        font-size: 3rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .confirm-input {
-        background: rgba(17, 17, 27, 0.8);
-        border: 2px solid rgba(99, 102, 241, 0.2);
-        color: #e4e4e7;
-        font-family: 'Courier New', monospace;
-        transition: all 0.3s ease;
-    }
-
-    .confirm-input:focus {
-        background: rgba(17, 17, 27, 1);
-        border-color: #6366f1;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 8px 24px rgba(99, 102, 241, 0.2);
-        outline: none;
-    }
-
-    .loading-spinner {
-        width: 18px;
-        height: 18px;
-        border: 2.5px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .consequence-item {
-        animation: fadeInUp 0.5s ease-out backwards;
-    }
-
-    .consequence-item:nth-child(1) { animation-delay: 0.1s; }
-    .consequence-item:nth-child(2) { animation-delay: 0.15s; }
-    .consequence-item:nth-child(3) { animation-delay: 0.2s; }
-    .consequence-item:nth-child(4) { animation-delay: 0.25s; }
-</style>
-
-<div class="danger-zone-card rounded-2xl shadow-2xl overflow-hidden section-card">
-    <!-- Header -->
-    <div class="danger-zone-header px-6 py-6">
-        <div class="flex items-center gap-4 relative z-10">
-            <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/30 shadow-lg">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-white">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
+    <!-- Consequences Section -->
+    <div class="mb-5">
+        <h5 class="font-weight-bold mb-3 d-flex align-items-center gap-2" style="font-size: 1rem; color: var(--text-color);">
+            <i class="fa-solid fa-trash-can text-muted"></i> What will be permanently deleted:
+        </h5>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <p class="info-card-label"><i class="fa-solid fa-id-card"></i> Profile Data</p>
+                <p class="info-card-value text-danger" style="font-size: 0.9375rem; font-weight: 500; color: var(--danger-color) !important;">Your profile and personal information</p>
             </div>
-            <div>
-                <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Danger Zone</h2>
-                <p class="text-white/90 text-sm md:text-base font-medium mt-1">Irreversible actions require careful consideration</p>
+            <div class="info-card">
+                <p class="info-card-label"><i class="fa-solid fa-database"></i> Stored Data</p>
+                <p class="info-card-value text-danger" style="font-size: 0.9375rem; font-weight: 500; color: var(--danger-color) !important;">All stored data and files</p>
+            </div>
+            <div class="info-card">
+                <p class="info-card-label"><i class="fa-solid fa-ban"></i> Services</p>
+                <p class="info-card-value text-danger" style="font-size: 0.9375rem; font-weight: 500; color: var(--danger-color) !important;">Access to all services</p>
+            </div>
+            <div class="info-card">
+                <p class="info-card-label"><i class="fa-solid fa-clock-rotate-left"></i> History</p>
+                <p class="info-card-value text-danger" style="font-size: 0.9375rem; font-weight: 500; color: var(--danger-color) !important;">Account history and activity logs</p>
             </div>
         </div>
     </div>
 
-    <!-- Body -->
-    <div class="p-6 md:p-8 space-y-6">
-        <!-- Warning Alert -->
-        <div class="danger-warning-alert rounded-xl p-5 flex gap-4">
-            <svg class="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <div>
-                <h3 class="text-red-300 font-bold text-lg mb-2">⚠️ Critical Warning</h3>
-                <p class="text-slate-300 leading-relaxed">Account deletion is <strong class="text-red-300">permanent and cannot be reversed</strong>. Please ensure you have backed up any important data before proceeding.</p>
-            </div>
-        </div>
-
-        <!-- Consequences Section -->
+    <!-- Delete Action Area -->
+    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-4 p-4 rounded-3" style="background: var(--hover-bg); border: 1px solid var(--border-color);">
         <div>
-            <h3 class="flex items-center gap-3 text-white font-black text-xl mb-5">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                </svg>
-                <span>What will be permanently deleted:</span>
-            </h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {% for item in consequences %}
-                <div class="consequence-item rounded-xl p-4 flex items-center gap-4" style="--item-glow: rgba(var(--glow-color), 0.1);">
-                    <div class="w-12 h-12 bg-gradient-to-br {{ item.gradient }} rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <div class="{{ item.color }}">{{ item.icon_svg | safe }}</div>
-                    </div>
-                    <span class="text-slate-300 font-semibold text-sm">{{ item.text }}</span>
-                </div>
-                {% endfor %}
-            </div>
+            <h5 class="font-weight-bold mb-1" style="color: var(--text-color);">Delete Account</h5>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">This action requires multi-step confirmation.</p>
         </div>
-
-        <!-- Delete Action Card -->
-        <div class="delete-action-card rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-                <h3 class="text-white font-bold text-lg mb-2">Delete Account</h3>
-                <p class="text-slate-400 text-sm">This action requires multi-step confirmation and cannot be undone.</p>
-            </div>
-            <button type="button" class="btn-delete-account px-6 py-3 rounded-xl text-white font-bold flex items-center gap-3 text-sm uppercase tracking-wide whitespace-nowrap" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                </svg>
-                <span>Delete Account</span>
-            </button>
-        </div>
+        <button type="button" class="btn btn-danger font-weight-bold d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+            <i class="fa-solid fa-trash"></i> Delete Account
+        </button>
     </div>
 </div>
 
 <!-- Delete Account Modal -->
-<div class="modal fade modal-danger" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content rounded-2xl overflow-hidden">
+        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color);">
             <!-- Modal Header -->
-            <div class="modal-header px-6 py-4 border-0">
-                <div class="flex items-center gap-3">
-                    <svg class="w-8 h-8 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    <h3 class="text-red-300 font-bold text-xl" id="deleteAccountModalLabel">Delete Account</h3>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="modalCloseBtn"></button>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger font-weight-bold d-flex align-items-center gap-2" id="deleteAccountModalLabel">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Delete Account
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="modalCloseBtn"></button>
             </div>
 
             <!-- Progress Bar -->
-            <div class="px-6 pb-4">
-                <p class="text-slate-400 text-xs font-semibold mb-2 uppercase tracking-wider" id="stepIndicator">Step 1 of 2</p>
-                <div class="modal-progress-bar">
-                    <div class="modal-progress-fill" id="progressBar" style="width: 50%;"></div>
+            <div class="px-3 pt-3">
+                <p class="text-muted mb-2 font-weight-bold" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;" id="stepIndicator">Step 1 of 2</p>
+                <div class="progress" style="height: 6px; background: var(--hover-bg);">
+                    <div class="progress-bar bg-danger" id="progressBar" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
 
             <!-- Step 1: Reason Selection -->
-            <div class="modal-body px-6 pb-6" id="step1Content">
-                <div class="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-2 border-blue-500/30 rounded-xl p-5 flex gap-4 mb-6">
-                    <svg class="w-6 h-6 text-blue-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
+            <div class="modal-body" id="step1Content">
+                <div class="alert alert-info d-flex gap-3 align-items-center mb-4" style="background: rgba(var(--primary-rgb), 0.1); border-color: rgba(var(--primary-rgb), 0.2);">
+                    <i class="fa-solid fa-circle-info fs-4" style="color: var(--primary-color);"></i>
                     <div>
-                        <p class="text-blue-300 font-bold mb-1">Help us improve</p>
-                        <p class="text-slate-300 text-sm">Your feedback helps us understand how to better serve our users.</p>
+                        <p class="mb-0 font-weight-bold" style="color: var(--text-color);">Help us improve</p>
+                        <p class="mb-0 text-muted" style="font-size: 0.875rem;">Your feedback helps us understand how to better serve our users.</p>
                     </div>
                 </div>
 
-                <label class="text-white font-bold text-base mb-4 block">
+                <label class="font-weight-bold mb-3 d-block" style="color: var(--text-color);">
                     Why are you deleting your account? 
-                    <span class="text-slate-400 font-medium text-sm">(Select all that apply)</span>
+                    <span class="text-muted font-weight-normal" style="font-size: 0.875rem;">(Select all that apply)</span>
                 </label>
 
-                <div class="space-y-3" id="reasonsContainer">
+                <div class="d-flex flex-column gap-2" id="reasonsContainer">
                     {% for reason in delete_reasons %}
-                    <div class="reason-option rounded-xl p-4 flex items-center gap-4" data-reason="{{ reason }}">
-                        <div class="custom-checkbox flex-shrink-0">
-                            <svg class="checkbox-icon w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
+                    <div class="reason-option p-3 rounded d-flex align-items-center gap-3" data-reason="{{ reason }}" style="background: var(--hover-bg); border: 1px solid var(--border-color); cursor: pointer;">
+                        <div class="custom-checkbox" style="width: 20px; height: 20px; border: 2px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-check text-white d-none checkbox-icon" style="font-size: 0.75rem;"></i>
                         </div>
-                        <span class="text-slate-200 font-semibold text-sm">{{ reason }}</span>
+                        <span style="font-size: 0.875rem; font-weight: 500;">{{ reason }}</span>
                     </div>
                     {% endfor %}
                 </div>
+                
+                <style>
+                .reason-option.selected { border-color: var(--primary-color) !important; background: rgba(var(--primary-rgb), 0.1) !important; }
+                .reason-option.selected .custom-checkbox { background: var(--primary-color); border-color: var(--primary-color) !important; }
+                .reason-option.selected .checkbox-icon { display: block !important; }
+                </style>
             </div>
 
             <!-- Step 2: Confirmation -->
-            <div class="modal-body px-6 pb-6" id="step2Content" style="display: none;">
+            <div class="modal-body" id="step2Content" style="display: none;">
                 <!-- Final Warning -->
-                <div class="bg-gradient-to-r from-red-500/15 to-rose-500/10 border-2 border-red-500/30 border-l-4 rounded-xl p-5 mb-6">
-                    <p class="text-red-300 font-bold text-lg mb-3">⚠️ Final Warning</p>
-                    <p class="text-slate-300 mb-4 leading-relaxed">All of the following will be <strong class="text-red-300">permanently deleted</strong>. There is <strong class="text-red-300">no recovery option</strong> once confirmed.</p>
-                    <ul class="space-y-2">
+                <div class="alert alert-danger mb-4" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--danger-color);">
+                    <p class="text-danger font-weight-bold mb-2"><i class="fa-solid fa-triangle-exclamation"></i> Final Warning</p>
+                    <p class="text-muted mb-3" style="font-size: 0.875rem;">All of the following will be <strong class="text-danger">permanently deleted</strong>. There is <strong class="text-danger">no recovery option</strong> once confirmed.</p>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
                         {% for item in consequences %}
-                        <li class="flex items-center gap-3 text-sm text-slate-300">
-                            <div class="{{ item.color }} flex-shrink-0">{{ item.icon_svg | safe }}</div>
+                        <li class="d-flex align-items-center gap-2" style="font-size: 0.875rem; color: var(--text-color);">
+                            <span class="text-danger"><i class="fa-solid fa-check"></i></span>
                             <span>{{ item.text }}</span>
                         </li>
                         {% endfor %}
@@ -446,74 +148,64 @@
                 </div>
 
                 <!-- Countdown -->
-                <div class="countdown-box rounded-xl p-8 text-center mb-6" id="countdownContainer">
-                    <svg class="w-16 h-16 text-blue-400 mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <p class="text-white font-bold text-xl mb-2">
-                        Please wait <span class="countdown-number" id="countdownNum">5</span> seconds...
+                <div class="text-center p-4 rounded mb-4" id="countdownContainer" style="background: var(--hover-bg); border: 1px solid var(--border-color);">
+                    <i class="fa-solid fa-clock text-primary fs-1 mb-3"></i>
+                    <p class="font-weight-bold fs-5 mb-1" style="color: var(--text-color);">
+                        Please wait <span id="countdownNum" class="text-primary">5</span> seconds...
                     </p>
-                    <p class="text-slate-400 text-sm">Take a moment to reconsider this irreversible action.</p>
+                    <p class="text-muted mb-0" style="font-size: 0.875rem;">Take a moment to reconsider this irreversible action.</p>
                 </div>
 
                 <!-- Confirmation Inputs -->
-                <div class="space-y-5" id="confirmInputsContainer" style="display: none;">
-                    <div>
-                        <label for="confirmTextInput" class="text-white font-bold text-sm mb-3 block">
-                            Type <span class="bg-red-500/20 text-red-300 px-2 py-1 rounded-md font-mono text-xs border border-red-500/30">DELETE</span> to confirm:
+                <div id="confirmInputsContainer" style="display: none;">
+                    <div class="mb-3">
+                        <label for="confirmTextInput" class="form-label font-weight-bold" style="font-size: 0.875rem; color: var(--text-color);">
+                            Type <span class="badge bg-danger">DELETE</span> to confirm:
                         </label>
                         <input 
                             type="text" 
                             id="confirmTextInput" 
-                            class="confirm-input w-full px-4 py-3 rounded-xl text-base"
+                            class="form-control"
                             placeholder="DELETE"
                             autocomplete="off"
+                            style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);"
                         >
                     </div>
 
-                    <div>
-                        <label for="confirmEmailInput" class="text-white font-bold text-sm mb-3 block">
+                    <div class="mb-3">
+                        <label for="confirmEmailInput" class="form-label font-weight-bold" style="font-size: 0.875rem; color: var(--text-color);">
                             Confirm your email address:
                         </label>
                         <input 
                             type="email" 
                             id="confirmEmailInput" 
-                            class="confirm-input w-full px-4 py-3 rounded-xl text-base"
+                            class="form-control"
                             placeholder="{{ user.personalInfo.email }}"
                             autocomplete="off"
+                            style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);"
                         >
                     </div>
                 </div>
             </div>
 
             <!-- Modal Footer -->
-            <div class="modal-footer px-6 py-4 border-0 border-t border-slate-700">
-                <button type="button" class="px-5 py-2.5 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg font-semibold text-sm transition" data-bs-dismiss="modal" id="cancelBtn">
-                    Cancel
-                </button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn">Cancel</button>
                 
                 <!-- Step 1 Button -->
-                <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-bold text-sm transition hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" id="nextBtn" disabled>
-                    <span>Continue</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
-                    </svg>
+                <button type="button" class="btn btn-primary d-flex align-items-center gap-2" id="nextBtn" disabled>
+                    Continue <i class="fa-solid fa-arrow-right"></i>
                 </button>
                 
                 <!-- Step 2 Button -->
-                <form id="deleteForm" method="POST" action="{{ url_for('profile.delete_account') }}" style="display: none;">
-                    <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-bold text-sm transition hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" id="deleteBtn" disabled>
+                <form id="deleteForm" method="POST" action="{{ url_for('profile.delete_account') }}" style="display: none; margin: 0;">
+                    <input type="hidden" name="email_confirm" id="hiddenEmailConfirm">
+                    <button type="submit" class="btn btn-danger d-flex align-items-center gap-2" id="deleteBtn" disabled>
                         <span id="deleteBtnText">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                            Delete My Account
+                            <i class="fa-solid fa-trash"></i> Delete My Account
                         </span>
                         <span id="deleteBtnLoading" style="display: none;">
-                            <div class="loading-spinner"></div>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             Deleting...
                         </span>
                     </button>
@@ -522,7 +214,6 @@
         </div>
     </div>
 </div>
-
 <script>
 (function() {
     'use strict';
@@ -664,6 +355,11 @@
             if (deleteBtn.disabled) {
                 e.preventDefault();
                 return;
+            }
+            
+            // Inject the confirmed email into the hidden form field
+            if (confirmEmailInput) {
+                document.getElementById('hiddenEmailConfirm').value = confirmEmailInput.value;
             }
             
             deleteBtn.disabled = true;

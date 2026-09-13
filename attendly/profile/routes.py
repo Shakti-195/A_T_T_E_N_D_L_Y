@@ -41,6 +41,8 @@ GRADE_STYLES = {
 @profile_bp.route('/profile/<attendly_id>', methods=['GET'])
 @login_required
 def profile_view(attendly_id=None):
+    if not attendly_id:
+        attendly_id = request.args.get('attendly_id')
     """
     Display user profile page using profile.html template.
     Handles password change POST request.
@@ -48,7 +50,7 @@ def profile_view(attendly_id=None):
     UPDATED: Includes teacher tabs data
     """
     # Define current user's ID safely for comparison
-    current_user_attendly_id = g.user.attendly_id.upper() if g.user and g.user.attendly_id else None
+    current_user_attendly_id = g.user.attendlyId.upper() if g.user else None
 
     if request.method == 'POST':
         # Only allow password change for own profile
@@ -74,12 +76,21 @@ def profile_view(attendly_id=None):
     if attendly_id is None or (current_user_attendly_id and attendly_id.upper() == current_user_attendly_id):
         user_to_view = User.query.options(joinedload(User.student_profile)).get(g.user.id)
         is_own_profile = True
-        attendly_id = user_to_view.attendly_id if user_to_view else None
+        attendly_id = user_to_view.attendlyId if user_to_view else None
     else:
         # Case 2: Viewing someone else's profile
         user_to_view = User.query.options(joinedload(User.student_profile)).filter(
             func.upper(User.attendly_id) == attendly_id.upper()
         ).first()
+        
+        if not user_to_view and attendly_id.upper().startswith('ATD'):
+            try:
+                numeric_id = int(attendly_id[3:])
+                user_to_view = User.query.options(joinedload(User.student_profile)).filter(
+                    User.id == numeric_id
+                ).first()
+            except ValueError:
+                pass
         
         if not user_to_view:
             flash(f'User not found with Attendly ID: {attendly_id.upper()}', 'danger')
@@ -343,7 +354,7 @@ def search_profile():
     quick_searches = User.query.filter(User.id != g.user.id).order_by(User.role).limit(3).all()
     
     quick_searches_data = [
-        {'id': user.attendly_id, 'role': user.role, 'label': user.username or user.role.capitalize()}
+        {'attendlyId': user.attendlyId, 'role': user.role, 'name': user.username or user.role.capitalize()}
         for user in quick_searches
     ]
 
@@ -364,14 +375,25 @@ def search_profile():
         ).filter(
             func.upper(User.attendly_id) == search_id.upper()
         ).first()
+        
+        if not user and search_id.upper().startswith('ATD'):
+            try:
+                numeric_id = int(search_id[3:])
+                user = User.query.options(
+                    joinedload(User.student_profile)
+                ).filter(
+                    User.id == numeric_id
+                ).first()
+            except ValueError:
+                pass
 
         if user:
-            current_user_id = g.user.attendly_id.upper() if g.user.attendly_id else None
+            current_user_id = g.user.attendlyId.upper() if g.user.attendlyId else None
             
-            if current_user_id and user.attendly_id.upper() == current_user_id:
+            if current_user_id and user.attendlyId.upper() == current_user_id:
                 return redirect(url_for('profile.profile_view'))
             else:
-                return redirect(url_for('profile.profile_view', attendly_id=user.attendly_id))
+                return redirect(url_for('profile.profile_view', attendly_id=user.attendlyId))
         else:
             flash(f'No profile found with Attendly ID: {search_id.upper()}', 'danger')
             return render_template('profile/search_profiles.html', quick_searches=quick_searches_data)
